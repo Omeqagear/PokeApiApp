@@ -1,0 +1,25 @@
+<nav>
+  <ul>
+    <li>
+      <a routerLink="" [class.activated]="currentUrl== '/'" [class.hover]="link1" (mouseover)="link1=true" (mouseout)="link1=false">
+        <i class="material-icons">home</i>
+      </a>
+    </li>
+    <li>
+      <a routerLink="catalog" [class.activated]="currentUrl == '/catalog'" [class.hover]="link2" (mouseover)="link2=true" (mouseout)="link2=false">
+        <i class="material-icons">shop</i>
+      </a>
+    </li>
+    <li>
+      <a routerLink="details" [class.activated]="currentUrl == '/details'" [class.hover]="link3" (mouseover)="link3=true" (mouseout)="link3=false">
+        <i class="material-icons">library_books</i>
+      </a>
+    </li>
+    <li>
+        <a routerLink="team" [class.activated]="currentUrl == '/team'" [class.hover]="link4" (mouseover)="link4=true" (mouseout)="link4=false">
+          <i class="material-icons">trip_origin</i>
+        </a>
+    </li>
+    
+  </ul>
+</nav>

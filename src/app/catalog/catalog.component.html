@@ -1,0 +1,11 @@
+<h1>Catálogo de Pokémon</h1>
+<mat-grid-list cols="6" [@listStagger]="pokemons$">
+    <mat-grid-tile *ngFor="let item of pokemons$ | slice:0:10000; let i=index;">
+        <mat-card  (click)="onItem(item)" [routerLink]= "['/photo', onItem(item) ]">
+            <mat-card-header>
+              <mat-card-title class="pokeName">{{ (item.name).charAt(0).toUpperCase() + (item.name).slice(1) }}</mat-card-title>
+            </mat-card-header>
+            <img class="pokeImg" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{((item.url).split('/').splice(6,7,1))[0] }}.png" >
+        </mat-card>
+    </mat-grid-tile>
+</mat-grid-list>

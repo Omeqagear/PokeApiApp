@@ -1,0 +1,57 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P">
+<body id="forest">
+  <div id="pokedex">
+
+    <div class="sensor">
+      <button></button>
+    </div>
+
+    <div class="camera-display">
+      <img src="{{img}}"/>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="stats-display">
+      <h1>Pokédex</h1>
+      <h2>{{ pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1) }}</h2>
+      <h2>Pokémon ID: #{{ id }}</h2>
+      <br>
+      <h3>Type</h3>
+      <ul>
+        <li *ngIf="types1[0] != undefined">{{ types1[0].charAt(0).toUpperCase() + types1[0].slice(1) }}</li>
+        <li *ngIf="types2[0] != undefined">{{ types2[0].charAt(0).toUpperCase() + types2[0].slice(1) }}</li>
+      </ul>
+      <h3>Moves</h3>
+      <ul>
+        <li *ngIf="moves1[0] != undefined">{{ moves1[0].charAt(0).toUpperCase() + moves1[0].slice(1) }}</li>
+        <li *ngIf="moves2[0] != undefined">{{ moves2[0].charAt(0).toUpperCase() + moves2[0].slice(1) }}</li>
+      </ul>
+    </div>
+
+    <div class="botom-actions">
+      <div id="actions">
+        <button class="a"><img src="./assets/images/pokeball.png" width="40px" height="45px" (click)="AddPokemonToTeam()"> </button>
+      </div>
+
+      <div id="cross">
+        <button class="cross-button up"></button>
+        <button class="cross-button right" (click)="prevID()"></button>
+        <button class="cross-button down"></button>
+        <button class="cross-button left" (click)="nextID()"></button>
+        <div class="cross-button center"> </div>
+      </div>
+    </div>
+
+    <div class="bottom-modes">
+        <button class="level-button"></button>
+        <button class="level-button"></button>
+        <button class="level-button"></button>
+        <button class="level-button"></button>
+
+        <button class="pokedex-mode black-button" (click)="frontImg()">Front</button>
+        <button class="game-mode black-button" (click)="backImag()">Back</button>
+    </div>
+
+  </div>
+</body>

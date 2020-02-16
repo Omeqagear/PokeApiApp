@@ -1,0 +1,39 @@
+<h1>Buscador de pokémon</h1>
+<mat-card class="example-card">
+    <mat-card-content>Introduzca el ID del pokemón deseado:</mat-card-content>
+  <mat-card-content>
+    <form novalidate [formGroup]="idForm" (ngSubmit)="onSubmit()">
+      <p>
+        <mat-form-field>
+          <input matInput formControlName="id" type="number">
+          <mat-hint>¡Debe introducir un número!</mat-hint>
+        </mat-form-field>
+        <mat-icon matSuffix>search</mat-icon>
+      </p>
+      <button mat-flat-button color="primary" type="submit" [disabled]="idForm.invalid">Submit</button>
+    </form>
+
+  </mat-card-content>
+</mat-card>
+
+<br>
+
+<mat-card class="example-card" *ngIf="id.id != undefined">
+  <mat-card-header>
+    <mat-card-title *ngFor="let item of pokemon$" [@listStagger]="pokemon$"><strong>Nombre: </strong>
+      {{ (item.name).charAt(0).toUpperCase() + (item.name).slice(1) }}</mat-card-title>
+    <mat-card-title><strong>Número Pokédex:</strong> #{{ id.id }}</mat-card-title>
+    <mat-card-title><strong>Tipos</strong></mat-card-title>
+    <mat-card-title *ngFor="let item of types$">
+      <li>{{ (item.name).charAt(0).toUpperCase() + (item.name).slice(1) }}</li>
+    </mat-card-title>
+  </mat-card-header>
+
+  <p>
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{id.id}}.png" width="20%"
+      height="20%">
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/{{id.id}}.png" width="20%"
+      height="20%">
+  </p>
+
+</mat-card>

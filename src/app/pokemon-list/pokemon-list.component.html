@@ -1,0 +1,7 @@
+<ul>
+  <li *ngFor="let item of pokemonJSON; let i=index">
+    <ul *ngIf="i<10090">
+      <li>{{ (item.name).charAt(0).toUpperCase() + (item.name).slice(1) }} <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{((item.url).split('/').splice(6,7,1))[0] }}.png"></li>
+    </ul>
+  </li>
+</ul>

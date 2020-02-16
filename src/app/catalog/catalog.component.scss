@@ -1,0 +1,21 @@
+.example-card {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+}
+
+.pokeImg {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%;
+}
+
+.pokeName {
+    text-anchor: middle;
+}
+
+mat-card {
+    cursor: pointer;
+}
