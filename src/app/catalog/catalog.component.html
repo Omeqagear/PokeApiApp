@@ -1,11 +1,32 @@
 <h1>Catálogo de Pokémon</h1>
-<mat-grid-list cols="6" [@listStagger]="pokemons$">
-    <mat-grid-tile *ngFor="let item of pokemons$ | slice:0:10000; let i=index;">
-        <mat-card  (click)="onItem(item)" [routerLink]= "['/photo', onItem(item) ]">
-            <mat-card-header>
-              <mat-card-title class="pokeName">{{ (item.name).charAt(0).toUpperCase() + (item.name).slice(1) }}</mat-card-title>
-            </mat-card-header>
-            <img class="pokeImg" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{((item.url).split('/').splice(6,7,1))[0] }}.png" >
+
+@if (loading) {
+  <div class="loading-container">
+    <p>Loading Pokémon...</p>
+  </div>
+}
+
+@if (error) {
+  <div class="error-message">
+    {{ error }}
+  </div>
+}
+
+@if (!loading && !error) {
+  <mat-grid-list cols="6" rowHeight="2:1" [@listStagger]="pokemons">
+    @for (item of pokemons; track item.name; let i = $index) {
+      <mat-grid-tile>
+        <mat-card (click)="onItem(item)" [routerLink]="['/photo', extractPokemonId(item.url)]" class="poke-card">
+          <mat-card-header>
+            <mat-card-title class="pokeName">{{ capitalize(item.name) }}</mat-card-title>
+          </mat-card-header>
+          <img class="pokeImg" 
+               [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + extractPokemonId(item.url) + '.png'" 
+               [alt]="item.name"
+               loading="lazy">
         </mat-card>
-    </mat-grid-tile>
-</mat-grid-list>
+      </mat-grid-tile>
+    }
+  </mat-grid-list>
+}
+

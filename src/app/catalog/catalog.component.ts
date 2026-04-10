@@ -1,9 +1,21 @@
-import { DataServiceService } from './../services/data-service.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatCardModule } from '@angular/material/card';
 import { trigger, style, transition, animate, query, stagger } from '@angular/animations';
+import { PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
+import { DataServiceService } from '../services/data-service.service';
 
 @Component({
   selector: 'app-catalog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatGridListModule,
+    MatCardModule
+  ],
   templateUrl: './catalog.component.html',
   styleUrls: ['./catalog.component.scss'],
   animations: [
@@ -30,22 +42,44 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
     ])
   ]
 })
-
 export class CatalogComponent implements OnInit {
+  private dataService = inject(DataServiceService);
 
-  pokemons$: Array<any> = [];
-  id: string = "";
+  pokemons: PokemonSummary[] = [];
+  loading = true;
+  error: string | null = null;
 
-  constructor(private data: DataServiceService) { }
-
-  //Class catalog use DataServiceService function GetPokemonNames() to get all pokemons from API
-  ngOnInit() {
-    this.data.getPokemonNames().subscribe(data => this.pokemons$ = data["results"]);
+  ngOnInit(): void {
+    this.loadPokemonList();
   }
 
-  //This function returns the ID of the pokemon that has been clicked in catalog display
-  onItem(item) {
-    this.id = ((item.url).split('/').splice(6, 7, 1))[0];
-    return this.id;
+  private loadPokemonList(): void {
+    this.loading = true;
+    this.error = null;
+    
+    this.dataService.getPokemonNames().subscribe({
+      next: (data: PokemonListResponse) => {
+        this.pokemons = data.results;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading Pokemon list:', err);
+        this.error = 'Failed to load Pokemon list. Please try again.';
+        this.loading = false;
+      }
+    });
+  }
+
+  extractPokemonId(url: string): number {
+    const parts = url.split('/').filter(Boolean);
+    return parseInt(parts[parts.length - 1], 10);
+  }
+
+  capitalize(name: string): string {
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  onItem(item: PokemonSummary): number {
+    return this.extractPokemonId(item.url);
   }
 }

@@ -3,7 +3,15 @@
     "allow": [
       "WebSearch",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(node *)",
+      "Bash(npm *)",
+      "Bash(del *)",
+      "Bash(ng *)",
+      "Bash(findstr *)",
+      "Bash(npx *)",
+      "Bash(taskkill *)"
     ]
   },
   "$version": 3

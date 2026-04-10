@@ -1,25 +1,14 @@
-
-<div class="container"
-fxLayout
-fxLayout.xs="column"
-fxLayoutAlign="center"
-fxLayoutGap="10px"
-fxLayoutGap.xs="0">
-<div class="item item-1" fxFlex="20%"></div>
-<div class="item item-2" fxFlex="20%" fxFlexOrder="3"></div>
-<div class="item item-3" fxFlex><img class="headerImg" src="./assets/images/Logo_de_Pokemon.png"></div>
+<div class="container">
+  <div class="header-section">
+    <img class="headerImg" src="./assets/images/Logo_de_Pokemon.png" alt="Pokemon Logo">
+  </div>
 </div>
-<br>
 
-<div class="content"
-fxLayout
-fxLayout.xs="column"
-fxLayoutAlign="center"
-fxLayoutGap="10px"
-fxLayoutGap.xs="0">
-<div class="item item-3" fxFlex><img class="headerImg" src="./assets/images/landscape.png"></div>
+<div class="content-section">
+  <img class="headerImg" src="./assets/images/landscape.png" alt="Pokemon Landscape">
 </div>
-<br>
 
-
-
+<div class="actions">
+  <a routerLink="catalog" mat-flat-button color="primary">Browse Catalog</a>
+  <a routerLink="details" mat-stroked-button color="accent">Search by ID</a>
+</div>

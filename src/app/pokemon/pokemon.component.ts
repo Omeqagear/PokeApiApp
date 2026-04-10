@@ -1,11 +1,27 @@
-import { DataServiceService } from './../services/data-service.service';
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
 import { trigger, style, transition, animate, query, stagger } from '@angular/animations';
+import { PokemonDetail } from '../shared/pokemon-api.interfaces';
+import { DataServiceService } from '../services/data-service.service';
 
 @Component({
   selector: 'app-pokemon',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule
+  ],
   templateUrl: './pokemon.component.html',
   styleUrls: ['./pokemon.component.scss'],
   animations: [
@@ -32,45 +48,46 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
     ])
   ]
 })
-
 export class PokemonComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private dataService = inject(DataServiceService);
 
-  pokemon$: Array<any> = [];
-  types$: Array<any> = [];
-  idForm: FormGroup;
-  id: string;
+  pokemonForm: FormGroup;
+  pokemonDetail: PokemonDetail | null = null;
+  loading = false;
+  error: string | null = null;
 
-
-  constructor(private fb: FormBuilder, private route: ActivatedRoute, private data: DataServiceService) {
-    this.crearFormulario();
-  }
-
-  ngOnInit() {
-  }
-
-  crearFormulario() {
-    this.idForm = this.fb.group({
-      id: ''
+  ngOnInit(): void {
+    this.pokemonForm = this.fb.group({
+      id: ['', [Validators.required, Validators.min(1), Validators.max(1025), Validators.pattern('^[0-9]+$')]]
     });
   }
 
-  onSubmit() {
-    this.id = this.idForm.value;
-    this.idForm.reset();
-    this.getName();
-    this.getTypes();
-    this.types$ = [];
+  onSubmit(): void {
+    if (this.pokemonForm.invalid) {
+      return;
+    }
+
+    const id = this.pokemonForm.value.id;
+    this.loading = true;
+    this.error = null;
+    this.pokemonDetail = null;
+
+    this.dataService.getPokemonDetail(id).subscribe({
+      next: (data) => {
+        this.pokemonDetail = data;
+        this.loading = false;
+        this.pokemonForm.reset();
+      },
+      error: (err) => {
+        console.error('Error loading Pokemon:', err);
+        this.error = `Pokemon with ID ${id} not found. Please try a different ID.`;
+        this.loading = false;
+      }
+    });
   }
 
-  //Function that use the service to get the Name from the API
-  getName() {
-    this.data.getPokemonImages(Object.values(this.id)[0]).subscribe(data => this.pokemon$ = data["forms"]);
+  getTypes(): string[] {
+    return this.pokemonDetail?.types.map(t => t.type.name) || [];
   }
-
-  //Function that use the service to get the Types from the API
-  getTypes() {
-    this.data.getPokemonImages(Object.values(this.id)[0]).subscribe(data => this.types$.push(data["types"][0]["type"]));
-    this.data.getPokemonImages(Object.values(this.id)[0]).subscribe(data => this.types$.push(data["types"][1]["type"]));
-  }
-
 }

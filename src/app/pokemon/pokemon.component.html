@@ -1,39 +1,77 @@
-<h1>Buscador de pokémon</h1>
-<mat-card class="example-card">
-    <mat-card-content>Introduzca el ID del pokemón deseado:</mat-card-content>
-  <mat-card-content>
-    <form novalidate [formGroup]="idForm" (ngSubmit)="onSubmit()">
-      <p>
-        <mat-form-field>
-          <input matInput formControlName="id" type="number">
-          <mat-hint>¡Debe introducir un número!</mat-hint>
-        </mat-form-field>
-        <mat-icon matSuffix>search</mat-icon>
-      </p>
-      <button mat-flat-button color="primary" type="submit" [disabled]="idForm.invalid">Submit</button>
-    </form>
+<h1>Buscador de Pokémon</h1>
 
+<mat-card class="example-card">
+  <mat-card-content>
+    <p>Introduzca el ID del Pokémon deseado:</p>
+    <form [formGroup]="pokemonForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="fill" style="width: 100%;">
+        <mat-label>Pokémon ID</mat-label>
+        <input matInput formControlName="id" type="number" placeholder="e.g., 25">
+        <mat-hint>Enter a number between 1 and 1025</mat-hint>
+        @if (pokemonForm.get('id')?.hasError('required')) {
+          <mat-error>ID is required</mat-error>
+        }
+        @if (pokemonForm.get('id')?.hasError('min') || pokemonForm.get('id')?.hasError('max')) {
+          <mat-error>ID must be between 1 and 1025</mat-error>
+        }
+        @if (pokemonForm.get('id')?.hasError('pattern')) {
+          <mat-error>Only numbers are allowed</mat-error>
+        }
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="pokemonForm.invalid || loading">
+        <mat-icon>search</mat-icon>
+        Search
+      </button>
+    </form>
   </mat-card-content>
 </mat-card>
 
-<br>
+@if (loading) {
+  <div class="loading-container">
+    <p>Loading Pokémon data...</p>
+  </div>
+}
 
-<mat-card class="example-card" *ngIf="id.id != undefined">
-  <mat-card-header>
-    <mat-card-title *ngFor="let item of pokemon$" [@listStagger]="pokemon$"><strong>Nombre: </strong>
-      {{ (item.name).charAt(0).toUpperCase() + (item.name).slice(1) }}</mat-card-title>
-    <mat-card-title><strong>Número Pokédex:</strong> #{{ id.id }}</mat-card-title>
-    <mat-card-title><strong>Tipos</strong></mat-card-title>
-    <mat-card-title *ngFor="let item of types$">
-      <li>{{ (item.name).charAt(0).toUpperCase() + (item.name).slice(1) }}</li>
-    </mat-card-title>
-  </mat-card-header>
+@if (error) {
+  <div class="error-message">
+    {{ error }}
+  </div>
+}
 
-  <p>
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{id.id}}.png" width="20%"
-      height="20%">
-    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/{{id.id}}.png" width="20%"
-      height="20%">
-  </p>
+@if (pokemonDetail && !loading) {
+  <mat-card class="example-card">
+    <mat-card-header>
+      <mat-card-title>
+        <strong>Name: </strong>{{ pokemonDetail.name | titlecase }}
+      </mat-card-title>
+      <mat-card-subtitle><strong>Pokédex Number:</strong> #{{ pokemonDetail.id }}</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <h3><strong>Types</strong></h3>
+      <ul>
+        @for (typeEntry of pokemonDetail.types; track typeEntry.type.name) {
+          <li>{{ typeEntry.type.name | titlecase }}</li>
+        }
+      </ul>
 
-</mat-card>
+      <h3><strong>Sprites</strong></h3>
+      <p>
+        @if (pokemonDetail.sprites.front_default) {
+          <img [src]="pokemonDetail.sprites.front_default" 
+               [alt]="pokemonDetail.name + ' front'" 
+               loading="lazy"
+               width="150" 
+               height="150">
+        }
+        @if (pokemonDetail.sprites.back_default) {
+          <img [src]="pokemonDetail.sprites.back_default" 
+               [alt]="pokemonDetail.name + ' back'" 
+               loading="lazy"
+               width="150" 
+               height="150">
+        }
+      </p>
+    </mat-card-content>
+  </mat-card>
+}

@@ -1,15 +1,27 @@
 <h1>Equipo Pokémon</h1>
-<p><button mat-flat-button class="mat_buttom" color="warn" (click)="deleteTeam()">Eliminar equipo</button>
-<button mat-flat-button class="mat_buttom" color="primary" (click)="genRandomTeam()">Equipo aleatorio</button></p>
-<br>
-<mat-grid-list cols="3">
-    <mat-grid-tile *ngFor="let item of pokemonTeam;let i=index;" [@fadeInOut]>
+
+<p>
+  <button mat-flat-button color="warn" (click)="deleteTeam()">Eliminar equipo</button>
+  <button mat-flat-button color="primary" (click)="genRandomTeam()">Equipo aleatorio</button>
+</p>
+
+@if (teamPokemon.length === 0) {
+  <p style="text-align: center; margin-top: 20px;">No tienes Pokémon en tu equipo. ¡Agrega algunos o genera un equipo aleatorio!</p>
+}
+
+@if (teamPokemon.length > 0) {
+  <mat-grid-list cols="3" rowHeight="2:1">
+    @for (item of teamPokemon; track item.id; let i = $index) {
+      <mat-grid-tile [@fadeInOut]>
         <mat-card class="example-card">
-            <img src="../assets/images/pokeball.png" width="20%" height="20%">
-            <img class="img" [src]="pokemonTeam[i].getImage()" width="90%" height="90%">
-            <button mat-flat-button class="mat_buttom_del"color="warn" (click)="deletePokemon(item)">Eliminar</button>
+          <img src="../assets/images/pokeball.png" width="20%" height="20%" alt="Pokeball">
+          <img class="img" [src]="item.getImage()" width="90%" height="90%" [alt]="item.getName()">
+          <button mat-flat-button color="warn" (click)="deletePokemon(item)">Eliminar</button>
         </mat-card>
-    </mat-grid-tile>
-</mat-grid-list>
+      </mat-grid-tile>
+    }
+  </mat-grid-list>
+}
+
 
 
