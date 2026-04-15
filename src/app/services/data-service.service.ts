@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PokemonListResponse, PokemonDetail } from '../shared/pokemon-api.interfaces';
@@ -7,11 +7,12 @@ import { PokemonListResponse, PokemonDetail } from '../shared/pokemon-api.interf
   providedIn: 'root'
 })
 export class DataServiceService {
-  private http = inject(HttpClient);
   private readonly baseUrl = 'https://pokeapi.co/api/v2/pokemon';
 
-  getPokemonNames(): Observable<PokemonListResponse> {
-    return this.http.get<PokemonListResponse>(`${this.baseUrl}/`);
+  constructor(private http: HttpClient) {}
+
+  getPokemonNames(limit: number = 20, offset: number = 0): Observable<PokemonListResponse> {
+    return this.http.get<PokemonListResponse>(`${this.baseUrl}/?limit=${limit}&offset=${offset}`);
   }
 
   getPokemonDetail(id: number): Observable<PokemonDetail> {

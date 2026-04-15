@@ -1,73 +1,152 @@
-<div id="pokedex">
-  <div class="sensor">
-    <button></button>
-  </div>
+<div class="pokemon-detail-container">
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="80"></mat-spinner>
+      <p>Loading Pokémon data...</p>
+    </div>
+  }
 
-  <div class="camera-display">
-    @if (spriteUrl) {
-      <img [src]="spriteUrl" [alt]="name" loading="lazy"/>
-    } @else {
-      <img src="./assets/images/pokeball.png" alt="Loading"/>
-    }
-  </div>
+  @if (error()) {
+    <div class="error-container">
+      <mat-icon>error_outline</mat-icon>
+      <h2>Failed to Load Pokémon</h2>
+      <p>Unable to fetch data for Pokémon #{{ id() }}</p>
+      <button mat-flat-button color="primary" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Catalog
+      </button>
+    </div>
+  }
 
-  <div class="divider"></div>
-
-  <div class="stats-display">
-    <h1>Pokédex</h1>
-    @if (name) {
-      <h2>{{ name.charAt(0).toUpperCase() + name.slice(1) }}</h2>
-      <h2>Pokémon ID: #{{ id }}</h2>
-      
-      @if (types.length > 0) {
-        <h3>Type</h3>
-        <ul>
-          @for (type of types; track type; let i = $index) {
-            @if (i < 2) {
-              <li>{{ type.charAt(0).toUpperCase() + type.slice(1) }}</li>
-            }
-          }
-        </ul>
-      }
-      
-      @if (moves.length > 0) {
-        <h3>Moves</h3>
-        <ul>
-          @for (move of moves; track move; let i = $index) {
-            @if (i < 10) {
-              <li>{{ move.charAt(0).toUpperCase() + move.slice(1) }}</li>
-            }
-          }
-        </ul>
-      }
-    } @else {
-      <h2>Loading...</h2>
-    }
-  </div>
-
-  <div class="botom-actions">
-    <div id="actions">
-      <button class="a">
-        <img src="./assets/images/pokeball.png" width="40px" height="45px" (click)="addPokemonToTeam()" alt="Add to team"/>
+  @if (!loading() && !error() && pokemonDetail()) {
+    <!-- Header with navigation -->
+    <div class="detail-header">
+      <button mat-icon-button (click)="goBack()" class="back-btn" aria-label="Back to catalog">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1 class="pokemon-name">{{ capitalize(name()) }}</h1>
+      <div class="pokemon-id">#{{ id().toString().padStart(3, '0') }}</div>
+      <button mat-icon-button (click)="addPokemonToTeam()" class="add-team-btn" aria-label="Add to team">
+        <mat-icon>group_add</mat-icon>
       </button>
     </div>
 
-    <div id="cross">
-      <button class="cross-button up"></button>
-      <button class="cross-button right" (click)="prevID()"></button>
-      <button class="cross-button down"></button>
-      <button class="cross-button left" (click)="nextID()"></button>
-      <div class="cross-button center"></div>
+    <!-- Main content grid -->
+    <div class="detail-content">
+      <!-- Left: Image and sprite selector -->
+      <div class="image-section">
+        <mat-card class="image-card">
+          <div class="sprite-selector">
+            <button mat-button [class.active]="selectedView() === 'front'" (click)="setSelectedView('front')">
+              <mat-icon>face</mat-icon>
+              Front
+            </button>
+            <button mat-button [class.active]="selectedView() === 'back'" (click)="setSelectedView('back')">
+              <mat-icon>arrow_back</mat-icon>
+              Back
+            </button>
+            <button mat-button [class.active]="selectedView() === 'shiny'" (click)="setSelectedView('shiny')">
+              <mat-icon>auto_awesome</mat-icon>
+              Shiny
+            </button>
+          </div>
+          <div class="sprite-display">
+            <img [src]="displayUrl()" [alt]="name()" class="pokemon-sprite">
+          </div>
+        </mat-card>
+      </div>
+
+      <!-- Right: Info and stats -->
+      <div class="info-section">
+        <!-- Types -->
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-card-title>Types</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="types-container">
+              @for (type of types(); track type) {
+                <span class="type-badge type-{{ type.toLowerCase() }}">
+                  {{ capitalize(type) }}
+                </span>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Physical attributes -->
+        <mat-card class="info-card">
+          <mat-card-content>
+            <div class="attributes-grid">
+              <div class="attribute">
+                <mat-icon>straighten</mat-icon>
+                <div class="attribute-value">{{ height() / 10 }}m</div>
+                <div class="attribute-label">Height</div>
+              </div>
+              <div class="attribute">
+                <mat-icon>monitor_weight</mat-icon>
+                <div class="attribute-value">{{ weight() / 10 }}kg</div>
+                <div class="attribute-label">Weight</div>
+              </div>
+              <div class="attribute">
+                <mat-icon>star</mat-icon>
+                <div class="attribute-value">{{ pokemonDetail()?.base_experience || '—' }}</div>
+                <div class="attribute-label">Base Exp</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Abilities -->
+        @if (abilities().length > 0) {
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>Abilities</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="abilities-list">
+                @for (ability of abilities(); track ability; let last = $last) {
+                  <span class="ability-item">{{ capitalize(ability) }}{{ last ? '' : ', ' }}</span>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Stats -->
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-card-title>Base Stats</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stats-container">
+              @for (stat of stats(); track stat.stat.name) {
+                <div class="stat-row">
+                  <div class="stat-label">{{ stat.stat.name.replace('-', ' ') | titlecase }}</div>
+                  <div class="stat-value">{{ stat.base_stat }}</div>
+                  <div class="stat-bar">
+                    <div class="stat-bar-fill" [style.width.%]="(stat.base_stat / 255) * 100"
+                         [style.background]="getStatColor(stat.base_stat)">
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </div>
-  </div>
 
-  <div class="bottom-modes">
-    <button class="level-button"></button>
-    <button class="level-button"></button>
-    <button class="level-button"></button>
-    <button class="level-button"></button>
-
-    <button class="pokedex-mode black-button" (click)="showFrontImage()">Front</button>
-    <button class="game-mode black-button" (click)="showBackImage()">Back</button>
-  </div>
+    <!-- Navigation arrows -->
+    <div class="pokemon-navigation">
+      <button mat-fab extended color="primary" (click)="prevID()">
+        <mat-icon>arrow_back</mat-icon>
+        Previous
+      </button>
+      <button mat-fab extended color="accent" (click)="nextID()">
+        Next
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+  }
 </div>

@@ -1,26 +1,51 @@
-<h1>Equipo Pokémon</h1>
+<div class="catalog-header">
+  <div class="header-content">
+    <h1>Equipo Pokémon</h1>
+    <div class="team-actions">
+      <button mat-flat-button color="warn" (click)="deleteTeam()">
+        <mat-icon>delete_sweep</mat-icon>
+        Eliminar equipo
+      </button>
+      <button mat-flat-button color="primary" (click)="genRandomTeam()">
+        <mat-icon>shuffle</mat-icon>
+        Equipo aleatorio
+      </button>
+    </div>
+  </div>
+  <div class="stats">
+    <mat-icon>collections</mat-icon>
+    <span>{{ teamPokemon().length }} Pokémon en tu equipo</span>
+  </div>
+</div>
 
-<p>
-  <button mat-flat-button color="warn" (click)="deleteTeam()">Eliminar equipo</button>
-  <button mat-flat-button color="primary" (click)="genRandomTeam()">Equipo aleatorio</button>
-</p>
-
-@if (teamPokemon.length === 0) {
-  <p style="text-align: center; margin-top: 20px;">No tienes Pokémon en tu equipo. ¡Agrega algunos o genera un equipo aleatorio!</p>
+@if (teamPokemon().length === 0) {
+  <div class="no-results">
+    <mat-icon>catching_pokemon</mat-icon>
+    <h3>Tu equipo está vacío</h3>
+    <p>¡Agrega Pokémon desde el catálogo o genera un equipo aleatorio!</p>
+  </div>
 }
 
-@if (teamPokemon.length > 0) {
-  <mat-grid-list cols="3" rowHeight="2:1">
-    @for (item of teamPokemon; track item.id; let i = $index) {
-      <mat-grid-tile [@fadeInOut]>
-        <mat-card class="example-card">
-          <img src="../assets/images/pokeball.png" width="20%" height="20%" alt="Pokeball">
-          <img class="img" [src]="item.getImage()" width="90%" height="90%" [alt]="item.getName()">
-          <button mat-flat-button color="warn" (click)="deletePokemon(item)">Eliminar</button>
-        </mat-card>
-      </mat-grid-tile>
+@if (teamPokemon().length > 0) {
+  <div class="catalog-grid">
+    @for (item of teamPokemon(); track item.id; let i = $index) {
+      <mat-card class="poke-card" [@fadeInOut]>
+        <div class="card-badge">#{{ item.id }}</div>
+        <div class="card-image-wrapper">
+          <img [src]="getPokemonImage(item)" [alt]="item.name" loading="lazy">
+        </div>
+        <mat-card-header>
+          <mat-card-title class="pokeName">{{ item.name }}</mat-card-title>
+        </mat-card-header>
+        <div class="card-hover-effect">
+          <button mat-flat-button color="warn" (click)="deletePokemon(item); $event.stopPropagation()">
+            <mat-icon>delete</mat-icon>
+            Eliminar
+          </button>
+        </div>
+      </mat-card>
     }
-  </mat-grid-list>
+  </div>
 }
 
 

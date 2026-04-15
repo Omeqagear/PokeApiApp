@@ -1,90 +1,250 @@
-/* You can add global styles to this file, and also import other style files */
+/* Modern Global Styles for Pokédex App */
 @use '@angular/material' as mat;
 
 // Include the common styles for Angular Material
 @include mat.core();
 
-// Define the theme
-$primary: mat.m2-define-palette(mat.$m2-indigo-palette);
-$accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+// Define a modern theme with Pokemon-inspired colors
+$primary: mat.m2-define-palette(mat.$m2-indigo-palette, 600, 400, 700);
+$accent: mat.m2-define-palette(mat.$m2-red-palette, 500, 400, 600);
+$warn: mat.m2-define-palette(mat.$m2-orange-palette);
 
 $theme: mat.m2-define-light-theme((
   color: (
     primary: $primary,
     accent: $accent,
+    warn: $warn,
   ),
-  typography: mat.m2-define-typography-config(),
+  typography: mat.m2-define-typography-config(
+    $font-family: "'Inter', 'Roboto', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif",
+  ),
   density: 0,
 ));
 
 // Emit the theme styles
 @include mat.all-component-themes($theme);
 
+// Import Google Font - Inter
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+// Material Icons - ensure proper rendering
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
+}
+
+// Material Symbols (new style)
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24;
+  font-size: 24px;
+  vertical-align: middle;
+}
+
+// Global styles
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  background: #F2F2F2;
-  font-family: 'Roboto', 'Montserrat', sans-serif;
-  height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  font-family: 'Inter', 'Roboto', 'Montserrat', sans-serif;
+  min-height: 100vh;
+  color: #1a1a2e;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-#container {
-  display: grid;
-  grid-template-columns: 70px auto;
-  height: 100%;
-
-  #content {
-    padding: 30px 50px;
-
-    ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-
-      li {
-        background: #fff;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 8px;
-
-        a {
-          font-size: 1.5em;
-          text-decoration: none;
-          font-weight: bold;
-          color: #00A8FF;
-        }
-
-        ul {
-          margin-top: 20px;
-
-          li {
-            padding: 0;
-
-            a {
-              font-size: 1em;
-              font-weight: 300;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// Loading spinner
+// Loading spinner container
 .loading-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 200px;
+  min-height: 300px;
+  gap: 16px;
+
+  p {
+    color: #666;
+    font-size: 1.1em;
+    font-weight: 500;
+  }
 }
 
 // Error message
 .error-message {
-  color: #f44336;
-  background: #ffebee;
-  padding: 16px;
+  color: #d32f2f;
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin: 20px 0;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.15);
+  border-left: 4px solid #d32f2f;
+}
+
+// Success message
+.success-message {
+  color: #2e7d32;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin: 20px 0;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
+  border-left: 4px solid #2e7d32;
+}
+
+// Card improvements
+mat-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 16px !important;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+}
+
+// Button improvements
+button[mat-flat-button],
+button[mat-raised-button],
+a[mat-flat-button],
+a[mat-raised-button] {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0.3px;
+  transition: all 0.2s !important;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// Input field improvements
+mat-form-field {
+  width: 100%;
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
   border-radius: 4px;
-  margin: 16px 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+  
+  &:hover {
+    background: linear-gradient(180deg, #5568d3 0%, #6a4190 100%);
+  }
+}
+
+// Selection styling
+::selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: #1a1a2e;
+}
+
+// Page transitions
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.page-exit {
+  opacity: 1;
+}
+
+.page-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+// Skeleton loader styles
+.skeleton-card {
+  pointer-events: none;
+  
+  .skeleton-text {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+    height: 1em;
+  }
+  
+  .skeleton-image {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+    height: 120px;
+    margin-top: 12px;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Utility classes
+.text-center {
   text-align: center;
 }
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gap-sm {
+  gap: 8px;
+}
+
+.gap-md {
+  gap: 16px;
+}
+
+.gap-lg {
+  gap: 24px;
+}
+
 

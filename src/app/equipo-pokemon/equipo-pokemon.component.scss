@@ -1,21 +1,342 @@
-.example-card {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+// Header styling
+.catalog-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  .header-content {
+    margin-bottom: 20px;
+
+    h1 {
+      font-size: 2.5em;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin: 0 0 20px 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .team-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+
+      button {
+        border-radius: 12px !important;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
+
+  .stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #666;
+    font-size: 1.1em;
+    font-weight: 500;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: #667eea;
+    }
+  }
+}
+
+// Empty state
+.no-results {
+  text-align: center;
+  padding: 80px 20px;
+  color: #666;
+
+  mat-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+    color: #ccc;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 1.5em;
+    color: #1a1a2e;
+    margin: 0 0 10px 0;
+  }
+
+  p {
+    font-size: 1.1em;
+    margin: 0;
+  }
+}
+
+// Grid layout using CSS Grid for better responsiveness
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+  padding: 0 20px 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+// Card styling
+.poke-card {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px !important;
+  overflow: hidden;
+  background: #fff;
+  border: 2px solid transparent;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+
+    .card-hover-effect {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .card-image-wrapper img {
+      transform: scale(1.15);
+    }
+  }
+
+  .card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    z-index: 1;
+  }
+
+  .card-image-wrapper {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
+    position: relative;
+
+    &.skeleton {
+      background: #e8ecf1;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 50%;
+      filter: blur(20px);
+    }
+
+    img {
+      width: 150px;
+      height: 150px;
+      object-fit: contain;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+    }
+
+    .skeleton-image {
+      width: 60%;
+      height: 60%;
+      background: linear-gradient(90deg, #ddd 25%, #eee 50%, #ddd 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 50%;
+    }
+  }
+
+  mat-card-header {
+    padding: 16px;
+    background: #fff;
+    position: relative;
+    z-index: 1;
+
+    .pokeName {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #1a1a2e;
+      text-transform: capitalize;
+      margin: 0;
+      text-align: center;
+    }
+  }
+
+  .card-hover-effect {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+    color: #fff;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    button {
+      background: #fff;
+      color: #d32f2f;
+      border-radius: 12px !important;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
 }
 
-.mat_buttom {
-    margin-left: 10px;
+// Shimmer animation for skeleton loading
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
-.mat_buttom_del {
-    margin-left: 30%;
+// Responsive design
+@media (max-width: 1400px) {
+  .catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+  }
+
+  .poke-card {
+    .card-image-wrapper {
+      height: 180px;
+
+      img {
+        width: 130px;
+        height: 130px;
+      }
+    }
+  }
 }
 
-.img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    overflow: hidden;
+@media (max-width: 1200px) {
+  .catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .catalog-header {
+    h1 {
+      font-size: 2em;
+    }
+  }
+
+  .poke-card {
+    .card-badge {
+      font-size: 0.75em;
+      padding: 4px 8px;
+    }
+
+    .card-image-wrapper {
+      height: 150px;
+
+      img {
+        width: 110px;
+        height: 110px;
+      }
+    }
+
+    mat-card-header .pokeName {
+      font-size: 1em;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0 12px 30px;
+  }
+
+  .catalog-header {
+    h1 {
+      font-size: 1.75em;
+    }
+
+    .team-actions {
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+
+      button {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+      }
+    }
+
+    .stats {
+      font-size: 0.95em;
+    }
+  }
+
+  .poke-card {
+    .card-image-wrapper {
+      height: 120px;
+
+      img {
+        width: 90px;
+        height: 90px;
+      }
+    }
+
+    .card-hover-effect {
+      display: none;
+    }
+  }
 }

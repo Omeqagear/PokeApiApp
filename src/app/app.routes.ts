@@ -12,11 +12,6 @@ export const routes: Routes = [
       .then(m => m.CatalogComponent)
   },
   {
-    path: 'details',
-    loadComponent: () => import('./pokemon/pokemon.component')
-      .then(m => m.PokemonComponent)
-  },
-  {
     path: 'photo/:id',
     loadComponent: () => import('./photo-pokemon/photo-pokemon.component')
       .then(m => m.PhotoPokemonComponent)

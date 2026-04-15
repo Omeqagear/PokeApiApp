@@ -63,6 +63,22 @@ export interface PokemonSprites {
   front_shiny_female: string | null;
   back_female: string | null;
   back_shiny_female: string | null;
+  other?: {
+    'official-artwork'?: {
+      front_default: string | null;
+      front_shiny: string | null;
+    };
+    'home'?: {
+      front_default: string | null;
+      front_female: string | null;
+      front_shiny: string | null;
+      front_shiny_female: string | null;
+    };
+    'dream_world'?: {
+      front_default: string | null;
+      front_female: string | null;
+    };
+  };
 }
 
 export interface PokemonGameIndex {

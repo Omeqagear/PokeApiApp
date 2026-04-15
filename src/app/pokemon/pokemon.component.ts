@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -52,15 +52,17 @@ export class PokemonComponent implements OnInit {
   private fb = inject(FormBuilder);
   private dataService = inject(DataServiceService);
 
-  pokemonForm: FormGroup;
-  pokemonDetail: PokemonDetail | null = null;
-  loading = false;
-  error: string | null = null;
+  pokemonForm: FormGroup = this.fb.group({
+    id: ['', [Validators.required, Validators.min(1), Validators.max(1025), Validators.pattern('^[0-9]+$')]]
+  });
+  
+  // Signal-based state
+  pokemonDetail = signal<PokemonDetail | null>(null);
+  loading = signal(false);
+  error = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.pokemonForm = this.fb.group({
-      id: ['', [Validators.required, Validators.min(1), Validators.max(1025), Validators.pattern('^[0-9]+$')]]
-    });
+    // Form already initialized in the declaration
   }
 
   onSubmit(): void {
@@ -69,25 +71,25 @@ export class PokemonComponent implements OnInit {
     }
 
     const id = this.pokemonForm.value.id;
-    this.loading = true;
-    this.error = null;
-    this.pokemonDetail = null;
+    this.loading.set(true);
+    this.error.set(null);
+    this.pokemonDetail.set(null);
 
     this.dataService.getPokemonDetail(id).subscribe({
       next: (data) => {
-        this.pokemonDetail = data;
-        this.loading = false;
+        this.pokemonDetail.set(data);
+        this.loading.set(false);
         this.pokemonForm.reset();
       },
       error: (err) => {
         console.error('Error loading Pokemon:', err);
-        this.error = `Pokemon with ID ${id} not found. Please try a different ID.`;
-        this.loading = false;
+        this.error.set(`Pokemon with ID ${id} not found. Please try a different ID.`);
+        this.loading.set(false);
       }
     });
   }
 
   getTypes(): string[] {
-    return this.pokemonDetail?.types.map(t => t.type.name) || [];
+    return this.pokemonDetail()?.types.map(t => t.type.name) || [];
   }
 }

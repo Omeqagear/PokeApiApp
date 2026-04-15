@@ -1,14 +1,80 @@
-<div class="container">
-  <div class="header-section">
-    <img class="headerImg" src="./assets/images/Logo_de_Pokemon.png" alt="Pokemon Logo">
-  </div>
+<div class="home-container">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <mat-icon>auto_awesome</mat-icon>
+        <span>Angular 21 • Modern Pokédex</span>
+      </div>
+      <h1 class="hero-title">
+        Welcome to the
+        <span class="gradient-text">Pokédex</span>
+      </h1>
+      <p class="hero-subtitle">
+        Your ultimate companion for exploring the world of Pokémon. 
+        Browse, search, and build your dream team with our modern web application.
+      </p>
+      <div class="hero-actions">
+        <a routerLink="/catalog" mat-flat-button color="primary" class="btn-large">
+          <mat-icon>explore</mat-icon>
+          Explore Pokémon
+        </a>
+        <a routerLink="/team" mat-stroked-button color="accent" class="btn-large">
+          <mat-icon>groups</mat-icon>
+          My Team
+        </a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="./assets/images/Logo_de_Pokemon.png" alt="Pokémon Logo" loading="lazy">
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="section-header">
+      <h2>Features</h2>
+      <p>Everything you need for your Pokémon journey</p>
+    </div>
+    <div class="features-grid">
+      @for (feature of features; track feature.title) {
+        <mat-card class="feature-card">
+          <mat-card-content>
+            <div class="feature-icon">
+              <mat-icon>{{ feature.icon }}</mat-icon>
+            </div>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+            <a [routerLink]="feature.route" mat-button color="primary" class="feature-link">
+              Get Started
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number">1025+</div>
+        <div class="stat-label">Pokémon</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">6</div>
+        <div class="stat-label">Team Size</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">18</div>
+        <div class="stat-label">Types</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">Adventures</div>
+      </div>
+    </div>
+  </section>
 </div>
 
-<div class="content-section">
-  <img class="headerImg" src="./assets/images/landscape.png" alt="Pokemon Landscape">
-</div>
-
-<div class="actions">
-  <a routerLink="catalog" mat-flat-button color="primary">Browse Catalog</a>
-  <a routerLink="details" mat-stroked-button color="accent">Search by ID</a>
-</div>

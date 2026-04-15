@@ -15,5 +15,6 @@ import { SidebarComponent } from './sidebar/sidebar.component';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'Pokedex';
+  title = 'Pokédex';
 }
+

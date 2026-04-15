@@ -1,24 +1,40 @@
-<nav>
-  <ul>
-    <li>
-      <a routerLink="" [class.activated]="isActive('/')" [class.hover]="link1" (mouseover)="link1=true" (mouseout)="link1=false">
-        <mat-icon>home</mat-icon>
-      </a>
-    </li>
-    <li>
-      <a routerLink="catalog" [class.activated]="isActive('/catalog')" [class.hover]="link2" (mouseover)="link2=true" (mouseout)="link2=false">
-        <mat-icon>shop</mat-icon>
-      </a>
-    </li>
-    <li>
-      <a routerLink="details" [class.activated]="isActive('/details')" [class.hover]="link3" (mouseover)="link3=true" (mouseout)="link3=false">
-        <mat-icon>library_books</mat-icon>
-      </a>
-    </li>
-    <li>
-      <a routerLink="team" [class.activated]="isActive('/team')" [class.hover]="link4" (mouseover)="link4=true" (mouseout)="link4=false">
-        <mat-icon>groups</mat-icon>
-      </a>
-    </li>
+<nav [class.collapsed]="isCollapsed()">
+  <div class="sidebar-header">
+    <div class="logo">
+      <mat-icon>nature_people</mat-icon>
+      @if (!isCollapsed()) {
+        <span class="logo-text">Pokédex</span>
+      }
+    </div>
+    <button class="toggle-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+      <mat-icon>{{ isCollapsed() ? 'menu_open' : 'menu' }}</mat-icon>
+    </button>
+  </div>
+
+  <ul class="nav-list">
+    @for (item of navItems; track item.path) {
+      <li>
+        <a 
+          [routerLink]="item.path"
+          [class.active]="isActive(item.path)"
+          matRipple
+          [matRippleDisabled]="false"
+          aria-label="{{ item.label }}">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          @if (!isCollapsed()) {
+            <span class="nav-label">{{ item.label }}</span>
+          }
+        </a>
+      </li>
+    }
   </ul>
+
+  <div class="sidebar-footer">
+    @if (!isCollapsed()) {
+      <div class="footer-text">
+        <small>Angular 21 • Pokédex</small>
+      </div>
+    }
+  </div>
 </nav>
+

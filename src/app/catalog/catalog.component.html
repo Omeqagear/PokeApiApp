@@ -1,32 +1,102 @@
-<h1>Catálogo de Pokémon</h1>
+<div class="catalog-header">
+  <div class="header-content">
+    <h1>Catálogo de Pokémon</h1>
+    <div class="search-container">
+      <form [formGroup]="searchForm" class="search-form">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search Pokémon by ID (1-1025)</mat-label>
+          <input matInput formControlName="searchInput" type="number" placeholder="e.g., 25 for Pikachu">
+          <mat-icon matPrefix>search</mat-icon>
+          @if (searchForm.get('searchInput')?.value) {
+            <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()" type="button">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+          @if (isSearching()) {
+            <mat-spinner matSuffix diameter="20"></mat-spinner>
+          }
+        </mat-form-field>
+      </form>
+      @if (searchMode() && searchResults().length > 0) {
+        <div class="search-badge">
+          <mat-icon>filter_list</mat-icon>
+          <span>Showing search results</span>
+        </div>
+      }
+    </div>
+  </div>
+  <div class="stats">
+    <mat-icon>collections</mat-icon>
+    <span>
+      @if (searchMode()) {
+        {{ searchResults().length }} result(s)
+      } @else {
+        {{ pokemons().length }} of {{ totalCount() }} Pokémon loaded
+      }
+    </span>
+  </div>
+</div>
 
-@if (loading) {
+@if (loading()) {
   <div class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
     <p>Loading Pokémon...</p>
   </div>
 }
 
-@if (error) {
+@if (error()) {
   <div class="error-message">
-    {{ error }}
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error() }}</p>
   </div>
 }
 
-@if (!loading && !error) {
-  <mat-grid-list cols="6" rowHeight="2:1" [@listStagger]="pokemons">
-    @for (item of pokemons; track item.name; let i = $index) {
-      <mat-grid-tile>
-        <mat-card (click)="onItem(item)" [routerLink]="['/photo', extractPokemonId(item.url)]" class="poke-card">
-          <mat-card-header>
-            <mat-card-title class="pokeName">{{ capitalize(item.name) }}</mat-card-title>
-          </mat-card-header>
-          <img class="pokeImg" 
-               [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + extractPokemonId(item.url) + '.png'" 
+@if (!loading() && !error()) {
+  @if (searchMode() && searchResults().length === 0 && !isSearching()) {
+    <div class="no-results">
+      <mat-icon>search_off</mat-icon>
+      <h3>No Pokémon Found</h3>
+      <p>Try a different ID between 1 and 1025</p>
+    </div>
+  }
+
+  <div class="catalog-grid" [@listStagger]="displayedPokemon()">
+    @for (item of displayedPokemon(); track item.name; let i = $index) {
+      <mat-card class="poke-card" (click)="navigateToPokemon(extractPokemonId(item.url))">
+        <div class="card-badge">#{{ extractPokemonId(item.url) }}</div>
+        <div class="card-image-wrapper">
+          <img class="pokeImg"
+               [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + extractPokemonId(item.url) + '.png'"
                [alt]="item.name"
                loading="lazy">
-        </mat-card>
-      </mat-grid-tile>
+        </div>
+        <mat-card-header>
+          <mat-card-title class="pokeName">{{ capitalize(item.name) }}</mat-card-title>
+        </mat-card-header>
+        <div class="card-hover-effect">
+          <mat-icon>visibility</mat-icon>
+          <span>View Details</span>
+        </div>
+      </mat-card>
     }
-  </mat-grid-list>
+  </div>
+
+  @if (!searchMode() && hasNext()) {
+    <div class="pagination">
+      <button mat-flat-button color="primary" (click)="loadMore()" [disabled]="loadingMore()">
+        @if (loadingMore()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          <mat-icon>expand_more</mat-icon>
+        }
+        Load More Pokémon
+      </button>
+    </div>
+  } @else if (!searchMode()) {
+    <div class="pagination complete">
+      <mat-icon>check_circle</mat-icon>
+      <p>All {{ totalCount() }} Pokémon loaded!</p>
+    </div>
+  }
 }
 
