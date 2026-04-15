@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   HttpInterceptor,
   HttpRequest,
@@ -9,7 +9,9 @@ import {
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CacheInterceptor implements HttpInterceptor {
   private cache = new Map<string, HttpResponse<any>>();
   private readonly maxAge = 5 * 60 * 1000; // 5 minutes

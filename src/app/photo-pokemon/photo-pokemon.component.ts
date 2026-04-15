@@ -47,7 +47,15 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
   loading = signal(true);
   error = signal(false);
 
+  readonly MIN_POKEMON_ID = 1;
   readonly MAX_POKEMON_ID = 1025;
+
+  /**
+   * Validates that the Pokemon ID is numeric and within valid range (1-1025)
+   */
+  private isValidPokemonId(id: number): boolean {
+    return id >= this.MIN_POKEMON_ID && id <= this.MAX_POKEMON_ID && Number.isInteger(id);
+  }
 
   // Computed signals
   name = computed(() => this.pokemonDetail()?.name || '');
@@ -82,8 +90,16 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
     this.route.params.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {
-      this.id.set(+params['id']);
-      this.loadPokemonData();
+      const rawId = +params['id'];
+      // Validate ID is numeric and within valid range
+      if (this.isValidPokemonId(rawId)) {
+        this.id.set(rawId);
+        this.loadPokemonData();
+      } else {
+        // Invalid ID - redirect to catalog with error
+        console.error(`Invalid Pokemon ID: ${rawId}. Must be between ${this.MIN_POKEMON_ID} and ${this.MAX_POKEMON_ID}`);
+        this.router.navigate(['/catalog']);
+      }
     });
   }
 
@@ -118,16 +134,20 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
 
   nextID(): void {
     const currentId = this.id();
-    const newId = currentId >= this.MAX_POKEMON_ID ? 1 : currentId + 1;
-    this.id.set(newId);
-    this.router.navigate(['/photo', newId]);
+    const newId = currentId >= this.MAX_POKEMON_ID ? this.MIN_POKEMON_ID : currentId + 1;
+    if (this.isValidPokemonId(newId)) {
+      this.id.set(newId);
+      this.router.navigate(['/photo', newId]);
+    }
   }
 
   prevID(): void {
     const currentId = this.id();
-    const newId = currentId <= 1 ? this.MAX_POKEMON_ID : currentId - 1;
-    this.id.set(newId);
-    this.router.navigate(['/photo', newId]);
+    const newId = currentId <= this.MIN_POKEMON_ID ? this.MAX_POKEMON_ID : currentId - 1;
+    if (this.isValidPokemonId(newId)) {
+      this.id.set(newId);
+      this.router.navigate(['/photo', newId]);
+    }
   }
 
   addPokemonToTeam(): void {

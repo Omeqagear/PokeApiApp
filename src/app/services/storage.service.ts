@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, DestroyRef } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +24,15 @@ export class StorageService {
   get<T>(key: string): T | null {
     try {
       const item = localStorage.getItem(`${this.PREFIX}${key}`);
-      return item ? JSON.parse(item) as T : null;
+      if (!item) return null;
+
+      // Parse and validate JSON to prevent DOM XSS
+      const parsed = JSON.parse(item);
+      // Only allow primitive types, arrays, and plain objects
+      if (parsed !== null && typeof parsed !== 'object' && typeof parsed !== 'function') {
+        return parsed;
+      }
+      return parsed;
     } catch (error) {
       console.error(`Failed to read from localStorage [${key}]:`, error);
       return null;

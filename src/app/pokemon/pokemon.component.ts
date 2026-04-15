@@ -83,7 +83,7 @@ export class PokemonComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading Pokemon:', err);
-        this.error.set(`Pokemon with ID ${id} not found. Please try a different ID.`);
+        this.error.set('Pokemon not found. Please try a different ID.');
         this.loading.set(false);
       }
     });

@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRippleModule } from '@angular/material/core';
 import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface NavItem {
   path: string;
@@ -35,9 +36,12 @@ export class SidebarComponent implements OnInit {
     { path: '/team', icon: 'groups', label: 'My Team' }
   ];
 
+  private destroyRef = inject(DestroyRef);
+
   ngOnInit(): void {
     this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe((event: NavigationEnd) => {
       this.currentUrl.set(event.urlAfterRedirects || event.url);
     });
