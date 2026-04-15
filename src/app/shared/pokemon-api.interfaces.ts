@@ -85,3 +85,4 @@ export interface PokemonGameIndex {
   game_index: number;
   version: PokemonSummary;
 }
+
