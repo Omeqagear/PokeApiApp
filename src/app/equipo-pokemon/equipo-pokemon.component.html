@@ -29,21 +29,18 @@
 @if (teamPokemon().length > 0) {
   <div class="catalog-grid">
     @for (item of teamPokemon(); track item.id; let i = $index) {
-      <mat-card class="poke-card" [@fadeInOut]>
+      <div class="poke-card" [@fadeInOut]>
         <div class="card-badge">#{{ item.id }}</div>
         <div class="card-image-wrapper">
           <img [src]="getPokemonImage(item)" [alt]="item.name" loading="lazy">
         </div>
-        <mat-card-header>
-          <mat-card-title class="pokeName">{{ item.name }}</mat-card-title>
-        </mat-card-header>
-        <div class="card-hover-effect">
-          <button mat-flat-button color="warn" (click)="deletePokemon(item); $event.stopPropagation()">
+        <div class="card-content">
+          <span class="pokeName">{{ item.name }}</span>
+          <button mat-icon-button color="warn" (click)="deletePokemon(item)" class="delete-btn">
             <mat-icon>delete</mat-icon>
-            Eliminar
           </button>
         </div>
-      </mat-card>
+      </div>
     }
   </div>
 }

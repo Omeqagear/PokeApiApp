@@ -97,7 +97,7 @@
 .poke-card {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 20px !important;
+  border-radius: 20px;
   overflow: hidden;
   background: #fff;
   border: 2px solid transparent;
@@ -108,11 +108,6 @@
     transform: translateY(-8px) scale(1.02);
     box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
     border-color: #667eea;
-
-    .card-hover-effect {
-      opacity: 1;
-      transform: translateY(0);
-    }
 
     .card-image-wrapper img {
       transform: scale(1.15);
@@ -143,10 +138,6 @@
     overflow: hidden;
     position: relative;
 
-    &.skeleton {
-      background: #e8ecf1;
-    }
-
     &::before {
       content: '';
       position: absolute;
@@ -166,20 +157,14 @@
       z-index: 1;
       filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
     }
-
-    .skeleton-image {
-      width: 60%;
-      height: 60%;
-      background: linear-gradient(90deg, #ddd 25%, #eee 50%, #ddd 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 50%;
-    }
   }
 
-  mat-card-header {
+  .card-content {
     padding: 16px;
     background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     position: relative;
     z-index: 1;
 
@@ -189,51 +174,23 @@
       color: #1a1a2e;
       text-transform: capitalize;
       margin: 0;
-      text-align: center;
     }
-  }
 
-  .card-hover-effect {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
-    color: #fff;
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    button {
-      background: #fff;
+    .delete-btn {
       color: #d32f2f;
-      border-radius: 12px !important;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      transition: transform 0.2s;
+
+      &:hover {
+        transform: scale(1.1);
+        background: rgba(211, 47, 47, 0.1);
+      }
 
       mat-icon {
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
       }
     }
-  }
-}
-
-// Shimmer animation for skeleton loading
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
   }
 }
 
@@ -290,7 +247,7 @@
       }
     }
 
-    mat-card-header .pokeName {
+    .card-content .pokeName {
       font-size: 1em;
     }
   }
@@ -333,10 +290,6 @@
         width: 90px;
         height: 90px;
       }
-    }
-
-    .card-hover-effect {
-      display: none;
     }
   }
 }

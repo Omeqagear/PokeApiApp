@@ -96,15 +96,18 @@ export class CatalogComponent implements OnInit {
     this.searchForm.get('searchInput')?.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      switchMap((value: string) => {
-        if (!value || value.trim() === '') {
+      switchMap((value: number | string | null) => {
+        // Handle both number (from type="number") and string inputs
+        const strValue = value !== null && value !== undefined ? String(value).trim() : '';
+
+        if (!strValue) {
           this.searchMode.set(false);
           this.searchResults.set([]);
           return of(null);
         }
 
-        // Check if it's a number (ID search)
-        const id = parseInt(value.trim(), 10);
+        // Parse as integer ID
+        const id = parseInt(strValue, 10);
         if (!isNaN(id) && id >= 1 && id <= 1025) {
           this.isSearching.set(true);
           return this.dataService.getPokemonDetail(id);
