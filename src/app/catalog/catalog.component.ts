@@ -11,8 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { trigger, style, transition, query, stagger, animate } from '@angular/animations';
-import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
-import { PokemonSummary, PokemonListResponse, PokemonDetail } from '../shared/pokemon-api.interfaces';
+import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of } from 'rxjs';
+import { PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
 import { DataServiceService } from '../services/data-service.service';
 
 @Component({
@@ -97,46 +97,66 @@ export class CatalogComponent implements OnInit {
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((value: number | string | null) => {
-        // Handle both number (from type="number") and string inputs
         const strValue = value !== null && value !== undefined ? String(value).trim() : '';
 
         if (!strValue) {
           this.searchMode.set(false);
           this.searchResults.set([]);
+          this.totalCount.set(0);
           return of(null);
         }
 
-        // Parse as integer ID
-        const id = parseInt(strValue, 10);
-        if (!isNaN(id) && id >= 1 && id <= 1025) {
-          this.isSearching.set(true);
-          return this.dataService.getPokemonDetail(id);
+        // Check if input is numeric (ID search) or text (name search)
+        if (/^\d+$/.test(strValue)) {
+          // ID search
+          const id = parseInt(strValue, 10);
+          if (id >= 1 && id <= 1025) {
+            this.searchMode.set(true);
+            this.isSearching.set(true);
+            return this.dataService.getPokemonDetail(id).pipe(
+              map((data) => {
+                this.isSearching.set(false);
+                this.totalCount.set(1);
+                return [{
+                  name: data.name,
+                  url: `https://pokeapi.co/api/v2/pokemon/${data.id}/`
+                }];
+              }),
+              catchError(() => {
+                this.isSearching.set(false);
+                this.totalCount.set(0);
+                return of([]);
+              })
+            );
+          }
         }
 
-        return of(null);
+        // Name search (non-numeric)
+        this.searchMode.set(true);
+        this.isSearching.set(true);
+        return this.dataService.searchPokemonByName(strValue).pipe(
+          map((results) => {
+            this.isSearching.set(false);
+            this.totalCount.set(results.length);
+            return results;
+          }),
+          catchError(() => {
+            this.isSearching.set(false);
+            this.totalCount.set(0);
+            return of([]);
+          })
+        );
       })
     ).subscribe({
-      next: (data: PokemonDetail | null) => {
-        if (data) {
-          this.searchMode.set(true);
-          this.searchResults.set([{
-            name: data.name,
-            url: `https://pokeapi.co/api/v2/pokemon/${data.id}/`
-          }]);
-          this.totalCount.set(1);
+      next: (results: PokemonSummary[] | null) => {
+        if (results !== null) {
+          this.searchResults.set(results);
         }
-        this.isSearching.set(false);
-      },
-      error: () => {
-        // Pokemon not found, clear results
-        this.searchMode.set(true);
-        this.searchResults.set([]);
-        this.isSearching.set(false);
       }
     });
   }
 
-  private loadPokemonList(isLoadMore: boolean = false): void {
+  private loadPokemonList(isLoadMore = false): void {
     if (isLoadMore) {
       this.loadingMore.set(true);
     } else {
