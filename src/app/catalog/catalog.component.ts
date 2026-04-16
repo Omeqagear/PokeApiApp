@@ -11,7 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { trigger, style, transition, query, stagger, animate } from '@angular/animations';
-import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, map, catchError } from 'rxjs';
 import { PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
 import { DataServiceService } from '../services/data-service.service';
 
@@ -96,7 +96,7 @@ export class CatalogComponent implements OnInit {
     this.searchForm.get('searchInput')?.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      switchMap((value: number | string | null) => {
+      switchMap((value) => {
         const strValue = value !== null && value !== undefined ? String(value).trim() : '';
 
         if (!strValue) {
@@ -111,11 +111,11 @@ export class CatalogComponent implements OnInit {
           // ID search
           const id = parseInt(strValue, 10);
           if (id >= 1 && id <= 1025) {
-            this.searchMode.set(true);
             this.isSearching.set(true);
             return this.dataService.getPokemonDetail(id).pipe(
               map((data) => {
                 this.isSearching.set(false);
+                this.searchMode.set(true);
                 this.totalCount.set(1);
                 return [{
                   name: data.name,
@@ -124,6 +124,7 @@ export class CatalogComponent implements OnInit {
               }),
               catchError(() => {
                 this.isSearching.set(false);
+                this.searchMode.set(true);
                 this.totalCount.set(0);
                 return of([]);
               })
@@ -132,16 +133,17 @@ export class CatalogComponent implements OnInit {
         }
 
         // Name search (non-numeric)
-        this.searchMode.set(true);
         this.isSearching.set(true);
         return this.dataService.searchPokemonByName(strValue).pipe(
           map((results) => {
             this.isSearching.set(false);
+            this.searchMode.set(true);
             this.totalCount.set(results.length);
             return results;
           }),
           catchError(() => {
             this.isSearching.set(false);
+            this.searchMode.set(true);
             this.totalCount.set(0);
             return of([]);
           })
