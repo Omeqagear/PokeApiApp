@@ -1,11 +1,43 @@
 <div class="catalog-header">
   <div class="header-content">
     <h1>Catálogo de Pokémon</h1>
+
+    <!-- Generation Filter -->
+    <div class="generation-filter">
+      <div class="filter-label">
+        <mat-icon>filter_list</mat-icon>
+        <span>Generation</span>
+      </div>
+      <div class="generation-chips">
+        <button
+          mat-stroked-button
+          class="gen-chip"
+          [class.active]="!selectedGeneration()"
+          (click)="selectGeneration(null)"
+        >
+          All
+        </button>
+        @for (gen of generations; track gen.name) {
+          <button
+            mat-stroked-button
+            class="gen-chip"
+            [class.active]="selectedGeneration()?.name === gen.name"
+            [style.--gen-color]="gen.color"
+            (click)="selectGeneration(gen)"
+          >
+            <span class="gen-name">{{ gen.name }}</span>
+            <span class="gen-region">{{ gen.region }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Search -->
     <div class="search-container">
       <form [formGroup]="searchForm" class="search-form">
         <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Search Pokémon by ID (1-1025)</mat-label>
-          <input matInput formControlName="searchInput" type="number" placeholder="e.g., 25 for Pikachu">
+          <mat-label>Search Pokémon by ID or name</mat-label>
+          <input matInput formControlName="searchInput" placeholder="e.g., 25 or Pikachu">
           <mat-icon matPrefix>search</mat-icon>
           @if (searchForm.get('searchInput')?.value) {
             <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()" type="button">
@@ -31,7 +63,12 @@
       @if (searchMode()) {
         {{ searchResults().length }} result(s)
       } @else {
-        {{ pokemons().length }} of {{ totalCount() }} Pokémon loaded
+        {{ pokemons().length }} Pokémon
+        @if (selectedGeneration()) {
+          in {{ selectedGeneration()!.region }}
+        } @else {
+          of {{ totalCount() }} total
+        }
       }
     </span>
   </div>
@@ -56,30 +93,40 @@
     <div class="no-results">
       <mat-icon>search_off</mat-icon>
       <h3>No Pokémon Found</h3>
-      <p>Try a different ID between 1 and 1025</p>
+      <p>Try a different ID or name</p>
     </div>
   }
 
-  <div class="catalog-grid" [@listStagger]="displayedPokemon()">
-    @for (item of displayedPokemon(); track item.name; let i = $index) {
-      <mat-card class="poke-card" (click)="navigateToPokemon(extractPokemonId(item.url))">
-        <div class="card-badge">#{{ extractPokemonId(item.url) }}</div>
-        <div class="card-image-wrapper">
-          <img class="pokeImg"
-               [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + extractPokemonId(item.url) + '.png'"
-               [alt]="item.name"
-               loading="lazy">
-        </div>
-        <mat-card-header>
-          <mat-card-title class="pokeName">{{ capitalize(item.name) }}</mat-card-title>
-        </mat-card-header>
-        <div class="card-hover-effect">
-          <mat-icon>visibility</mat-icon>
-          <span>View Details</span>
-        </div>
-      </mat-card>
-    }
-  </div>
+  @if (!searchMode() && pokemons().length === 0) {
+    <div class="no-results">
+      <mat-icon>pokemon_go</mat-icon>
+      <h3>No Pokémon Found</h3>
+      <p>No Pokémon available in this range</p>
+    </div>
+  }
+
+  @if (displayedPokemon().length > 0) {
+    <div class="catalog-grid" [@listStagger]="displayedPokemon()">
+      @for (item of displayedPokemon(); track item.name; let i = $index) {
+        <mat-card class="poke-card" (click)="navigateToPokemon(extractPokemonId(item.url))">
+          <div class="card-badge">#{{ extractPokemonId(item.url) }}</div>
+          <div class="card-image-wrapper">
+            <img class="pokeImg"
+                 [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + extractPokemonId(item.url) + '.png'"
+                 [alt]="item.name"
+                 loading="lazy">
+          </div>
+          <mat-card-header>
+            <mat-card-title class="pokeName">{{ capitalize(item.name) }}</mat-card-title>
+          </mat-card-header>
+          <div class="card-hover-effect">
+            <mat-icon>visibility</mat-icon>
+            <span>View Details</span>
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
 
   @if (!searchMode() && hasNext()) {
     <div class="pagination">
@@ -95,8 +142,13 @@
   } @else if (!searchMode()) {
     <div class="pagination complete">
       <mat-icon>check_circle</mat-icon>
-      <p>All {{ totalCount() }} Pokémon loaded!</p>
+      <p>
+        @if (selectedGeneration()) {
+          All {{ totalCount() }} Pokémon from {{ selectedGeneration()!.region }} loaded!
+        } @else {
+          All {{ totalCount() }} Pokémon loaded!
+        }
+      </p>
     </div>
   }
 }
-

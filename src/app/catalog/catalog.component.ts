@@ -9,11 +9,32 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatChipsModule } from '@angular/material/chips';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { trigger, style, transition, query, stagger, animate } from '@angular/animations';
 import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of } from 'rxjs';
 import { PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
 import { DataServiceService } from '../services/data-service.service';
+
+interface Generation {
+  name: string;
+  region: string;
+  startId: number;
+  endId: number;
+  color: string;
+}
+
+const GENERATIONS: Generation[] = [
+  { name: 'Gen I', region: 'Kanto', startId: 1, endId: 151, color: '#ff6b6b' },
+  { name: 'Gen II', region: 'Johto', startId: 152, endId: 251, color: '#feca57' },
+  { name: 'Gen III', region: 'Hoenn', startId: 252, endId: 386, color: '#48dbfb' },
+  { name: 'Gen IV', region: 'Sinnoh', startId: 387, endId: 493, color: '#a29bfe' },
+  { name: 'Gen V', region: 'Unova', startId: 494, endId: 649, color: '#55efc4' },
+  { name: 'Gen VI', region: 'Kalos', startId: 650, endId: 721, color: '#fd79a8' },
+  { name: 'Gen VII', region: 'Alola', startId: 722, endId: 809, color: '#fdcb6e' },
+  { name: 'Gen VIII', region: 'Galar', startId: 810, endId: 905, color: '#74b9ff' },
+  { name: 'Gen IX', region: 'Paldea', startId: 906, endId: 1025, color: '#ff7675' },
+];
 
 @Component({
   selector: 'app-catalog',
@@ -29,6 +50,7 @@ import { DataServiceService } from '../services/data-service.service';
     MatBadgeModule,
     MatInputModule,
     MatFormFieldModule,
+    MatChipsModule,
     ReactiveFormsModule
   ],
   templateUrl: './catalog.component.html',
@@ -41,9 +63,9 @@ import { DataServiceService } from '../services/data-service.service';
           [
             style({ opacity: 0, transform: 'translateY(-15px)' }),
             stagger(
-              '50ms',
+              '30ms',
               animate(
-                '550ms ease-out',
+                '400ms ease-out',
                 style({ opacity: 1, transform: 'translateY(0px)' })
               )
             )
@@ -62,28 +84,34 @@ export class CatalogComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
+  generations = GENERATIONS;
+  readonly limit = 40;
+
   // Signal-based state
   pokemons = signal<PokemonSummary[]>([]);
   loading = signal(true);
   loadingMore = signal(false);
   error = signal<string | null>(null);
-  
-  // Pagination
-  limit = 40;
-  offset = signal(0);
+
+  // Pagination (offset into the full PokeAPI list)
+  currentOffset = signal(0);
   totalCount = signal(0);
   hasNext = signal(false);
+  genLoadedCount = signal(0);
+
+  // Generation filter
+  selectedGeneration = signal<Generation | null>(null);
 
   // Search
   searchForm: FormGroup = this.fb.group({
-    searchInput: ['', [Validators.min(1), Validators.max(1025), Validators.pattern('^[0-9]+$')]]
+    searchInput: ['']
   });
   searchResults = signal<PokemonSummary[]>([]);
   isSearching = signal(false);
-  searchMode = signal(false); // true when searching, false when browsing
+  searchMode = signal(false);
 
-  // Computed signals
-  displayedPokemon = computed(() => 
+  // Computed
+  displayedPokemon = computed(() =>
     this.searchMode() ? this.searchResults() : this.pokemons()
   );
 
@@ -102,13 +130,10 @@ export class CatalogComponent implements OnInit {
         if (!strValue) {
           this.searchMode.set(false);
           this.searchResults.set([]);
-          this.totalCount.set(0);
           return of(null);
         }
 
-        // Check if input is numeric (ID search) or text (name search)
         if (/^\d+$/.test(strValue)) {
-          // ID search
           const id = parseInt(strValue, 10);
           if (id >= 1 && id <= 1025) {
             this.isSearching.set(true);
@@ -116,7 +141,6 @@ export class CatalogComponent implements OnInit {
               map((data) => {
                 this.isSearching.set(false);
                 this.searchMode.set(true);
-                this.totalCount.set(1);
                 return [{
                   name: data.name,
                   url: `https://pokeapi.co/api/v2/pokemon/${data.id}/`
@@ -125,26 +149,22 @@ export class CatalogComponent implements OnInit {
               catchError(() => {
                 this.isSearching.set(false);
                 this.searchMode.set(true);
-                this.totalCount.set(0);
                 return of([]);
               })
             );
           }
         }
 
-        // Name search (non-numeric)
         this.isSearching.set(true);
         return this.dataService.searchPokemonByName(strValue).pipe(
           map((results) => {
             this.isSearching.set(false);
             this.searchMode.set(true);
-            this.totalCount.set(results.length);
             return results;
           }),
           catchError(() => {
             this.isSearching.set(false);
             this.searchMode.set(true);
-            this.totalCount.set(0);
             return of([]);
           })
         );
@@ -166,17 +186,24 @@ export class CatalogComponent implements OnInit {
     }
     this.error.set(null);
 
-    this.dataService.getPokemonNames(this.limit, this.offset()).subscribe({
+    const gen = this.selectedGeneration();
+    const offset = this.currentOffset();
+    const genSize = gen ? gen.endId - gen.startId + 1 : 1025;
+
+    this.dataService.getPokemonNames(this.limit, offset).subscribe({
       next: (data: PokemonListResponse) => {
         if (isLoadMore) {
           this.pokemons.update(existing => [...existing, ...data.results]);
         } else {
           this.pokemons.set(data.results);
         }
-        
-        this.totalCount.set(data.count);
-        this.hasNext.set(data.next !== null);
-        
+
+        this.totalCount.set(genSize);
+        this.genLoadedCount.update(c => c + data.results.length);
+
+        const loadedSoFar = this.genLoadedCount();
+        this.hasNext.set(loadedSoFar < genSize && data.results.length === this.limit);
+
         if (isLoadMore) {
           this.loadingMore.set(false);
         } else {
@@ -186,7 +213,7 @@ export class CatalogComponent implements OnInit {
       error: (err) => {
         console.error('Error loading Pokemon list:', err);
         this.error.set('Failed to load Pokemon list. Please try again.');
-        
+
         if (isLoadMore) {
           this.loadingMore.set(false);
         } else {
@@ -197,8 +224,27 @@ export class CatalogComponent implements OnInit {
   }
 
   loadMore(): void {
-    this.offset.update(current => current + this.limit);
+    this.currentOffset.update(current => current + this.limit);
     this.loadPokemonList(true);
+  }
+
+  selectGeneration(gen: Generation | null): void {
+    if (this.selectedGeneration()?.name === gen?.name) return;
+
+    this.selectedGeneration.set(gen);
+    this.clearSearch();
+
+    if (gen) {
+      // PokeAPI is 0-indexed, so Gen I starts at offset 0
+      const offset = gen.startId - 1;
+      this.currentOffset.set(offset);
+      this.genLoadedCount.set(0);
+    } else {
+      this.currentOffset.set(0);
+      this.genLoadedCount.set(0);
+    }
+
+    this.loadPokemonList(false);
   }
 
   clearSearch(): void {
@@ -214,10 +260,6 @@ export class CatalogComponent implements OnInit {
 
   capitalize(name: string): string {
     return name.charAt(0).toUpperCase() + name.slice(1);
-  }
-
-  onItem(item: PokemonSummary): number {
-    return this.extractPokemonId(item.url);
   }
 
   navigateToPokemon(id: number): void {

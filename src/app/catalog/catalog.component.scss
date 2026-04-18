@@ -16,6 +16,98 @@
       background-clip: text;
     }
 
+    // Generation Filter
+    .generation-filter {
+      margin-bottom: 24px;
+
+      .filter-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-bottom: 12px;
+        color: #888;
+        font-size: 0.85em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      .generation-chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+
+        .gen-chip {
+          padding: 8px 18px;
+          border-radius: 24px !important;
+          font-size: 0.9em;
+          font-weight: 600;
+          border-width: 2px !important;
+          transition: all 0.2s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+          line-height: 1.1;
+          min-width: 70px;
+          background: transparent;
+
+          .gen-name {
+            font-weight: 700;
+            font-size: 0.95em;
+          }
+
+          .gen-region {
+            font-size: 0.65em;
+            opacity: 0.6;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .gen-region {
+            font-size: 0.65em;
+            opacity: 0.6;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .gen-region {
+            font-size: 0.7em;
+            opacity: 0.6;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+          }
+
+          &.active {
+            background: var(--gen-color, #667eea) !important;
+            border-color: var(--gen-color, #667eea) !important;
+            color: #fff !important;
+            box-shadow: 0 2px 12px color-mix(in srgb, var(--gen-color, #667eea) 40%, transparent);
+
+            .gen-region {
+              opacity: 0.9;
+            }
+          }
+
+          &:not(.active):hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+          }
+        }
+      }
+    }
+
     .search-container {
       max-width: 600px;
       margin: 0 auto;
@@ -374,6 +466,21 @@
 
     .stats {
       font-size: 0.95em;
+    }
+
+    .generation-filter {
+      .generation-chips {
+        gap: 6px;
+
+        .gen-chip {
+          padding: 4px 10px;
+          font-size: 0.75em;
+
+          .gen-region {
+            display: none;
+          }
+        }
+      }
     }
   }
 
