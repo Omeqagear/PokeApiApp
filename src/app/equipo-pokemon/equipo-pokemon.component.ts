@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { forkJoin, of, catchError } from 'rxjs';
 import { Pokemon } from '../shared/pokemon';
@@ -21,8 +22,7 @@ import {
   GENERATIONS,
   TeamArchetype,
   GenerationFilter,
-  GeneratedTeam,
-  PokemonWithStats
+  GeneratedTeam
 } from '../services/team-builder.service';
 
 function getGeneration(id: number): number {
@@ -58,7 +58,8 @@ function getGeneration(id: number): number {
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatSlideToggleModule
   ],
   templateUrl: './equipo-pokemon.component.html',
   styleUrls: ['./equipo-pokemon.component.scss'],
@@ -88,6 +89,7 @@ export class EquipoPokemonComponent implements OnInit {
   isGenerating = signal(false);
   generationProgress = signal(0);
   activeTab = signal<'manual' | 'builder'>('manual');
+  includeLegendary = signal<boolean>(true);
   teamArchetypes = TEAM_ARCHETYPES;
   generations = GENERATIONS;
 
@@ -172,7 +174,8 @@ export class EquipoPokemonComponent implements OnInit {
     try {
       const team = await this.teamBuilderService.generateMetaTeam(
         archetype.id,
-        this.selectedGeneration() || undefined
+        this.selectedGeneration() || undefined,
+        this.includeLegendary()
       );
 
       this.generationProgress.set(80);
@@ -231,7 +234,8 @@ export class EquipoPokemonComponent implements OnInit {
     try {
       const team = await this.teamBuilderService.generateStatBasedTeam(
         stats,
-        this.selectedGeneration() || undefined
+        this.selectedGeneration() || undefined,
+        this.includeLegendary()
       );
 
       this.generationProgress.set(80);
@@ -370,7 +374,42 @@ export class EquipoPokemonComponent implements OnInit {
 
     this.deleteTeam();
 
-    const ids = this.getRandomUniqueIds(6);
+    let ids = this.getRandomUniqueIds(6);
+
+    if (!this.includeLegendary()) {
+      const nonLegendaryIds: number[] = [];
+      let attempts = 0;
+      const maxAttempts = ids.length * 3;
+
+      for (const id of ids) {
+        if (nonLegendaryIds.length >= 6) break;
+        if (attempts >= maxAttempts) break;
+
+        const isLegendary = await this.teamBuilderService.isLegendary(id);
+        if (!isLegendary) {
+          nonLegendaryIds.push(id);
+        } else {
+          const replacementIds = this.getRandomUniqueIds(1, [...ids, ...nonLegendaryIds]);
+          if (replacementIds.length > 0) {
+            ids = [...ids.filter(i => i !== id), ...replacementIds];
+          }
+        }
+        attempts++;
+      }
+
+      if (nonLegendaryIds.length < 6) {
+        const remaining = 6 - nonLegendaryIds.length;
+        const extraIds = this.getRandomUniqueIds(remaining, nonLegendaryIds);
+        for (const id of extraIds) {
+          const isLegendary = await this.teamBuilderService.isLegendary(id);
+          if (!isLegendary) {
+            nonLegendaryIds.push(id);
+          }
+        }
+      }
+
+      ids = nonLegendaryIds.length > 0 ? nonLegendaryIds : ids;
+    }
 
     const requests = ids.map(id =>
       this.dataService.getPokemonDetail(id).pipe(

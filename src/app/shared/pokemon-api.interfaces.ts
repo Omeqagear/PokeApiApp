@@ -86,3 +86,10 @@ export interface PokemonGameIndex {
   version: PokemonSummary;
 }
 
+export interface PokemonSpecies {
+  id: number;
+  name: string;
+  is_legendary: boolean;
+  is_mythical: boolean;
+}
+

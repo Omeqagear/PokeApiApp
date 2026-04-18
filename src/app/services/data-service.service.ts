@@ -2,16 +2,18 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, catchError, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { PokemonListResponse, PokemonDetail, PokemonSummary } from '../shared/pokemon-api.interfaces';
+import { PokemonListResponse, PokemonDetail, PokemonSummary, PokemonSpecies } from '../shared/pokemon-api.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataServiceService {
   private readonly baseUrl = 'https://pokeapi.co/api/v2/pokemon';
+  private readonly speciesUrl = 'https://pokeapi.co/api/v2/pokemon-species';
   private allPokemonCache: PokemonSummary[] | null = null;
   private readonly maxPokemonCount = 1025;
   private pokemonDetailCache = new Map<number, PokemonDetail>();
+  private pokemonSpeciesCache = new Map<number, PokemonSpecies>();
 
   constructor(private http: HttpClient) {}
 
@@ -86,6 +88,28 @@ export class DataServiceService {
       map((response) => {
         this.allPokemonCache = response.results;
         return this.allPokemonCache;
+      })
+    );
+  }
+
+  getPokemonSpecies(id: number): Observable<PokemonSpecies> {
+    if (id <= 0 || id > this.maxPokemonId) {
+      return of({} as PokemonSpecies);
+    }
+
+    if (this.pokemonSpeciesCache.has(id)) {
+      return of(this.pokemonSpeciesCache.get(id)!);
+    }
+
+    return this.http.get<PokemonSpecies>(`${this.speciesUrl}/${id}/`).pipe(
+      tap((data) => {
+        if (data && data.id) {
+          this.pokemonSpeciesCache.set(id, data);
+        }
+      }),
+      catchError((error) => {
+        console.error(`Error fetching species for Pokémon ID ${id}:`, error);
+        return of({} as PokemonSpecies);
       })
     );
   }

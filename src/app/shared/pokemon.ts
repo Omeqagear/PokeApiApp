@@ -30,12 +30,12 @@ export class Pokemon {
         move1: string,
         move2: string,
         stats: PokemonStat[] = [],
-        totalStats: number = 0,
-        generation: number = 1,
-        baseExperience: number = 0,
+        totalStats = 0,
+        generation = 1,
+        baseExperience = 0,
         types: any[] = [],
-        height: number = 0,
-        weight: number = 0,
+        height = 0,
+        weight = 0,
         abilities: any[] = [],
         moves: any[] = []
     ) {

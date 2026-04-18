@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { DataServiceService } from './data-service.service';
-import { PokemonDetail } from '../shared/pokemon-api.interfaces';
+import { PokemonDetail, PokemonSpecies } from '../shared/pokemon-api.interfaces';
 import { Pokemon } from '../shared/pokemon';
 
 export interface TeamArchetype {
@@ -156,14 +156,15 @@ export const TEAM_ARCHETYPES: TeamArchetype[] = [
 export class TeamBuilderService {
   private dataService = inject(DataServiceService);
   private pokemonCache = new Map<number, PokemonDetail>();
+  private speciesCache = new Map<number, PokemonSpecies>();
   private allPokemonLoaded = false;
   private allPokemonDetails: PokemonDetail[] = [];
 
-  async generateMetaTeam(archetypeId: string, generation?: GenerationFilter): Promise<GeneratedTeam | null> {
+  async generateMetaTeam(archetypeId: string, generation?: GenerationFilter, includeLegendary = true): Promise<GeneratedTeam | null> {
     const archetype = TEAM_ARCHETYPES.find(a => a.id === archetypeId);
     if (!archetype) return null;
 
-    const pokemonPool = await this.getPokemonPool(generation);
+    const pokemonPool = await this.getPokemonPool(generation, includeLegendary);
     if (pokemonPool.length === 0) return null;
 
     const team: PokemonWithStats[] = [];
@@ -192,8 +193,8 @@ export class TeamBuilderService {
     };
   }
 
-  async generateStatBasedTeam(stats: string[], generation?: GenerationFilter): Promise<GeneratedTeam | null> {
-    const pokemonPool = await this.getPokemonPool(generation);
+  async generateStatBasedTeam(stats: string[], generation?: GenerationFilter, includeLegendary = true): Promise<GeneratedTeam | null> {
+    const pokemonPool = await this.getPokemonPool(generation, includeLegendary);
     if (pokemonPool.length === 0) return null;
 
     const sorted = [...pokemonPool].sort((a, b) => {
@@ -219,7 +220,7 @@ export class TeamBuilderService {
     };
   }
 
-  private async getPokemonPool(generation?: GenerationFilter): Promise<PokemonWithStats[]> {
+  private async getPokemonPool(generation?: GenerationFilter, includeLegendary = true): Promise<PokemonWithStats[]> {
     if (!this.allPokemonLoaded) {
       await this.loadAllPokemon();
     }
@@ -231,6 +232,10 @@ export class TeamBuilderService {
     }
 
     pool = pool.filter(p => p.id > 0 && !this.isFormOrMega(p.name));
+
+    if (!includeLegendary) {
+      pool = await this.filterNonLegendary(pool);
+    }
 
     return pool.map(detail => this.toPokemonWithStats(detail));
   }
@@ -372,8 +377,63 @@ export class TeamBuilderService {
     return formKeywords.some(keyword => name.includes(keyword));
   }
 
+  private async filterNonLegendary(pool: PokemonDetail[]): Promise<PokemonDetail[]> {
+    const filtered: PokemonDetail[] = [];
+    const batchSize = 20;
+
+    for (let i = 0; i < pool.length; i += batchSize) {
+      const batch = pool.slice(i, i + batchSize);
+      const requests = batch.map(p => {
+        if (this.speciesCache.has(p.id)) {
+          return of(this.speciesCache.get(p.id)!);
+        }
+        return this.dataService.getPokemonSpecies(p.id).pipe(
+          catchError(() => of(null))
+        );
+      });
+
+      const results = await new Promise<PokemonSpecies[]>(resolve => {
+        forkJoin(requests).subscribe({
+          next: (data) => resolve(data.filter((d): d is PokemonSpecies => d !== null && d.id > 0)),
+          error: () => resolve([])
+        });
+      });
+
+      results.forEach((species, index) => {
+        this.speciesCache.set(species.id, species);
+        if (!species.is_legendary && !species.is_mythical) {
+          filtered.push(batch[index]);
+        }
+      });
+    }
+
+    return filtered;
+  }
+
+  async isLegendary(pokemonId: number): Promise<boolean> {
+    if (this.speciesCache.has(pokemonId)) {
+      const species = this.speciesCache.get(pokemonId)!;
+      return species.is_legendary || species.is_mythical;
+    }
+
+    return new Promise<boolean>(resolve => {
+      this.dataService.getPokemonSpecies(pokemonId).subscribe({
+        next: (species) => {
+          if (species && species.id) {
+            this.speciesCache.set(species.id, species);
+            resolve(species.is_legendary || species.is_mythical);
+          } else {
+            resolve(false);
+          }
+        },
+        error: () => resolve(false)
+      });
+    });
+  }
+
   clearCache(): void {
     this.pokemonCache.clear();
+    this.speciesCache.clear();
     this.allPokemonDetails = [];
     this.allPokemonLoaded = false;
   }

@@ -44,6 +44,17 @@
     <div class="builder-section" [@fadeInOut]>
       <h2>Generate META Team</h2>
       
+      <!-- Legendary Toggle -->
+      <div class="builder-group legendary-toggle-group">
+        <mat-slide-toggle 
+          [checked]="includeLegendary()" 
+          (change)="includeLegendary.set($event.checked)"
+          class="legendary-toggle">
+          <mat-icon class="toggle-icon">stars</mat-icon>
+          Include Legendary Pokémon
+        </mat-slide-toggle>
+      </div>
+      
       <!-- Archetype Selection -->
       <div class="builder-group">
         <h3>Team Archetype</h3>
