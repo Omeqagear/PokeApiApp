@@ -63,10 +63,7 @@ export class EquipoPokemonComponent implements OnInit {
     this.teamPokemon.update(team => team.filter(p => p.id !== pokemon.id));
   }
 
-  getPokemonImage(item: Pokemon | any): string {
-    if (typeof item.getImage === 'function') {
-      return item.getImage();
-    }
+  getPokemonImage(item: Pokemon | { id: number; spriteUrl?: string }): string {
     return item.spriteUrl || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${item.id}.png`;
   }
 

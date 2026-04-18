@@ -12,14 +12,14 @@ export const routes: Routes = [
       .then(m => m.CatalogComponent)
   },
   {
-    path: 'photo/:id',
-    loadComponent: () => import('./photo-pokemon/photo-pokemon.component')
-      .then(m => m.PhotoPokemonComponent)
-  },
-  {
     path: 'team',
     loadComponent: () => import('./equipo-pokemon/equipo-pokemon.component')
       .then(m => m.EquipoPokemonComponent)
+  },
+  {
+    path: 'photo/:id',
+    loadComponent: () => import('./photo-pokemon/photo-pokemon.component')
+      .then(m => m.PhotoPokemonComponent)
   },
   {
     path: '**',

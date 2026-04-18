@@ -11,7 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { trigger, style, transition, query, stagger, animate } from '@angular/animations';
-import { debounceTime, distinctUntilChanged, switchMap, map, catchError } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of } from 'rxjs';
 import { PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
 import { DataServiceService } from '../services/data-service.service';
 

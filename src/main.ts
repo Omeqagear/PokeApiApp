@@ -1,22 +1,15 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
-import { CacheInterceptor } from './app/services/cache.interceptor';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { cacheInterceptor } from './app/services/cache.interceptor';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptors([cacheInterceptor])),
     provideAnimations(),
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: CacheInterceptor,
-      multi: true
-    }
   ]
 }).catch((err: unknown) => console.error(err));
-

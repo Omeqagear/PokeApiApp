@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, catchError } from 'rxjs';
+import { Observable, of, catchError, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { PokemonListResponse, PokemonDetail, PokemonSummary } from '../shared/pokemon-api.interfaces';
 
@@ -11,6 +11,7 @@ export class DataServiceService {
   private readonly baseUrl = 'https://pokeapi.co/api/v2/pokemon';
   private allPokemonCache: PokemonSummary[] | null = null;
   private readonly maxPokemonCount = 1025;
+  private pokemonDetailCache = new Map<number, PokemonDetail>();
 
   constructor(private http: HttpClient) {}
 
@@ -24,15 +25,29 @@ export class DataServiceService {
   }
 
   getPokemonDetail(id: number): Observable<PokemonDetail> {
-    if (id <= 0) {
+    if (id <= 0 || id > this.maxPokemonId) {
       return of({} as PokemonDetail);
     }
+
+    if (this.pokemonDetailCache.has(id)) {
+      return of(this.pokemonDetailCache.get(id)!);
+    }
+
     return this.http.get<PokemonDetail>(`${this.baseUrl}/${id}/`).pipe(
+      tap((data) => {
+        if (data && data.id) {
+          this.pokemonDetailCache.set(id, data);
+        }
+      }),
       catchError((error) => {
         console.error(`Error fetching Pokémon with id ${id}:`, error);
         return of({} as PokemonDetail);
       })
     );
+  }
+
+  private get maxPokemonId(): number {
+    return this.maxPokemonCount;
   }
 
   /**

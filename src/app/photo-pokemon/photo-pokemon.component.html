@@ -1,152 +1,141 @@
-<div class="pokemon-detail-container">
-  @if (loading()) {
-    <div class="loading-container">
-      <mat-spinner diameter="80"></mat-spinner>
-      <p>Loading Pokémon data...</p>
+<div class="pokemon-page">
+  <!-- Navigation Arrows (always visible) -->
+  @if (pokemonId) {
+    <div class="nav-arrows">
+      <button mat-icon-button class="nav-btn prev-btn" [disabled]="!hasPrev" (click)="navigateToPokemon(prevId)">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button mat-icon-button class="nav-btn next-btn" [disabled]="!hasNext" (click)="navigateToPokemon(nextId)">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
   }
 
-  @if (error()) {
+  @if (loading) {
+    <div class="loading-container">
+      <div class="pokeball-loader">
+        <div class="pokeball-top"></div>
+        <div class="pokeball-bottom"></div>
+        <div class="pokeball-center"></div>
+      </div>
+      <p class="loading-text">Loading Pokémon...</p>
+    </div>
+  }
+
+  @if (error) {
     <div class="error-container">
       <mat-icon>error_outline</mat-icon>
-      <h2>Failed to Load Pokémon</h2>
-      <p>Unable to fetch data for Pokémon #{{ id() }}</p>
-      <button mat-flat-button color="primary" (click)="goBack()">
-        <mat-icon>arrow_back</mat-icon>
-        Back to Catalog
+      <p>{{ error }}</p>
+      <button mat-stroked-button color="warn" (click)="navigateToCatalog()">
+        Return to Catalog
       </button>
     </div>
   }
 
-  @if (!loading() && !error() && pokemonDetail()) {
-    <!-- Header with navigation -->
-    <div class="detail-header">
-      <button mat-icon-button (click)="goBack()" class="back-btn" aria-label="Back to catalog">
+  @if (pokemon && !loading) {
+    <div class="pokemon-container" [ngClass]="'bg-' + (pokemon.types[0]?.type?.name || 'normal')">
+      <!-- Back Button -->
+      <button mat-icon-button (click)="navigateToCatalog()" class="back-btn">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      <h1 class="pokemon-name">{{ capitalize(name()) }}</h1>
-      <div class="pokemon-id">#{{ id().toString().padStart(3, '0') }}</div>
-      <button mat-icon-button (click)="addPokemonToTeam()" class="add-team-btn" aria-label="Add to team">
-        <mat-icon>group_add</mat-icon>
-      </button>
-    </div>
 
-    <!-- Main content grid -->
-    <div class="detail-content">
-      <!-- Left: Image and sprite selector -->
-      <div class="image-section">
-        <mat-card class="image-card">
-          <div class="sprite-selector">
-            <button mat-button [class.active]="selectedView() === 'front'" (click)="setSelectedView('front')">
-              <mat-icon>face</mat-icon>
-              Front
-            </button>
-            <button mat-button [class.active]="selectedView() === 'back'" (click)="setSelectedView('back')">
-              <mat-icon>arrow_back</mat-icon>
-              Back
-            </button>
-            <button mat-button [class.active]="selectedView() === 'shiny'" (click)="setSelectedView('shiny')">
-              <mat-icon>auto_awesome</mat-icon>
-              Shiny
-            </button>
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Left: Pokemon Image -->
+        <div class="image-section">
+          <div class="pokemon-id-badge">#{{ pokemon.id | number:'3.0-0' }}</div>
+          <div class="image-wrapper">
+            <img
+              class="pokemon-main-img"
+              [src]="getSpriteUrl(pokemon)"
+              [alt]="capitalize(pokemon.name)"
+              (error)="handleImageError($event)"
+            >
+            <div class="image-glow" [ngClass]="'glow-' + (pokemon.types[0]?.type?.name || 'normal')"></div>
           </div>
-          <div class="sprite-display">
-            <img [src]="displayUrl()" [alt]="name()" class="pokemon-sprite">
-          </div>
-        </mat-card>
-      </div>
+        </div>
 
-      <!-- Right: Info and stats -->
-      <div class="info-section">
-        <!-- Types -->
-        <mat-card class="info-card">
-          <mat-card-header>
-            <mat-card-title>Types</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="types-container">
-              @for (type of types(); track type) {
-                <span class="type-badge type-{{ type.toLowerCase() }}">
-                  {{ capitalize(type) }}
+        <!-- Right: Pokemon Info -->
+        <div class="info-section">
+          <h1 class="pokemon-name">{{ capitalize(pokemon.name) }}</h1>
+
+          <!-- Types -->
+          <div class="types-container">
+            @for (type of pokemon.types; track $index) {
+              <span class="type-badge" [ngClass]="'type-' + type.type.name">{{ capitalize(type.type.name) }}</span>
+            }
+          </div>
+
+          <!-- Physical Info -->
+          <div class="physical-info">
+            <div class="info-item">
+              <span class="info-label">Height</span>
+              <span class="info-value">{{ (pokemon.height / 10).toFixed(1) }} m</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Weight</span>
+              <span class="info-value">{{ (pokemon.weight / 10).toFixed(1) }} kg</span>
+            </div>
+          </div>
+
+          <!-- Abilities -->
+          <div class="info-block">
+            <h3 class="block-title">Abilities</h3>
+            <div class="abilities-list">
+              @for (ability of pokemon.abilities; track $index) {
+                <span class="ability-tag">
+                  {{ capitalize(ability.ability.name) }}
+                  @if (ability.is_hidden) {
+                    <span class="hidden-badge">Hidden</span>
+                  }
                 </span>
               }
             </div>
-          </mat-card-content>
-        </mat-card>
+          </div>
 
-        <!-- Physical attributes -->
-        <mat-card class="info-card">
-          <mat-card-content>
-            <div class="attributes-grid">
-              <div class="attribute">
-                <mat-icon>straighten</mat-icon>
-                <div class="attribute-value">{{ height() / 10 }}m</div>
-                <div class="attribute-label">Height</div>
-              </div>
-              <div class="attribute">
-                <mat-icon>monitor_weight</mat-icon>
-                <div class="attribute-value">{{ weight() / 10 }}kg</div>
-                <div class="attribute-label">Weight</div>
-              </div>
-              <div class="attribute">
-                <mat-icon>star</mat-icon>
-                <div class="attribute-value">{{ pokemonDetail()?.base_experience || '—' }}</div>
-                <div class="attribute-label">Base Exp</div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Abilities -->
-        @if (abilities().length > 0) {
-          <mat-card class="info-card">
-            <mat-card-header>
-              <mat-card-title>Abilities</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="abilities-list">
-                @for (ability of abilities(); track ability; let last = $last) {
-                  <span class="ability-item">{{ capitalize(ability) }}{{ last ? '' : ', ' }}</span>
-                }
-              </div>
-            </mat-card-content>
-          </mat-card>
-        }
-
-        <!-- Stats -->
-        <mat-card class="info-card">
-          <mat-card-header>
-            <mat-card-title>Base Stats</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+          <!-- Stats with Progress Bars -->
+          <div class="stats-block">
+            <h3 class="block-title">Base Stats</h3>
             <div class="stats-container">
-              @for (stat of stats(); track stat.stat.name) {
+              @for (stat of pokemon.stats; track stat.stat.name) {
                 <div class="stat-row">
-                  <div class="stat-label">{{ stat.stat.name.replace('-', ' ') | titlecase }}</div>
-                  <div class="stat-value">{{ stat.base_stat }}</div>
-                  <div class="stat-bar">
-                    <div class="stat-bar-fill" [style.width.%]="(stat.base_stat / 255) * 100"
-                         [style.background]="getStatColor(stat.base_stat)">
-                    </div>
+                  <span class="stat-label">{{ getStatShortName(stat.stat.name) }}</span>
+                  <span class="stat-value">{{ stat.base_stat }}</span>
+                  <div class="stat-bar-container">
+                    <div
+                      class="stat-bar"
+                      [style.width.%]="getStatPercentage(stat.base_stat)"
+                      [style.background-color]="getStatColor(stat.base_stat)"
+                    ></div>
                   </div>
                 </div>
               }
             </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </div>
+          </div>
 
-    <!-- Navigation arrows -->
-    <div class="pokemon-navigation">
-      <button mat-fab extended color="primary" (click)="prevID()">
-        <mat-icon>arrow_back</mat-icon>
-        Previous
-      </button>
-      <button mat-fab extended color="accent" (click)="nextID()">
-        Next
-        <mat-icon>arrow_forward</mat-icon>
-      </button>
+          <!-- Moves -->
+          <div class="info-block">
+            <h3 class="block-title">Moves</h3>
+            <div class="moves-list">
+              @for (move of pokemon.moves.slice(0, 8); track $index) {
+                <span class="move-tag">{{ capitalize(move.move.name) }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Bottom Navigation -->
+          <div class="bottom-nav">
+            <button mat-flat-button class="nav-action-btn team-btn" (click)="navigateToTeam()">
+              <mat-icon>group</mat-icon>
+              My Team
+            </button>
+            <button mat-stroked-button class="nav-action-btn catalog-btn" (click)="navigateToCatalog()">
+              <mat-icon>grid_view</mat-icon>
+              Catalog
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   }
 </div>
