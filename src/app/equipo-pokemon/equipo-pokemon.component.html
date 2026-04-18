@@ -1,49 +1,172 @@
-<div class="catalog-header">
-  <div class="header-content">
-    <h1>Equipo Pokémon</h1>
-    <div class="team-actions">
-      <button mat-flat-button color="warn" (click)="deleteTeam()">
-        <mat-icon>delete_sweep</mat-icon>
-        Eliminar equipo
-      </button>
-      <button mat-flat-button color="primary" (click)="genRandomTeam()">
-        <mat-icon>shuffle</mat-icon>
-        Equipo aleatorio
-      </button>
+<div class="team-page">
+  <div class="catalog-header">
+    <div class="header-content">
+      <h1>Equipo Pokémon</h1>
+      <div class="team-actions">
+        <button mat-flat-button color="warn" (click)="deleteTeam()">
+          <mat-icon>delete_sweep</mat-icon>
+          Eliminar equipo
+        </button>
+        <button mat-flat-button color="primary" (click)="genRandomTeam()">
+          <mat-icon>shuffle</mat-icon>
+          Equipo aleatorio
+        </button>
+      </div>
+    </div>
+    <div class="stats">
+      <mat-icon>collections</mat-icon>
+      <span>{{ teamPokemon().length }} Pokémon en tu equipo</span>
     </div>
   </div>
-  <div class="stats">
-    <mat-icon>collections</mat-icon>
-    <span>{{ teamPokemon().length }} Pokémon en tu equipo</span>
-  </div>
-</div>
 
-@if (teamPokemon().length === 0) {
-  <div class="no-results">
-    <mat-icon>catching_pokemon</mat-icon>
-    <h3>Tu equipo está vacío</h3>
-    <p>¡Agrega Pokémon desde el catálogo o genera un equipo aleatorio!</p>
+  <!-- Tab Switcher -->
+  <div class="tab-switcher">
+    <button 
+      mat-stroked-button 
+      [class.active]="activeTab() === 'manual'"
+      (click)="setActiveTab('manual')"
+    >
+      <mat-icon>people</mat-icon>
+      Manual
+    </button>
+    <button 
+      mat-stroked-button 
+      [class.active]="activeTab() === 'builder'"
+      (click)="setActiveTab('builder')"
+    >
+      <mat-icon>build</mat-icon>
+      Team Builder
+    </button>
   </div>
-}
 
-@if (teamPokemon().length > 0) {
-  <div class="catalog-grid">
-    @for (item of teamPokemon(); track item.id; let i = $index) {
-      <div class="poke-card" [@fadeInOut]>
-        <div class="card-badge">#{{ item.id }}</div>
-        <div class="card-image-wrapper">
-          <img [src]="getPokemonImage(item)" [alt]="item.name" loading="lazy">
-        </div>
-        <div class="card-content">
-          <span class="pokeName">{{ item.name }}</span>
-          <button mat-icon-button color="warn" (click)="deletePokemon(item)" class="delete-btn">
-            <mat-icon>delete</mat-icon>
-          </button>
+  <!-- Team Builder Tab -->
+  @if (activeTab() === 'builder') {
+    <div class="builder-section" [@fadeInOut]>
+      <h2>Generate META Team</h2>
+      
+      <!-- Archetype Selection -->
+      <div class="builder-group">
+        <h3>Team Archetype</h3>
+        <div class="archetype-grid">
+          @for (archetype of teamArchetypes; track archetype.id) {
+            <mat-card 
+              class="archetype-card" 
+              [class.selected]="selectedArchetype()?.id === archetype.id"
+              (click)="selectArchetype(archetype)"
+            >
+              <mat-icon class="archetype-icon">{{ archetype.icon }}</mat-icon>
+              <h4>{{ archetype.name }}</h4>
+              <p>{{ archetype.description }}</p>
+            </mat-card>
+          }
         </div>
       </div>
+
+      <!-- Generation Filter -->
+      <div class="builder-group">
+        <h3>Generation Filter (Optional)</h3>
+        <div class="generation-chips">
+          @for (gen of generations; track gen.name) {
+            <button
+              mat-stroked-button
+              class="gen-chip"
+              [class.active]="selectedGeneration()?.name === gen.name"
+              (click)="selectGeneration(gen)"
+            >
+              {{ gen.name }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <div class="builder-actions">
+        <button 
+          mat-flat-button 
+          color="primary" 
+          (click)="generateMetaTeam()"
+          [disabled]="!selectedArchetype() || isGenerating()"
+        >
+          @if (isGenerating()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            <mat-icon>auto_awesome</mat-icon>
+          }
+          Generate META Team
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      @if (isGenerating()) {
+        <div class="progress-container">
+          <mat-progress-bar mode="determinate" [value]="generationProgress()"></mat-progress-bar>
+          <p>Generating optimal team...</p>
+        </div>
+      }
+
+      <!-- Generated Team Preview -->
+      @if (generatedTeam()) {
+        <div class="generated-team-preview">
+          <h3>Generated Team: {{ generatedTeam()!.archetype.name }}</h3>
+          <p class="team-strategy">{{ generatedTeam()!.archetype.strategy }}</p>
+          <div class="synergy-badge">
+            <mat-icon>star</mat-icon>
+            Synergy: {{ generatedTeam()!.synergyScore }}%
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Manual Tab (Original + Enhanced) -->
+  @if (activeTab() === 'manual') {
+    @if (teamPokemon().length === 0) {
+      <div class="no-results">
+        <mat-icon>catching_pokemon</mat-icon>
+        <h3>Tu equipo está vacío</h3>
+        <p>¡Agrega Pokémon desde el catálogo o genera un equipo aleatorio!</p>
+      </div>
     }
-  </div>
-}
 
-
-
+    @if (teamPokemon().length > 0) {
+      <div class="catalog-grid">
+        @for (item of teamPokemon(); track item.id; let i = $index) {
+          <div class="poke-card" [@fadeInOut] (click)="navigateToPokemon(item.id)">
+            <div class="card-badge">#{{ item.id }}</div>
+            <div class="card-image-wrapper">
+              <img [src]="getPokemonImage(item)" [alt]="item.name" loading="lazy">
+            </div>
+            <div class="card-content">
+              <span class="pokeName">{{ item.name }}</span>
+              <div class="card-actions">
+                <button mat-icon-button color="primary" class="view-btn" (click)="navigateToPokemon(item.id); $event.stopPropagation()">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deletePokemon(item); $event.stopPropagation()" class="delete-btn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            @if (item.stats && item.stats.length > 0) {
+              <div class="card-stats">
+                @for (stat of item.stats; track stat.name) {
+                  <div class="mini-stat">
+                    <span class="mini-stat-label">{{ getStatShortName(stat.name) }}</span>
+                    <div class="mini-stat-bar">
+                      <div 
+                        class="mini-stat-fill" 
+                        [style.width.%]="getStatPercentage(stat.value)"
+                        [style.background-color]="getStatColor(stat.value)"
+                      ></div>
+                    </div>
+                    <span class="mini-stat-value">{{ stat.value }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
