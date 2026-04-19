@@ -220,6 +220,11 @@
 
   @if (!loading() && hasNext() && !searchMode()) {
     <div #loadMoreTrigger class="load-more-trigger" aria-hidden="true"></div>
+    @if (loadingMore()) {
+      <div class="load-more-spinner">
+        <ds-pokeball-spinner [size]="60" label="Loading more..."></ds-pokeball-spinner>
+      </div>
+    }
   }
 
   @if (!loading() && !searchMode() && pokemons().length > 0 && !hasNext()) {

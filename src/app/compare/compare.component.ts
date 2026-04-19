@@ -11,7 +11,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { DataServiceService } from '../services/data-service.service';
 import { PokemonDetail, PokemonSummary } from '../shared/pokemon-api.interfaces';
-import { StatBarComponent } from '../shared/components/stat-bar/stat-bar.component';
 import { TypeBadgeComponent } from '../shared/components/type-badge/type-badge.component';
 import { capitalize, getStatShortName } from '../shared/utils/pokemon.utils';
 import { of } from 'rxjs';
@@ -31,7 +30,6 @@ import { catchError } from 'rxjs/operators';
     MatFormFieldModule,
     MatSelectModule,
     MatCardModule,
-    StatBarComponent,
     TypeBadgeComponent
   ],
   templateUrl: './compare.component.html',

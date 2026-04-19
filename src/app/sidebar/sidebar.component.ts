@@ -40,7 +40,7 @@ export class SidebarComponent implements OnInit {
 
   currentUrl = signal('/');
   isCollapsed = signal(false);
-  isDark = this.themeService.theme;
+  isDark = computed(() => this.themeService.theme() === 'dark');
   teamCount = this.teamService.teamCount;
   favoritesCount = this.favoritesService.favoritesCount;
 

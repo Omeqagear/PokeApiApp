@@ -2,7 +2,7 @@
   <ds-page-header title="Equipo Pokémon" [showStats]="true">
     <div stats aria-live="polite">
       <mat-icon>collections</mat-icon>
-      <span>{{ teamPokemon().length }} Pokémon en tu equipo</span>
+      <span>{{ teamPokemon().length }} Pokémon in your Team</span>
     </div>
     <div class="header-actions">
       @if (teamPokemon().length > 0) {
@@ -17,11 +17,11 @@
       }
       <button mat-flat-button color="warn" (click)="deleteTeam()" aria-label="Delete entire team">
         <mat-icon>delete_sweep</mat-icon>
-        Eliminar equipo
+        Delete Team
       </button>
       <button mat-flat-button color="primary" (click)="genRandomTeam()" aria-label="Generate random team">
         <mat-icon>shuffle</mat-icon>
-        Equipo aleatorio
+        Random Team
       </button>
     </div>
   </ds-page-header>
@@ -161,10 +161,6 @@
         message="Add Pokémon from the catalog or generate a random team to get started on your adventure!"
         actionLabel="Browse Catalog"
         actionRoute="/catalog"
-        actionIcon="grid_view"
-        secondaryActionLabel="Random Team"
-        secondaryActionRoute="/team"
-        secondaryActionIcon="shuffle"
       ></ds-empty-state>
     }
 
