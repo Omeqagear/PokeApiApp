@@ -27,36 +27,44 @@ import { CommonModule } from '@angular/common';
     .page-header {
       text-align: center;
       margin-bottom: 40px;
+      padding: 0 20px;
     }
 
     .header-content {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .header-title {
       font-size: 2.5em;
       font-weight: 700;
-      margin: 0 0 20px 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0 0 16px 0;
+      background: linear-gradient(135deg, var(--brand-primary, #8b5cf6) 0%, var(--brand-secondary, #6366f1) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
     }
 
     .header-subtitle {
-      font-size: 1.1em;
-      color: #666;
+      font-size: 1.05em;
+      color: var(--text-tertiary, #737373);
       margin: 0;
+      line-height: 1.5;
     }
 
     .header-stats {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: #666;
-      font-size: 1.1em;
+      gap: 10px;
+      padding: 10px 20px;
+      background: var(--surface-card, #ffffff);
+      border: 0.5px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+      border-radius: 12px;
+      color: var(--text-secondary, #525252);
+      font-size: 0.95em;
       font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
   `]
 })

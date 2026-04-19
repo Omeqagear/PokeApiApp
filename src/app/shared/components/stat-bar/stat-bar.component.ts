@@ -23,38 +23,52 @@ import { CommonModule } from '@angular/common';
   styles: [`
     .stat-row {
       display: grid;
-      grid-template-columns: 40px 32px 1fr;
+      grid-template-columns: 44px 36px 1fr;
       align-items: center;
-      gap: 0.75rem;
+      gap: 12px;
     }
 
     .stat-label {
       font-size: 0.7rem;
       font-weight: 700;
-      color: #888;
+      color: var(--text-tertiary, #737373);
       text-transform: uppercase;
-      letter-spacing: 0.025em;
+      letter-spacing: 0.06em;
     }
 
     .stat-value {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary, #fafafa);
       text-align: right;
+      font-variant-numeric: tabular-nums;
     }
 
     .stat-bar-container {
-      height: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 4px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
       overflow: hidden;
+      position: relative;
     }
 
     .stat-bar {
       height: 100%;
-      border-radius: 4px;
-      transition: width 0.6s ease-out;
+      border-radius: 6px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       min-width: 4px;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+        border-radius: 6px 6px 0 0;
+      }
     }
   `]
 })

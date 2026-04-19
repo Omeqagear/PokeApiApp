@@ -1,14 +1,14 @@
 nav {
   background: var(--bg-secondary, #0f0f0f);
   height: 100vh;
-  width: 240px;
+  width: 220px;
   position: fixed;
   left: 0;
   top: 0;
   display: flex;
   flex-direction: column;
   transition: width 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  border-right: 1px solid var(--border-subtle, #262626);
+  border-right: 0.5px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
   z-index: 100;
   overflow: hidden;
 
@@ -21,6 +21,7 @@ nav {
     .footer-text {
       opacity: 0;
       transform: translateX(-8px);
+      pointer-events: none;
     }
 
     .toggle-btn {
@@ -32,58 +33,60 @@ nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 12px;
-    border-bottom: 1px solid var(--border-subtle, #262626);
+    padding: 20px 16px;
+    border-bottom: 0.5px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
 
       mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
         color: var(--brand-primary, #8b5cf6);
+        filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
       }
 
       .logo-text {
-        font-size: 1.1em;
+        font-size: 1em;
         font-weight: 600;
         color: var(--text-primary, #fafafa);
         white-space: nowrap;
         transition: opacity 150ms, transform 150ms;
+        letter-spacing: -0.01em;
       }
     }
 
     .toggle-btn {
       background: none;
       border: none;
-      color: var(--text-secondary, #a1a1a1);
+      color: var(--text-tertiary, #737373);
       cursor: pointer;
       padding: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 6px;
-      transition: background 150ms, color 150ms;
+      transition: all 150ms;
 
       &:hover {
         background: var(--bg-tertiary, #141414);
-        color: var(--text-primary, #fafafa);
+        color: var(--text-secondary, #a1a1a1);
       }
 
       mat-icon {
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
       }
     }
   }
 
   .nav-list {
     list-style: none;
-    padding: 12px 8px;
+    padding: 16px 8px;
     margin: 0;
     flex: 1;
 
@@ -96,13 +99,15 @@ nav {
         align-items: center;
         gap: 12px;
         padding: 10px 12px;
-        color: var(--text-secondary, #a1a1a1);
+        color: var(--text-tertiary, #737373);
         text-decoration: none;
-        border-radius: 6px;
+        border-radius: 8px;
         transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
         white-space: nowrap;
         position: relative;
+        font-weight: 500;
+        font-size: 0.875em;
 
         mat-icon {
           font-size: 20px;
@@ -110,18 +115,16 @@ nav {
           height: 20px;
           flex-shrink: 0;
           color: var(--text-tertiary, #737373);
-          transition: color 150ms;
+          transition: all 150ms;
         }
 
         .nav-label {
-          font-size: 0.875em;
-          font-weight: 500;
           transition: opacity 150ms, transform 150ms;
         }
 
         &:hover {
           background: var(--bg-tertiary, #141414);
-          color: var(--text-primary, #fafafa);
+          color: var(--text-secondary, #a1a1a1);
 
           mat-icon {
             color: var(--text-secondary, #a1a1a1);
@@ -129,6 +132,7 @@ nav {
         }
 
         &.active {
+          background: rgba(139, 92, 246, 0.1);
           color: var(--brand-primary, #8b5cf6);
 
           &::before {
@@ -138,9 +142,10 @@ nav {
             top: 50%;
             transform: translateY(-50%);
             width: 3px;
-            height: 20px;
+            height: 24px;
             background: var(--brand-primary, #8b5cf6);
-            border-radius: 0 2px 2px 0;
+            border-radius: 0 3px 3px 0;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
           }
 
           mat-icon {
@@ -153,20 +158,20 @@ nav {
 
   .sidebar-footer {
     padding: 12px;
-    border-top: 1px solid var(--border-subtle, #262626);
+    border-top: 0.5px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
 
     .theme-toggle {
       display: flex;
       align-items: center;
       gap: 10px;
       width: 100%;
-      padding: 8px 12px;
+      padding: 10px 12px;
       margin-bottom: 8px;
       background: none;
       border: none;
-      color: var(--text-secondary, #a1a1a1);
+      color: var(--text-tertiary, #737373);
       cursor: pointer;
-      border-radius: 6px;
+      border-radius: 8px;
       transition: all 150ms;
       font-size: 0.8em;
       font-weight: 500;
@@ -185,7 +190,7 @@ nav {
 
       &:hover {
         background: var(--bg-tertiary, #141414);
-        color: var(--text-primary, #fafafa);
+        color: var(--text-secondary, #a1a1a1);
       }
     }
 
@@ -195,7 +200,8 @@ nav {
       transition: opacity 150ms;
 
       small {
-        font-size: 0.7em;
+        font-size: 0.65em;
+        letter-spacing: 0.05em;
       }
     }
   }

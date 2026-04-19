@@ -1,6 +1,6 @@
 .team-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  background: var(--gradient-page);
 }
 
 .header-actions {
@@ -43,13 +43,13 @@
     }
 
     &.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
+      background: var(--gradient-brand);
+      color: var(--text-inverse);
       border: none;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      box-shadow: var(--shadow-brand-md);
 
       mat-icon {
-        color: #fff;
+        color: var(--text-inverse);
       }
     }
   }
@@ -63,7 +63,7 @@
   h2 {
     font-size: 1.8em;
     font-weight: 700;
-    color: #1a1a2e;
+    color: var(--text-primary);
     margin: 0 0 24px 0;
     text-align: center;
   }
@@ -71,7 +71,7 @@
   h3 {
     font-size: 1.2em;
     font-weight: 600;
-    color: #333;
+    color: var(--text-secondary);
     margin: 0 0 16px 0;
   }
 }
@@ -91,13 +91,13 @@
     gap: 8px;
     font-size: 1.1em;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--text-primary);
 
     .toggle-icon {
       font-size: 24px;
       width: 24px;
       height: 24px;
-      color: #667eea;
+      color: var(--brand-primary);
     }
   }
 }
@@ -111,42 +111,43 @@
 .archetype-card {
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 2px solid transparent;
+  border: 2px solid var(--border-subtle);
   border-radius: 16px;
   padding: 16px;
   text-align: center;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    box-shadow: var(--shadow-brand-md);
+    border-color: var(--brand-primary);
   }
 
   &.selected {
-    border-color: #667eea;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    border-color: var(--brand-primary);
+    background: var(--type-bg-psychic);
+    box-shadow: var(--shadow-brand-lg);
   }
 
   .archetype-icon {
     font-size: 40px;
     width: 40px;
     height: 40px;
-    color: #667eea;
+    color: var(--brand-primary);
     margin-bottom: 8px;
   }
 
   h4 {
     font-size: 1em;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--text-primary);
     margin: 8px 0;
   }
 
   p {
     font-size: 0.85em;
-    color: #666;
+    color: var(--text-tertiary);
     margin: 0;
     line-height: 1.4;
   }
@@ -163,9 +164,9 @@
     padding: 8px 16px !important;
 
     &.active {
-      background: #667eea;
-      color: #fff;
-      border-color: #667eea;
+      background: var(--brand-primary);
+      color: var(--text-inverse);
+      border-color: var(--brand-primary);
     }
   }
 }
@@ -205,29 +206,29 @@
   }
 
   p {
-    color: #666;
+    color: var(--text-tertiary);
     font-size: 0.9em;
     margin: 0;
   }
 }
 
 .generated-team-preview {
-  background: #fff;
+  background: var(--surface-card);
   border-radius: 16px;
   padding: 24px;
   margin-top: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-card);
   text-align: center;
 
   h3 {
     font-size: 1.4em;
     font-weight: 700;
-    color: #1a1a2e;
+    color: var(--text-primary);
     margin: 0 0 8px 0;
   }
 
   .team-strategy {
-    color: #666;
+    color: var(--text-tertiary);
     font-size: 1em;
     margin: 0 0 16px 0;
   }
@@ -236,8 +237,8 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
+    background: var(--gradient-brand);
+    color: var(--text-inverse);
     padding: 8px 16px;
     border-radius: 20px;
     font-weight: 600;
@@ -262,18 +263,18 @@
 ::ng-deep {
   ds-poke-card .card-actions {
     .view-btn {
-      color: #667eea;
+      color: var(--brand-primary);
 
       &:hover {
-        background: rgba(102, 126, 234, 0.1);
+        background: rgba(139, 92, 246, 0.1);
       }
     }
 
     .delete-btn {
-      color: #d32f2f;
+      color: var(--color-danger);
 
       &:hover {
-        background: rgba(211, 47, 47, 0.1);
+        background: rgba(239, 68, 68, 0.1);
       }
     }
   }

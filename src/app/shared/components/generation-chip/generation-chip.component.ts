@@ -21,29 +21,40 @@ import { CommonModule } from '@angular/common';
   `,
   styles: [`
     .gen-chip {
-      padding: 8px 18px;
-      border-radius: 24px;
-      font-size: 0.9em;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85em;
       font-weight: 600;
-      border-width: 2px;
-      border-style: solid;
-      transition: all 200ms ease;
+      border: 1.5px solid transparent;
+      transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
-      line-height: 1.1;
-      min-width: 70px;
-      background: transparent;
+      line-height: 1.2;
+      min-width: 68px;
+      background: var(--surface-card, #ffffff);
       cursor: pointer;
-      border-color: transparent;
-      color: inherit;
+      color: var(--text-secondary, #525252);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+      .gen-name {
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+
+      .gen-region {
+        font-size: 0.7em;
+        font-weight: 400;
+        opacity: 0.7;
+      }
 
       &.active {
         background: var(--gen-color, #667eea);
         border-color: var(--gen-color, #667eea);
-        color: #fff;
-        box-shadow: 0 2px 12px color-mix(in srgb, var(--gen-color, #667eea) 40%, transparent);
+        color: #ffffff;
+        box-shadow: 0 4px 14px color-mix(in srgb, var(--gen-color, #667eea) 35%, transparent);
+        transform: translateY(-1px);
 
         .gen-region {
           opacity: 0.9;
@@ -51,9 +62,11 @@ import { CommonModule } from '@angular/common';
       }
 
       &:not(.active):hover {
-        border-color: #667eea;
-        color: #667eea;
-        background: rgba(102, 126, 234, 0.05);
+        border-color: var(--gen-color, #667eea);
+        color: var(--gen-color, #667eea);
+        background: color-mix(in srgb, var(--gen-color, #667eea) 8%, transparent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        transform: translateY(-1px);
       }
     }
   `]
