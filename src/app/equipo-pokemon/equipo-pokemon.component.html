@@ -1,30 +1,31 @@
 <div class="team-page">
-  <div class="catalog-header">
-    <div class="header-content">
-      <h1>Equipo Pokémon</h1>
-      <div class="team-actions">
-        <button mat-flat-button color="warn" (click)="deleteTeam()">
-          <mat-icon>delete_sweep</mat-icon>
-          Eliminar equipo
-        </button>
-        <button mat-flat-button color="primary" (click)="genRandomTeam()">
-          <mat-icon>shuffle</mat-icon>
-          Equipo aleatorio
-        </button>
-      </div>
-    </div>
-    <div class="stats">
+  <ds-page-header title="Equipo Pokémon" [showStats]="true">
+    <div stats aria-live="polite">
       <mat-icon>collections</mat-icon>
       <span>{{ teamPokemon().length }} Pokémon en tu equipo</span>
     </div>
-  </div>
+    <div class="header-actions">
+      <button mat-flat-button color="warn" (click)="deleteTeam()" aria-label="Delete entire team">
+        <mat-icon>delete_sweep</mat-icon>
+        Eliminar equipo
+      </button>
+      <button mat-flat-button color="primary" (click)="genRandomTeam()" aria-label="Generate random team">
+        <mat-icon>shuffle</mat-icon>
+        Equipo aleatorio
+      </button>
+    </div>
+  </ds-page-header>
 
   <!-- Tab Switcher -->
-  <div class="tab-switcher">
+  <div class="tab-switcher" role="tablist" aria-label="Team management tabs">
     <button 
       mat-stroked-button 
       [class.active]="activeTab() === 'manual'"
       (click)="setActiveTab('manual')"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'manual'"
+      aria-controls="manual-tab-panel"
+      id="manual-tab"
     >
       <mat-icon>people</mat-icon>
       Manual
@@ -33,6 +34,10 @@
       mat-stroked-button 
       [class.active]="activeTab() === 'builder'"
       (click)="setActiveTab('builder')"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'builder'"
+      aria-controls="builder-tab-panel"
+      id="builder-tab"
     >
       <mat-icon>build</mat-icon>
       Team Builder
@@ -41,7 +46,7 @@
 
   <!-- Team Builder Tab -->
   @if (activeTab() === 'builder') {
-    <div class="builder-section" [@fadeInOut]>
+    <div class="builder-section" [@fadeInOut] id="builder-tab-panel" role="tabpanel" aria-labelledby="builder-tab">
       <h2>Generate META Team</h2>
       
       <!-- Legendary Toggle -->
@@ -57,16 +62,22 @@
       
       <!-- Archetype Selection -->
       <div class="builder-group">
-        <h3>Team Archetype</h3>
-        <div class="archetype-grid">
+        <h2>Team Archetype</h2>
+        <div class="archetype-grid" role="listbox" aria-label="Team archetype selection">
           @for (archetype of teamArchetypes; track archetype.id) {
             <mat-card 
               class="archetype-card" 
               [class.selected]="selectedArchetype()?.id === archetype.id"
               (click)="selectArchetype(archetype)"
+              (keydown.enter)="selectArchetype(archetype)"
+              (keydown.space)="selectArchetype(archetype); $event.preventDefault()"
+              tabindex="0"
+              role="option"
+              [attr.aria-selected]="selectedArchetype()?.id === archetype.id"
+              [attr.aria-label]="archetype.name + ': ' + archetype.description"
             >
               <mat-icon class="archetype-icon">{{ archetype.icon }}</mat-icon>
-              <h4>{{ archetype.name }}</h4>
+              <h3>{{ archetype.name }}</h3>
               <p>{{ archetype.description }}</p>
             </mat-card>
           }
@@ -75,7 +86,7 @@
 
       <!-- Generation Filter -->
       <div class="builder-group">
-        <h3>Generation Filter (Optional)</h3>
+        <h2>Generation Filter (Optional)</h2>
         <div class="generation-chips">
           @for (gen of generations; track gen.name) {
             <button
@@ -83,6 +94,7 @@
               class="gen-chip"
               [class.active]="selectedGeneration()?.name === gen.name"
               (click)="selectGeneration(gen)"
+              [attr.aria-pressed]="selectedGeneration()?.name === gen.name"
             >
               {{ gen.name }}
             </button>
@@ -97,6 +109,7 @@
           color="primary" 
           (click)="generateMetaTeam()"
           [disabled]="!selectedArchetype() || isGenerating()"
+          aria-label="Generate META team"
         >
           @if (isGenerating()) {
             <mat-spinner diameter="20"></mat-spinner>
@@ -109,7 +122,7 @@
 
       <!-- Progress Bar -->
       @if (isGenerating()) {
-        <div class="progress-container">
+        <div class="progress-container" aria-live="polite">
           <mat-progress-bar mode="determinate" [value]="generationProgress()"></mat-progress-bar>
           <p>Generating optimal team...</p>
         </div>
@@ -118,7 +131,7 @@
       <!-- Generated Team Preview -->
       @if (generatedTeam()) {
         <div class="generated-team-preview">
-          <h3>Generated Team: {{ generatedTeam()!.archetype.name }}</h3>
+          <h2>Generated Team: {{ generatedTeam()!.archetype.name }}</h2>
           <p class="team-strategy">{{ generatedTeam()!.archetype.strategy }}</p>
           <div class="synergy-badge">
             <mat-icon>star</mat-icon>
@@ -132,52 +145,33 @@
   <!-- Manual Tab (Original + Enhanced) -->
   @if (activeTab() === 'manual') {
     @if (teamPokemon().length === 0) {
-      <div class="no-results">
-        <mat-icon>catching_pokemon</mat-icon>
-        <h3>Tu equipo está vacío</h3>
-        <p>¡Agrega Pokémon desde el catálogo o genera un equipo aleatorio!</p>
-      </div>
+      <ds-empty-state 
+        icon="catching_pokemon"
+        title="Tu equipo está vacío"
+        message="¡Agrega Pokémon desde el catálogo o genera un equipo aleatorio!"
+      />
     }
 
     @if (teamPokemon().length > 0) {
-      <div class="catalog-grid">
+      <div class="catalog-grid" role="list" aria-label="Your Pokémon team">
         @for (item of teamPokemon(); track item.id; let i = $index) {
-          <div class="poke-card" [@fadeInOut] (click)="navigateToPokemon(item.id)">
-            <div class="card-badge">#{{ item.id }}</div>
-            <div class="card-image-wrapper">
-              <img [src]="getPokemonImage(item)" [alt]="item.name" loading="lazy">
-            </div>
-            <div class="card-content">
-              <span class="pokeName">{{ item.name }}</span>
-              <div class="card-actions">
-                <button mat-icon-button color="primary" class="view-btn" (click)="navigateToPokemon(item.id); $event.stopPropagation()">
+          <div role="listitem">
+            <ds-poke-card
+              [pokemon]="item"
+              [clickable]="true"
+              (cardClick)="navigateToPokemon(item.id)"
+            >
+              <div actions>
+                <button mat-icon-button color="primary" class="view-btn" (click)="navigateToPokemon(item.id); $event.stopPropagation()" [attr.aria-label]="'View ' + item.name">
                   <mat-icon>visibility</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deletePokemon(item); $event.stopPropagation()" class="delete-btn">
+                <button mat-icon-button color="warn" (click)="deletePokemon(item); $event.stopPropagation()" class="delete-btn" [attr.aria-label]="'Remove ' + item.name + ' from team'">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
-            </div>
-            @if (item.stats && item.stats.length > 0) {
-              <div class="card-stats">
-                @for (stat of item.stats; track stat.name) {
-                  <div class="mini-stat">
-                    <span class="mini-stat-label">{{ getStatShortName(stat.name) }}</span>
-                    <div class="mini-stat-bar">
-                      <div 
-                        class="mini-stat-fill" 
-                        [style.width.%]="getStatPercentage(stat.value)"
-                        [style.background-color]="getStatColor(stat.value)"
-                      ></div>
-                    </div>
-                    <span class="mini-stat-value">{{ stat.value }}</span>
-                  </div>
-                }
-              </div>
-            }
+            </ds-poke-card>
           </div>
         }
       </div>
     }
   }
-</div>

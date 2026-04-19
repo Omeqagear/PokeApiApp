@@ -5,69 +5,16 @@
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-// Loading Animation
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  gap: 1.5rem;
   position: relative;
   z-index: 1;
-
-  .pokeball-loader {
-    width: 80px;
-    height: 80px;
-    position: relative;
-    animation: spin 1s linear infinite;
-
-    .pokeball-top,
-    .pokeball-bottom {
-      position: absolute;
-      width: 100%;
-      height: 50%;
-      border-radius: 50% 50% 0 0;
-    }
-
-    .pokeball-top {
-      background: #ff1744;
-      top: 0;
-    }
-
-    .pokeball-bottom {
-      background: #fff;
-      bottom: 0;
-      border-radius: 0 0 50% 50%;
-    }
-
-    .pokeball-center {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background: #fff;
-      border: 4px solid #333;
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
-    }
-  }
-
-  .loading-text {
-    font-size: 1.1rem;
-    color: #888;
-    letter-spacing: 0.5px;
-  }
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-// Error Container
 .error-container {
   display: flex;
   flex-direction: column;
@@ -78,7 +25,6 @@
   color: #ff6b6b;
 }
 
-// Main Container with Type-based Background
 .pokemon-container {
   min-height: 100vh;
   padding: 1.5rem;
@@ -96,7 +42,6 @@
     z-index: 0;
   }
 
-  // Type-based background gradients
   &.bg-normal { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
   &.bg-fire { background: linear-gradient(135deg, #1a1a2e 0%, #2d1b1b 50%, #4a1942 100%); }
   &.bg-water { background: linear-gradient(135deg, #1a1a2e 0%, #1b2d3d 50%, #1b3a4a 100%); }
@@ -117,16 +62,15 @@
   &.bg-fairy { background: linear-gradient(135deg, #1a1a2e 0%, #2d1b2d 50%, #3a1b3a 100%); }
 }
 
-// Nav Arrows
 .nav-arrows {
   position: fixed;
   top: 50%;
-  left: 0;
+  left: 240px;
   right: 0;
   transform: translateY(-50%);
   display: flex;
   justify-content: space-between;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
   z-index: 100;
   pointer-events: none;
 
@@ -154,7 +98,12 @@
   }
 }
 
-// Back Button
+@media (max-width: 768px) {
+  .nav-arrows {
+    left: 56px;
+  }
+}
+
 .back-btn {
   position: relative;
   z-index: 10;
@@ -169,7 +118,6 @@
   }
 }
 
-// Main Content Layout
 .main-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -193,7 +141,6 @@
   }
 }
 
-// Image Section
 .image-section {
   display: flex;
   flex-direction: column;
@@ -246,7 +193,7 @@
       &.glow-ghost { background: #705898; }
       &.glow-dragon { background: #7038f8; }
       &.glow-dark { background: #705848; }
-      &.glow-steel { background: #b8b8d8; }
+      &.glow-steel { background: #b8b8d0; }
       &.glow-fairy { background: #ee80ee; }
     }
 
@@ -258,6 +205,39 @@
       z-index: 1;
       filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.4));
       animation: float 3s ease-in-out infinite;
+      transition: transform 0.3s ease;
+    }
+
+    .shiny-toggle {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.15) !important;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff !important;
+      width: 40px;
+      height: 40px;
+      transition: all 0.2s ease;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.25) !important;
+        transform: scale(1.1);
+      }
+
+      &.active {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+        color: #1a1a2e !important;
+        border-color: #fbbf24;
+        box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+      }
     }
   }
 }
@@ -267,7 +247,6 @@
   50% { transform: translateY(-10px); }
 }
 
-// Info Section
 .info-section {
   display: flex;
   flex-direction: column;
@@ -286,43 +265,12 @@
   }
 }
 
-// Types
 .types-container {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-
-  .type-badge {
-    padding: 0.4rem 1rem;
-    border-radius: 9999px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: capitalize;
-    letter-spacing: 0.5px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-
-    &.type-normal { background: rgba(168, 168, 120, 0.3); color: #c8c8a0; }
-    &.type-fire { background: rgba(240, 128, 48, 0.3); color: #f0a060; }
-    &.type-water { background: rgba(104, 144, 240, 0.3); color: #88a8f0; }
-    &.type-grass { background: rgba(56, 168, 0, 0.3); color: #68c830; }
-    &.type-electric { background: rgba(248, 208, 48, 0.3); color: #f8d860; }
-    &.type-ice { background: rgba(152, 216, 216, 0.3); color: #b0e8e8; }
-    &.type-fighting { background: rgba(192, 48, 40, 0.3); color: #e06058; }
-    &.type-poison { background: rgba(112, 88, 152, 0.3); color: #9078b0; }
-    &.type-ground { background: rgba(224, 192, 104, 0.3); color: #e0c880; }
-    &.type-flying { background: rgba(168, 144, 240, 0.3); color: #b0a0f0; }
-    &.type-psychic { background: rgba(248, 88, 136, 0.3); color: #f888a8; }
-    &.type-bug { background: rgba(168, 184, 32, 0.3); color: #c0d050; }
-    &.type-rock { background: rgba(184, 160, 56, 0.3); color: #d0b878; }
-    &.type-ghost { background: rgba(112, 88, 152, 0.3); color: #9078b0; }
-    &.type-dragon { background: rgba(112, 56, 248, 0.3); color: #9068f8; }
-    &.type-dark { background: rgba(112, 88, 72, 0.3); color: #a08878; }
-    &.type-steel { background: rgba(184, 184, 216, 0.3); color: #c0c0d8; }
-    &.type-fairy { background: rgba(238, 128, 238, 0.3); color: #f0a0f0; }
-  }
 }
 
-// Physical Info
 .physical-info {
   display: flex;
   gap: 2rem;
@@ -347,7 +295,6 @@
   }
 }
 
-// Info Blocks
 .info-block {
   .block-title {
     font-size: 0.8rem;
@@ -379,7 +326,7 @@
         font-size: 0.65rem;
         padding: 0.15rem 0.4rem;
         background: rgba(255, 107, 107, 0.2);
-      color: #ff6b6b;
+        color: #ff6b6b;
         border-radius: 4px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -404,7 +351,6 @@
   }
 }
 
-// Stats with Progress Bars
 .stats-block {
   .block-title {
     font-size: 0.8rem;
@@ -419,46 +365,9 @@
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
-
-    .stat-row {
-      display: grid;
-      grid-template-columns: 40px 32px 1fr;
-      align-items: center;
-      gap: 0.75rem;
-
-      .stat-label {
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .stat-value {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #fff;
-        text-align: right;
-      }
-
-      .stat-bar-container {
-        height: 8px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 4px;
-        overflow: hidden;
-
-        .stat-bar {
-          height: 100%;
-          border-radius: 4px;
-          transition: width 0.6s ease-out;
-          min-width: 4px;
-        }
-      }
-    }
   }
 }
 
-// Bottom Navigation
 .bottom-nav {
   display: flex;
   gap: 0.75rem;

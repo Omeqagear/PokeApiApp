@@ -1,20 +1,20 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatBadgeModule } from '@angular/material/badge';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { trigger, style, transition, query, stagger, animate } from '@angular/animations';
 import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of } from 'rxjs';
 import { PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
 import { DataServiceService } from '../services/data-service.service';
+import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
+import { GenerationChipComponent } from '../shared/components/generation-chip/generation-chip.component';
+import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/pokeball-spinner.component';
+import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
+import { PageHeaderComponent } from '../shared/components/page-header/page-header.component';
 
 interface Generation {
   name: string;
@@ -42,42 +42,20 @@ const GENERATIONS: Generation[] = [
   imports: [
     CommonModule,
     RouterModule,
-    MatGridListModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
     MatButtonModule,
     MatIconModule,
-    MatBadgeModule,
     MatInputModule,
     MatFormFieldModule,
-    MatChipsModule,
-    ReactiveFormsModule
+    MatProgressSpinnerModule,
+    ReactiveFormsModule,
+    PokeCardComponent,
+    GenerationChipComponent,
+    PokeballSpinnerComponent,
+    EmptyStateComponent,
+    PageHeaderComponent
   ],
   templateUrl: './catalog.component.html',
-  styleUrls: ['./catalog.component.scss'],
-  animations: [
-    trigger('listStagger', [
-      transition('* <=> *', [
-        query(
-          ':enter',
-          [
-            style({ opacity: 0, transform: 'translateY(-15px)' }),
-            stagger(
-              '30ms',
-              animate(
-                '400ms ease-out',
-                style({ opacity: 1, transform: 'translateY(0px)' })
-              )
-            )
-          ],
-          { optional: true }
-        ),
-        query(':leave', animate('50ms', style({ opacity: 0 })), {
-          optional: true
-        })
-      ])
-    ])
-  ]
+  styleUrls: ['./catalog.component.scss']
 })
 export class CatalogComponent implements OnInit {
   private dataService = inject(DataServiceService);

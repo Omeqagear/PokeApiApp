@@ -1,33 +1,36 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataServiceService } from '../services/data-service.service';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PokemonDetail } from '../shared/pokemon-api.interfaces';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TypeBadgeComponent } from '../shared/components/type-badge/type-badge.component';
+import { StatBarComponent } from '../shared/components/stat-bar/stat-bar.component';
+import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/pokeball-spinner.component';
+import { capitalize, getStatShortName } from '../shared/utils/pokemon.utils';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-photo-pokemon',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatProgressBarModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule, TypeBadgeComponent, StatBarComponent, PokeballSpinnerComponent],
   templateUrl: './photo-pokemon.component.html',
   styleUrls: ['./photo-pokemon.component.scss']
 })
-export class PhotoPokemonComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+export class PhotoPokemonComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
-  pokemonId: number | null = null;
-  pokemon: PokemonDetail | null = null;
-  loading = true;
-  error: string | null = null;
-  hasPrev = true;
-  hasNext = true;
-  prevId = 0;
-  nextId = 0;
+  pokemonId = signal<number | null>(null);
+  pokemon = signal<PokemonDetail | null>(null);
+  loading = signal(true);
+  error = signal<string | null>(null);
+  hasPrev = signal(true);
+  hasNext = signal(true);
+  prevId = signal(0);
+  nextId = signal(0);
+  isShiny = signal(false);
   readonly maxPokemonId = 1025;
 
   constructor(
@@ -38,55 +41,63 @@ export class PhotoPokemonComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.pipe(
-      takeUntilDestroyed(this.destroyRef)
+      takeUntil(this.destroy$)
     ).subscribe((params) => {
       const id = parseInt(params['id'], 10);
       if (!isNaN(id)) {
-        this.pokemonId = id;
-        this.updateNavButtons();
+        this.pokemonId.set(id);
+        this.updateNavButtons(id);
         this.loadPokemon(id);
-        this.prefetchNeighbors(id);
       } else {
-        this.error = 'Invalid Pokémon ID';
-        this.loading = false;
+        this.error.set('Invalid Pokémon ID');
+        this.loading.set(false);
       }
     });
   }
 
-  private updateNavButtons(): void {
-    this.hasPrev = this.pokemonId !== null && this.pokemonId > 1;
-    this.hasNext = this.pokemonId !== null && this.pokemonId < this.maxPokemonId;
-    this.prevId = this.pokemonId ? this.pokemonId - 1 : 0;
-    this.nextId = this.pokemonId ? this.pokemonId + 1 : 0;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private updateNavButtons(id: number): void {
+    this.hasPrev.set(id > 1);
+    this.hasNext.set(id < this.maxPokemonId);
+    this.prevId.set(id > 1 ? id - 1 : 0);
+    this.nextId.set(id < this.maxPokemonId ? id + 1 : 0);
   }
 
   private loadPokemon(id: number): void {
-    this.loading = true;
-    this.error = null;
+    this.loading.set(true);
+    this.error.set(null);
+    this.isShiny.set(false);
 
-    this.dataService.getPokemonDetail(id).subscribe({
+    this.dataService.getPokemonDetail(id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (data: PokemonDetail) => {
         if (data && data.id) {
-          this.pokemon = data;
+          this.pokemon.set(data);
+          this.prefetchNeighbors(id);
         } else {
-          this.error = 'Pokémon not found.';
+          this.error.set('Pokémon not found.');
         }
-        this.loading = false;
+        this.loading.set(false);
       },
       error: (err) => {
         console.error('Error loading Pokémon:', err);
-        this.error = 'Failed to load Pokémon details. Please try again.';
-        this.loading = false;
+        this.error.set('Failed to load Pokémon details. Please try again.');
+        this.loading.set(false);
       }
     });
   }
 
   private prefetchNeighbors(id: number): void {
     if (id > 1) {
-      this.dataService.getPokemonDetail(id - 1).subscribe();
+      this.dataService.getPokemonDetail(id - 1).pipe(takeUntil(this.destroy$)).subscribe();
     }
     if (id < this.maxPokemonId) {
-      this.dataService.getPokemonDetail(id + 1).subscribe();
+      this.dataService.getPokemonDetail(id + 1).pipe(takeUntil(this.destroy$)).subscribe();
     }
   }
 
@@ -102,38 +113,28 @@ export class PhotoPokemonComponent implements OnInit {
     this.router.navigate(['/photo', id]);
   }
 
-  capitalize(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  getStatPercentage(baseStat: number): number {
-    return Math.min((baseStat / 255) * 100, 100);
-  }
-
-  getStatColor(baseStat: number): string {
-    if (baseStat >= 150) return '#ff4081';
-    if (baseStat >= 120) return '#ff7043';
-    if (baseStat >= 90) return '#ffca28';
-    if (baseStat >= 60) return '#66bb6a';
-    return '#42a5f5';
-  }
-
-  getStatShortName(statName: string): string {
-    const shortNames: Record<string, string> = {
-      'hp': 'HP',
-      'attack': 'ATK',
-      'defense': 'DEF',
-      'special-attack': 'SPA',
-      'special-defense': 'SPD',
-      'speed': 'SPE'
-    };
-    return shortNames[statName] || statName;
-  }
+  capitalize = capitalize;
+  getStatShortName = getStatShortName;
 
   getSpriteUrl(pokemon: PokemonDetail): string {
+    if (this.isShiny()) {
+      return pokemon.sprites.other?.['official-artwork']?.front_shiny
+        || pokemon.sprites.front_shiny
+        || pokemon.sprites.other?.['official-artwork']?.front_default
+        || pokemon.sprites.front_default
+        || '';
+    }
     return pokemon.sprites.other?.['official-artwork']?.front_default
       || pokemon.sprites.front_default
       || '';
+  }
+
+  toggleShiny(): void {
+    this.isShiny.update(v => !v);
+  }
+
+  hasShinySprite(pokemon: PokemonDetail): boolean {
+    return !!(pokemon.sprites.other?.['official-artwork']?.front_shiny || pokemon.sprites.front_shiny);
   }
 
   handleImageError(event: Event): void {

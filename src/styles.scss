@@ -1,33 +1,124 @@
-/* Modern Global Styles for Pokédex App */
+/* ============================================
+   POKÉDEX DESIGN SYSTEM
+   Linear-Stripe Hybrid Design
+   ============================================ */
+
+// ============================================
+// 1. DESIGN TOKENS
+// ============================================
+@use 'styles/tokens/colors';
+@use 'styles/tokens/typography';
+@use 'styles/tokens/spacing';
+@use 'styles/tokens/effects';
+@use 'styles/tokens/breakpoints';
+
+// ============================================
+// 2. THEMES (CSS Variables for custom components)
+// ============================================
+@use 'styles/themes/light';
+@use 'styles/themes/dark';
+@use 'styles/themes/type-themes';
+
+// ============================================
+// 3. UTILITIES
+// ============================================
+@use 'styles/utils/mixins';
+@use 'styles/utils/animations';
+
+// ============================================
+// 4. ANGULAR MATERIAL CORE
+// ============================================
 @use '@angular/material' as mat;
 
-// Include the common styles for Angular Material
 @include mat.core();
 
-// Define a modern theme with Pokemon-inspired colors
-$primary: mat.m2-define-palette(mat.$m2-indigo-palette, 600, 400, 700);
-$accent: mat.m2-define-palette(mat.$m2-red-palette, 500, 400, 600);
-$warn: mat.m2-define-palette(mat.$m2-orange-palette);
+// Define purple-based Material palettes to match brand
+$mat-primary: mat.m2-define-palette(mat.$m2-purple-palette, 500, 300, 700);
+$mat-accent: mat.m2-define-palette(mat.$m2-indigo-palette, 400, 200, 600);
+$mat-warn: mat.m2-define-palette(mat.$m2-red-palette);
 
-$theme: mat.m2-define-light-theme((
+// LIGHT THEME
+$mat-light-theme: mat.m2-define-light-theme((
   color: (
-    primary: $primary,
-    accent: $accent,
-    warn: $warn,
+    primary: $mat-primary,
+    accent: $mat-accent,
+    warn: $mat-warn,
   ),
   typography: mat.m2-define-typography-config(
-    $font-family: "'Inter', 'Roboto', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif",
+    $font-family: typography.$font-family-body,
   ),
   density: 0,
 ));
 
-// Emit the theme styles
-@include mat.all-component-themes($theme);
+// DARK THEME
+$mat-dark-theme: mat.m2-define-dark-theme((
+  color: (
+    primary: $mat-primary,
+    accent: $mat-accent,
+    warn: $mat-warn,
+  ),
+  typography: mat.m2-define-typography-config(
+    $font-family: typography.$font-family-body,
+  ),
+  density: 0,
+));
 
-// Import Google Font - Inter
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+// Apply light theme by default
+@include mat.all-component-themes($mat-light-theme);
 
-// Material Icons - ensure proper rendering
+// ============================================
+// 5. CSS VARIABLES (applied after Material themes)
+// ============================================
+
+// Light theme CSS variables
+:root {
+  color-scheme: light;
+  @include light.light-theme;
+}
+
+// Dark theme - applied via class on html element
+.dark-theme {
+  color-scheme: dark;
+  @include mat.all-component-themes($mat-dark-theme);
+  @include dark.dark-theme;
+}
+
+// ============================================
+// 6. GOOGLE FONTS
+// ============================================
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+// ============================================
+// 7. BASE STYLES
+// ============================================
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: typography.$font-family-body;
+  min-height: 100vh;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @include mixins.reduced-motion;
+}
+
+// ============================================
+// 8. MATERIAL ICONS
+// ============================================
+
 .material-icons {
   font-family: 'Material Icons';
   font-weight: normal;
@@ -45,143 +136,145 @@ $theme: mat.m2-define-light-theme((
   vertical-align: middle;
 }
 
-// Material Symbols (new style)
 .material-symbols-outlined {
   font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
   font-size: 24px;
   vertical-align: middle;
 }
 
-// Global styles
-* {
-  box-sizing: border-box;
-}
+// ============================================
+// 9. MATERIAL COMPONENT OVERRIDES
+// ============================================
 
-body {
-  margin: 0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-  font-family: 'Inter', 'Roboto', 'Montserrat', sans-serif;
-  min-height: 100vh;
-  color: #1a1a2e;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-// Loading spinner container
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
-  gap: 16px;
-
-  p {
-    color: #666;
-    font-size: 1.1em;
-    font-weight: 500;
-  }
-}
-
-// Error message
-.error-message {
-  color: #d32f2f;
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-  padding: 20px 24px;
-  border-radius: 12px;
-  margin: 20px 0;
-  text-align: center;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.15);
-  border-left: 4px solid #d32f2f;
-}
-
-// Success message
-.success-message {
-  color: #2e7d32;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-  padding: 20px 24px;
-  border-radius: 12px;
-  margin: 20px 0;
-  text-align: center;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
-  border-left: 4px solid #2e7d32;
-}
-
-// Card improvements
 mat-card {
-  transition: transform 0.2s, box-shadow 0.2s;
-  border-radius: 16px !important;
-  
+  border-radius: 8px !important;
+  transition: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-card-hover);
   }
 }
 
-// Button improvements
 button[mat-flat-button],
 button[mat-raised-button],
 a[mat-flat-button],
 a[mat-raised-button] {
-  border-radius: 12px !important;
-  font-weight: 600 !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
   text-transform: none !important;
-  letter-spacing: 0.3px;
-  transition: all 0.2s !important;
-  
+  letter-spacing: 0.02em;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 }
 
-// Input field improvements
+button[mat-stroked-button] {
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+button[mat-icon-button] {
+  border-radius: 6px !important;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
 mat-form-field {
   width: 100%;
 }
 
-// Scrollbar styling
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+mat-input {
+  font-weight: 400;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
+// ============================================
+// 10. COMMON COMPONENT STYLES
+// ============================================
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-  border-radius: 4px;
-  
-  &:hover {
-    background: linear-gradient(180deg, #5568d3 0%, #6a4190 100%);
+.loading-container {
+  @include mixins.flex-column-center;
+  min-height: 300px;
+  gap: 16px;
+
+  p {
+    color: var(--text-tertiary);
+    font-size: 0.95em;
+    font-weight: 500;
   }
 }
 
-// Selection styling
-::selection {
-  background: rgba(102, 126, 234, 0.3);
-  color: #1a1a2e;
+.error-message {
+  color: var(--color-danger-dark);
+  background: var(--color-danger-bg);
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin: 16px 0;
+  text-align: center;
+  font-weight: 500;
+  border-left: 3px solid var(--color-danger);
 }
 
-// Page transitions
+.success-message {
+  color: var(--color-success-dark);
+  background: var(--color-success-bg);
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin: 16px 0;
+  text-align: center;
+  font-weight: 500;
+  border-left: 3px solid var(--color-success);
+}
+
+// ============================================
+// 11. SCROLLBAR
+// ============================================
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+
+  &:hover {
+    background: var(--border-strong);
+  }
+}
+
+// ============================================
+// 12. SELECTION
+// ============================================
+
+::selection {
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--text-primary);
+}
+
+// ============================================
+// 13. PAGE TRANSITIONS
+// ============================================
+
 .page-enter {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(8px);
 }
 
 .page-enter-active {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity 150ms, transform 150ms;
 }
 
 .page-exit {
@@ -190,23 +283,26 @@ mat-form-field {
 
 .page-exit-active {
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 100ms;
 }
 
-// Skeleton loader styles
+// ============================================
+// 14. SKELETON LOADER
+// ============================================
+
 .skeleton-card {
   pointer-events: none;
-  
+
   .skeleton-text {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 4px;
     height: 1em;
   }
-  
+
   .skeleton-image {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 8px;
@@ -216,35 +312,35 @@ mat-form-field {
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-// Utility classes
-.text-center {
-  text-align: center;
-}
+// ============================================
+// 15. UTILITY CLASSES
+// ============================================
 
-.flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
 
-.gap-sm {
-  gap: 8px;
-}
+.flex-center { @include mixins.flex-center; }
+.flex-between { @include mixins.flex-between; }
+.flex-column { @include mixins.flex-column; }
 
-.gap-md {
-  gap: 16px;
-}
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+.gap-8 { gap: 32px; }
 
-.gap-lg {
-  gap: 24px;
-}
+.container { @include mixins.max-content-width; @include mixins.container-padding; }
 
+.sr-only { @include mixins.sr-only; }
 
+// ============================================
+// 16. TYPE THEME CLASSES
+// ============================================
+
+@include type-themes.type-theme-classes;

@@ -3,8 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRippleModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ThemeService } from '../shared/services/theme.service';
 
 interface NavItem {
   path: string;
@@ -19,16 +22,20 @@ interface NavItem {
     CommonModule,
     RouterModule,
     MatIconModule,
-    MatRippleModule
+    MatRippleModule,
+    MatButtonModule,
+    MatTooltipModule
   ],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent implements OnInit {
   private router = inject(Router);
+  private themeService = inject(ThemeService);
 
   currentUrl = signal('/');
   isCollapsed = signal(false);
+  isDark = this.themeService.theme;
 
   navItems: NavItem[] = [
     { path: '/', icon: 'home', label: 'Home' },
@@ -54,5 +61,8 @@ export class SidebarComponent implements OnInit {
   toggleSidebar(): void {
     this.isCollapsed.update(val => !val);
   }
-}
 
+  toggleTheme(): void {
+    this.themeService.toggle();
+  }
+}

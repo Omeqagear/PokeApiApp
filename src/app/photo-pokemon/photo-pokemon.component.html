@@ -1,41 +1,36 @@
 <div class="pokemon-page">
   <!-- Navigation Arrows (always visible) -->
-  @if (pokemonId) {
+  @if (pokemonId()) {
     <div class="nav-arrows">
-      <button mat-icon-button class="nav-btn prev-btn" [disabled]="!hasPrev" (click)="navigateToPokemon(prevId)">
+      <button mat-icon-button class="nav-btn prev-btn" [disabled]="!hasPrev()" (click)="navigateToPokemon(prevId())" aria-label="Previous Pokémon">
         <mat-icon>chevron_left</mat-icon>
       </button>
-      <button mat-icon-button class="nav-btn next-btn" [disabled]="!hasNext" (click)="navigateToPokemon(nextId)">
+      <button mat-icon-button class="nav-btn next-btn" [disabled]="!hasNext()" (click)="navigateToPokemon(nextId())" aria-label="Next Pokémon">
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
   }
 
-  @if (loading) {
+  @if (loading()) {
     <div class="loading-container">
-      <div class="pokeball-loader">
-        <div class="pokeball-top"></div>
-        <div class="pokeball-bottom"></div>
-        <div class="pokeball-center"></div>
-      </div>
-      <p class="loading-text">Loading Pokémon...</p>
+      <ds-pokeball-spinner label="Loading Pokémon..."></ds-pokeball-spinner>
     </div>
   }
 
-  @if (error) {
+  @if (error()) {
     <div class="error-container">
       <mat-icon>error_outline</mat-icon>
-      <p>{{ error }}</p>
+      <p>{{ error() }}</p>
       <button mat-stroked-button color="warn" (click)="navigateToCatalog()">
         Return to Catalog
       </button>
     </div>
   }
 
-  @if (pokemon && !loading) {
-    <div class="pokemon-container" [ngClass]="'bg-' + (pokemon.types[0]?.type?.name || 'normal')">
+  @if (pokemon() && !loading()) {
+    <div class="pokemon-container" [ngClass]="'bg-' + (pokemon()!.types[0]?.type?.name || 'normal')">
       <!-- Back Button -->
-      <button mat-icon-button (click)="navigateToCatalog()" class="back-btn">
+      <button mat-icon-button (click)="navigateToCatalog()" class="back-btn" aria-label="Back to catalog">
         <mat-icon>arrow_back</mat-icon>
       </button>
 
@@ -43,26 +38,38 @@
       <div class="main-content">
         <!-- Left: Pokemon Image -->
         <div class="image-section">
-          <div class="pokemon-id-badge">#{{ pokemon.id | number:'3.0-0' }}</div>
+          <div class="pokemon-id-badge">#{{ pokemon()!.id | number:'3.0-0' }}</div>
           <div class="image-wrapper">
             <img
               class="pokemon-main-img"
-              [src]="getSpriteUrl(pokemon)"
-              [alt]="capitalize(pokemon.name)"
+              [src]="getSpriteUrl(pokemon()!)"
+              [alt]="capitalize(pokemon()!.name)"
               (error)="handleImageError($event)"
             >
-            <div class="image-glow" [ngClass]="'glow-' + (pokemon.types[0]?.type?.name || 'normal')"></div>
+            <div class="image-glow" [ngClass]="'glow-' + (pokemon()!.types[0]?.type?.name || 'normal')"></div>
+            @if (hasShinySprite(pokemon()!)) {
+              <button
+                mat-mini-fab
+                class="shiny-toggle"
+                [class.active]="isShiny()"
+                (click)="toggleShiny()"
+                [matTooltip]="isShiny() ? 'Show normal' : 'Show shiny'"
+                aria-label="Toggle shiny version"
+              >
+                <mat-icon>auto_awesome</mat-icon>
+              </button>
+            }
           </div>
         </div>
 
         <!-- Right: Pokemon Info -->
         <div class="info-section">
-          <h1 class="pokemon-name">{{ capitalize(pokemon.name) }}</h1>
+          <h1 class="pokemon-name">{{ capitalize(pokemon()!.name) }}</h1>
 
           <!-- Types -->
-          <div class="types-container">
-            @for (type of pokemon.types; track $index) {
-              <span class="type-badge" [ngClass]="'type-' + type.type.name">{{ capitalize(type.type.name) }}</span>
+          <div class="types-container" aria-label="Pokémon types">
+            @for (type of pokemon()!.types; track $index) {
+              <ds-type-badge [type]="type.type.name" variant="ghost"></ds-type-badge>
             }
           </div>
 
@@ -70,19 +77,19 @@
           <div class="physical-info">
             <div class="info-item">
               <span class="info-label">Height</span>
-              <span class="info-value">{{ (pokemon.height / 10).toFixed(1) }} m</span>
+              <span class="info-value">{{ (pokemon()!.height / 10).toFixed(1) }} m</span>
             </div>
             <div class="info-item">
               <span class="info-label">Weight</span>
-              <span class="info-value">{{ (pokemon.weight / 10).toFixed(1) }} kg</span>
+              <span class="info-value">{{ (pokemon()!.weight / 10).toFixed(1) }} kg</span>
             </div>
           </div>
 
           <!-- Abilities -->
           <div class="info-block">
-            <h3 class="block-title">Abilities</h3>
+            <h2 class="block-title">Abilities</h2>
             <div class="abilities-list">
-              @for (ability of pokemon.abilities; track $index) {
+              @for (ability of pokemon()!.abilities; track $index) {
                 <span class="ability-tag">
                   {{ capitalize(ability.ability.name) }}
                   @if (ability.is_hidden) {
@@ -94,30 +101,21 @@
           </div>
 
           <!-- Stats with Progress Bars -->
-          <div class="stats-block">
-            <h3 class="block-title">Base Stats</h3>
+          <div class="stats-block" aria-describedby="stats-description">
+            <h2 class="block-title">Base Stats</h2>
+            <span id="stats-description" class="sr-only">Base statistics for {{ capitalize(pokemon()!.name) }}</span>
             <div class="stats-container">
-              @for (stat of pokemon.stats; track stat.stat.name) {
-                <div class="stat-row">
-                  <span class="stat-label">{{ getStatShortName(stat.stat.name) }}</span>
-                  <span class="stat-value">{{ stat.base_stat }}</span>
-                  <div class="stat-bar-container">
-                    <div
-                      class="stat-bar"
-                      [style.width.%]="getStatPercentage(stat.base_stat)"
-                      [style.background-color]="getStatColor(stat.base_stat)"
-                    ></div>
-                  </div>
-                </div>
+              @for (stat of pokemon()!.stats; track stat.stat.name) {
+                <ds-stat-bar [label]="stat.stat.name" [value]="stat.base_stat"></ds-stat-bar>
               }
             </div>
           </div>
 
           <!-- Moves -->
           <div class="info-block">
-            <h3 class="block-title">Moves</h3>
+            <h2 class="block-title">Moves</h2>
             <div class="moves-list">
-              @for (move of pokemon.moves.slice(0, 8); track $index) {
+              @for (move of pokemon()!.moves.slice(0, 8); track $index) {
                 <span class="move-tag">{{ capitalize(move.move.name) }}</span>
               }
             </div>

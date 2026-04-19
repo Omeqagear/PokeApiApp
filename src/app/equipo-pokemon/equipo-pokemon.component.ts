@@ -4,11 +4,8 @@ import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { forkJoin, of, catchError } from 'rxjs';
@@ -24,26 +21,10 @@ import {
   GenerationFilter,
   GeneratedTeam
 } from '../services/team-builder.service';
-
-function getGeneration(id: number): number {
-  const genRanges = [
-    { start: 1, end: 151 },
-    { start: 152, end: 251 },
-    { start: 252, end: 386 },
-    { start: 387, end: 493 },
-    { start: 494, end: 649 },
-    { start: 650, end: 721 },
-    { start: 722, end: 809 },
-    { start: 810, end: 905 },
-    { start: 906, end: 1025 },
-  ];
-  for (let i = 0; i < genRanges.length; i++) {
-    if (id >= genRanges[i].start && id <= genRanges[i].end) {
-      return i + 1;
-    }
-  }
-  return 9;
-}
+import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
+import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
+import { PageHeaderComponent } from '../shared/components/page-header/page-header.component';
+import { getGeneration } from '../shared/utils/pokemon.utils';
 
 @Component({
   selector: 'app-equipo-pokemon',
@@ -54,12 +35,12 @@ function getGeneration(id: number): number {
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    MatChipsModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    PokeCardComponent,
+    EmptyStateComponent,
+    PageHeaderComponent
   ],
   templateUrl: './equipo-pokemon.component.html',
   styleUrls: ['./equipo-pokemon.component.scss'],
@@ -81,7 +62,6 @@ export class EquipoPokemonComponent implements OnInit {
   private validPokemonLoaded = false;
   private readonly POKEAPI_LIST_LIMIT = 1350;
 
-  // Team builder state
   selectedArchetype = signal<TeamArchetype | null>(null);
   selectedGeneration = signal<GenerationFilter | null>(null);
   selectedStatPriority = signal<string[]>([]);
@@ -196,11 +176,11 @@ export class EquipoPokemonComponent implements OnInit {
             p.totalStats,
             p.generation,
             p.baseExperience,
-            (p as any).types || [],
-            (p as any).height || 0,
-            (p as any).weight || 0,
-            (p as any).abilities || [],
-            (p as any).moves || []
+            p.types || [],
+            p.height || 0,
+            p.weight || 0,
+            p.abilities || [],
+            p.moves || []
           );
           return pokemon;
         });
@@ -256,11 +236,11 @@ export class EquipoPokemonComponent implements OnInit {
             p.totalStats,
             p.generation,
             p.baseExperience,
-            (p as any).types || [],
-            (p as any).height || 0,
-            (p as any).weight || 0,
-            (p as any).abilities || [],
-            (p as any).moves || []
+            p.types || [],
+            p.height || 0,
+            p.weight || 0,
+            p.abilities || [],
+            p.moves || []
           );
           return pokemon;
         });
@@ -286,30 +266,6 @@ export class EquipoPokemonComponent implements OnInit {
 
   navigateToPokemon(id: number): void {
     this.router.navigate(['/photo', id]);
-  }
-
-  getStatShortName(statName: string): string {
-    const shortNames: Record<string, string> = {
-      'hp': 'HP',
-      'attack': 'ATK',
-      'defense': 'DEF',
-      'special-attack': 'SPA',
-      'special-defense': 'SPD',
-      'speed': 'SPE'
-    };
-    return shortNames[statName] || statName;
-  }
-
-  getStatPercentage(baseStat: number): number {
-    return Math.min((baseStat / 255) * 100, 100);
-  }
-
-  getStatColor(baseStat: number): string {
-    if (baseStat >= 150) return '#ff4081';
-    if (baseStat >= 120) return '#ff7043';
-    if (baseStat >= 90) return '#ffca28';
-    if (baseStat >= 60) return '#66bb6a';
-    return '#42a5f5';
   }
 
   async loadValidPokemonIds(): Promise<void> {
@@ -414,7 +370,7 @@ export class EquipoPokemonComponent implements OnInit {
     const requests = ids.map(id =>
       this.dataService.getPokemonDetail(id).pipe(
         catchError(error => {
-          console.warn(`⚠️ Failed to load Pokémon ID ${id}:`, error);
+          console.warn(`Failed to load Pokémon ID ${id}:`, error);
           return of(null);
         })
       )
@@ -427,7 +383,7 @@ export class EquipoPokemonComponent implements OnInit {
         );
 
         if (validResults.length === 0) {
-          console.error('❌ No valid Pokémon could be loaded');
+          console.error('No valid Pokémon could be loaded');
           alert('Error generating team. Please try again.');
           return;
         }
@@ -462,7 +418,7 @@ export class EquipoPokemonComponent implements OnInit {
         this.teamPokemon.set(newTeam);
       },
       error: (error) => {
-        console.error('💥 Unexpected error in forkJoin:', error);
+        console.error('Unexpected error in forkJoin:', error);
         alert('Error generating team. Please try again.');
       }
     });

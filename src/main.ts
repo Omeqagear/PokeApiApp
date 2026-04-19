@@ -5,11 +5,13 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { cacheInterceptor } from './app/services/cache.interceptor';
+import { AccessibilityService } from './app/shared/services/accessibility.service';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
     provideHttpClient(withInterceptors([cacheInterceptor])),
     provideAnimations(),
+    AccessibilityService,
   ]
 }).catch((err: unknown) => console.error(err));
