@@ -12,17 +12,21 @@
   </div>
 
   <ul class="nav-list">
-    @for (item of navItems; track item.path) {
+    @for (item of navItems(); track item.path) {
       <li>
         <a 
           [routerLink]="item.path"
           [class.active]="isActive(item.path)"
           matRipple
           [matRippleDisabled]="false"
-          aria-label="{{ item.label }}">
+          [attr.aria-label]="item.label"
+        >
           <mat-icon>{{ item.icon }}</mat-icon>
           @if (!isCollapsed()) {
             <span class="nav-label">{{ item.label }}</span>
+          }
+          @if (item.badge && item.badge > 0 && !isCollapsed()) {
+            <span class="nav-badge">{{ item.badge }}/6</span>
           }
         </a>
       </li>

@@ -13,6 +13,7 @@ import { Pokemon } from '../shared/pokemon';
 import { PokemonDetail } from '../shared/pokemon-api.interfaces';
 import { DataServiceService } from '../services/data-service.service';
 import { StorageService } from '../services/storage.service';
+import { TeamService } from '../services/team.service';
 import {
   TeamBuilderService,
   TEAM_ARCHETYPES,
@@ -55,6 +56,7 @@ export class EquipoPokemonComponent implements OnInit {
   private dataService = inject(DataServiceService);
   private storageService = inject(StorageService);
   private teamBuilderService = inject(TeamBuilderService);
+  private teamService = inject(TeamService);
   private router = inject(Router);
 
   teamPokemon = signal<Pokemon[]>([]);
@@ -103,6 +105,7 @@ export class EquipoPokemonComponent implements OnInit {
   deletePokemon(pokemon: Pokemon): void {
     this.storageService.remove(pokemon.id.toString());
     this.teamPokemon.update(team => team.filter(p => p.id !== pokemon.id));
+    this.teamService.refreshCount();
   }
 
   getPokemonImage(item: Pokemon | { id: number; spriteUrl?: string }): string {
@@ -113,6 +116,7 @@ export class EquipoPokemonComponent implements OnInit {
     this.storageService.clear();
     this.teamPokemon.set([]);
     this.generatedTeam.set(null);
+    this.teamService.refreshCount();
   }
 
   setActiveTab(tab: 'manual' | 'builder'): void {
@@ -162,7 +166,7 @@ export class EquipoPokemonComponent implements OnInit {
 
       if (team) {
         this.generatedTeam.set(team);
-        
+
         const newTeam: Pokemon[] = team.pokemon.map(p => {
           const pokemon = new Pokemon(
             p.id.toString(),
@@ -190,6 +194,7 @@ export class EquipoPokemonComponent implements OnInit {
           this.storageService.set(pokemon.id.toString(), pokemon);
         });
         this.teamPokemon.set(newTeam);
+        this.teamService.refreshCount();
       }
 
       this.generationProgress.set(100);
@@ -222,7 +227,7 @@ export class EquipoPokemonComponent implements OnInit {
 
       if (team) {
         this.generatedTeam.set(team);
-        
+
         const newTeam: Pokemon[] = team.pokemon.map(p => {
           const pokemon = new Pokemon(
             p.id.toString(),
@@ -250,6 +255,7 @@ export class EquipoPokemonComponent implements OnInit {
           this.storageService.set(pokemon.id.toString(), pokemon);
         });
         this.teamPokemon.set(newTeam);
+        this.teamService.refreshCount();
       }
 
       this.generationProgress.set(100);
@@ -270,40 +276,40 @@ export class EquipoPokemonComponent implements OnInit {
 
   async loadValidPokemonIds(): Promise<void> {
     if (this.validPokemonLoaded) return;
-    
+
     const CACHE_KEY = 'valid_pokemon_ids_cache';
-    
+
     const cached = this.storageService.get<{ ids: number[]; timestamp: number }>(CACHE_KEY);
     const now = Date.now();
     const CACHE_DURATION = 24 * 60 * 60 * 1000;
-    
+
     if (cached?.ids && cached.timestamp && (now - cached.timestamp < CACHE_DURATION)) {
       this.validPokemonIds = cached.ids;
       this.validPokemonLoaded = true;
       return;
     }
-    
+
     try {
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${this.POKEAPI_LIST_LIMIT}`);
-      
+
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
+
       const data = await response.json();
-      
+
       this.validPokemonIds = data.results
         .map((p: any) => {
           const match = p.url.match(/\/pokemon\/(\d+)\/$/);
           return match ? parseInt(match[1], 10) : null;
         })
         .filter((id: number | null): id is number => id !== null && id > 0);
-      
+
       this.storageService.set(CACHE_KEY, {
         ids: this.validPokemonIds,
         timestamp: now
       });
-      
+
       this.validPokemonLoaded = true;
-      
+
     } catch (error) {
       console.warn('Failed to load valid Pokémon IDs, using fallback range:', error);
       this.validPokemonIds = Array.from({ length: 1025 }, (_, i) => i + 1);
@@ -313,13 +319,13 @@ export class EquipoPokemonComponent implements OnInit {
 
   private getRandomUniqueIds(count: number, exclude: number[] = []): number[] {
     const pool = this.validPokemonIds.filter(id => !exclude.includes(id));
-    
+
     const shuffled = [...pool];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    
+
     return shuffled.slice(0, count);
   }
 
@@ -416,6 +422,7 @@ export class EquipoPokemonComponent implements OnInit {
         });
 
         this.teamPokemon.set(newTeam);
+        this.teamService.refreshCount();
       },
       error: (error) => {
         console.error('Unexpected error in forkJoin:', error);

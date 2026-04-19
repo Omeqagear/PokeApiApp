@@ -44,8 +44,11 @@
     <form [formGroup]="searchForm" class="search-form">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Search Pokémon by ID or name</mat-label>
-        <input matInput formControlName="searchInput" placeholder="e.g., 25 or Pikachu" aria-label="Search Pokémon by ID or name">
+        <input matInput formControlName="searchInput" placeholder="e.g., 25 or Pikachu" aria-label="Search Pokémon by ID or name" (keydown.ctrl.f)="$event.stopPropagation()" (keydown.meta.f)="$event.stopPropagation()">
         <mat-icon matPrefix>search</mat-icon>
+        <span class="search-shortcut" matSuffix aria-hidden="true">
+          <kbd>Ctrl</kbd><kbd>K</kbd>
+        </span>
         @if (searchForm.get('searchInput')?.value) {
           <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()" type="button">
             <mat-icon>close</mat-icon>
@@ -66,8 +69,10 @@
 </ds-page-header>
 
 @if (loading()) {
-  <div class="loading-container">
-    <ds-pokeball-spinner [size]="80" label="Loading Pokémon..."></ds-pokeball-spinner>
+  <div class="catalog-grid" role="list">
+    @for (item of skeletonArray; track $index) {
+      <ds-skeleton-card [showTypes]="true"></ds-skeleton-card>
+    }
   </div>
 }
 
@@ -77,17 +82,33 @@
 
 @if (!loading() && !error()) {
   @if (searchMode() && searchResults().length === 0 && !isSearching()) {
-    <ds-empty-state icon="search_off" title="No Pokémon Found" message="Try a different ID or name"></ds-empty-state>
+    <ds-empty-state
+      icon="search_off"
+      title="No Pokémon Found"
+      message="We couldn't find any Pokémon matching your search. Try a different name or ID number."
+      actionLabel="Clear Search"
+      actionRoute="/catalog"
+      actionIcon="clear"
+      [compact]="true"
+    ></ds-empty-state>
   }
 
   @if (!searchMode() && pokemons().length === 0) {
-    <ds-empty-state icon="pokemon_go" title="No Pokémon Found" message="No Pokémon available in this range"></ds-empty-state>
+    <ds-empty-state
+      icon="explore"
+      title="No Pokémon Available"
+      message="Looks like this generation doesn't have any Pokémon yet. Try selecting a different generation!"
+      actionLabel="View All Pokémon"
+      actionRoute="/catalog"
+      actionIcon="grid_view"
+      [compact]="true"
+    ></ds-empty-state>
   }
 
   @if (displayedPokemon().length > 0) {
     <div class="catalog-grid" role="list">
       @for (item of displayedPokemon(); track item.name; let i = $index) {
-        <div role="listitem">
+        <div role="listitem" [attr.data-pokemon-id]="extractPokemonId(item.url)">
           <ds-poke-card
             [pokemon]="{
               id: extractPokemonId(item.url),
@@ -95,24 +116,33 @@
               spriteUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + extractPokemonId(item.url) + '.png'
             }"
             (cardClick)="navigateToPokemon(extractPokemonId(item.url))"
-          ></ds-poke-card>
+          >
+            <div actions>
+              @if (!isInTeam(extractPokemonId(item.url))) {
+                <button
+                  mat-icon-button
+                  class="add-team-btn"
+                  (click)="addToTeam(extractPokemonId(item.url), capitalize(item.name), 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + extractPokemonId(item.url) + '.png'); $event.stopPropagation()"
+                  [attr.aria-label]="'Add ' + capitalize(item.name) + ' to team'"
+                  matTooltip="Add to team"
+                >
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              } @else {
+                <mat-icon class="in-team-icon" matTooltip="In team">check_circle</mat-icon>
+              }
+            </div>
+          </ds-poke-card>
         </div>
       }
     </div>
   }
 
-  @if (!searchMode() && hasNext()) {
-    <div class="pagination">
-      <button mat-flat-button color="primary" (click)="loadMore()" [disabled]="loadingMore()">
-        @if (loadingMore()) {
-          <mat-spinner diameter="20"></mat-spinner>
-        } @else {
-          <mat-icon>expand_more</mat-icon>
-        }
-        Load More Pokémon
-      </button>
-    </div>
-  } @else if (!searchMode()) {
+  @if (!loading() && hasNext() && !searchMode()) {
+    <div #loadMoreTrigger class="load-more-trigger" aria-hidden="true"></div>
+  }
+
+  @if (!loading() && !searchMode() && pokemons().length > 0 && !hasNext()) {
     <div class="pagination complete">
       <mat-icon>check_circle</mat-icon>
       <p>

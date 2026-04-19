@@ -1,6 +1,8 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, HostListener, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataServiceService } from '../services/data-service.service';
+import { FavoritesService } from '../services/favorites.service';
+import { TeamService } from '../services/team.service';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,6 +23,8 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class PhotoPokemonComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private favoritesService = inject(FavoritesService);
+  private teamService = inject(TeamService);
 
   pokemonId = signal<number | null>(null);
   pokemon = signal<PokemonDetail | null>(null);
@@ -113,6 +117,37 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
     this.router.navigate(['/photo', id]);
   }
 
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent): void {
+    if (this.loading()) return;
+
+    switch (event.key) {
+      case 'ArrowLeft':
+        if (this.hasPrev() && !event.ctrlKey && !event.metaKey) {
+          event.preventDefault();
+          this.navigateToPokemon(this.prevId());
+        }
+        break;
+      case 'ArrowRight':
+        if (this.hasNext() && !event.ctrlKey && !event.metaKey) {
+          event.preventDefault();
+          this.navigateToPokemon(this.nextId());
+        }
+        break;
+      case 's':
+      case 'S':
+        if (!event.ctrlKey && !event.metaKey && !(event.target instanceof HTMLInputElement)) {
+          this.toggleShiny();
+        }
+        break;
+      case 'Escape':
+        if (event.target instanceof HTMLInputElement) {
+          (event.target as HTMLInputElement).blur();
+        }
+        break;
+    }
+  }
+
   capitalize = capitalize;
   getStatShortName = getStatShortName;
 
@@ -142,5 +177,116 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
       return;
     }
     event.target.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/1.svg';
+  }
+
+  isFavorite(): boolean {
+    const id = this.pokemonId();
+    return id !== null ? this.favoritesService.isFavorite(id) : false;
+  }
+
+  isInTeam(): boolean {
+    const id = this.pokemonId();
+    return id !== null ? this.teamService.isInTeam(id) : false;
+  }
+
+  toggleFavorite(): void {
+    const pokemon = this.pokemon();
+    if (pokemon) {
+      this.favoritesService.toggleFavorite(pokemon);
+    }
+  }
+
+  addToTeam(): void {
+    const pokemon = this.pokemon();
+    if (!pokemon) return;
+
+    if (this.teamService.isTeamFull()) {
+      alert('Your team is full! Remove a Pokémon to add more.');
+      return;
+    }
+
+    if (this.teamService.isInTeam(pokemon.id)) {
+      alert('This Pokémon is already in your team!');
+      return;
+    }
+
+    const pokemonObj = new Pokemon(
+      pokemon.id.toString(),
+      pokemon.name,
+      pokemon.sprites.front_default || '',
+      pokemon.types[0]?.type.name || 'unknown',
+      pokemon.types[1]?.type.name || '',
+      pokemon.moves[0]?.move.name || 'unknown',
+      pokemon.moves[1]?.move.name || 'unknown',
+      pokemon.stats.map(s => ({ name: s.stat.name, value: s.base_stat })),
+      pokemon.stats.reduce((sum, s) => sum + s.base_stat, 0),
+      1,
+      pokemon.base_experience,
+      pokemon.types,
+      pokemon.height,
+      pokemon.weight,
+      pokemon.abilities,
+      pokemon.moves
+    );
+
+    const added = this.teamService.addToTeam(pokemonObj);
+    if (added) {
+      this.teamService.refreshCount();
+    }
+  }
+}
+
+class Pokemon {
+  id: number;
+  name: string;
+  spriteUrl: string;
+  type1: string;
+  type2: string;
+  move1: string;
+  move2: string;
+  stats: any[];
+  totalStats: number;
+  generation: number;
+  baseExperience: number;
+  types: any[];
+  height: number;
+  weight: number;
+  abilities: any[];
+  moves: any[];
+
+  constructor(
+    id: string,
+    name: string,
+    spriteUrl: string,
+    type1: string,
+    type2: string,
+    move1: string,
+    move2: string,
+    stats: any[],
+    totalStats: number,
+    generation: number,
+    baseExperience: number,
+    types: any[],
+    height: number,
+    weight: number,
+    abilities: any[],
+    moves: any[]
+  ) {
+    this.id = typeof id === 'string' ? parseInt(id, 10) : id;
+    this.name = name;
+    this.spriteUrl = spriteUrl;
+    this.type1 = type1;
+    this.type2 = type2;
+    this.move1 = move1;
+    this.move2 = move2;
+    this.stats = stats;
+    this.totalStats = totalStats;
+    this.generation = generation;
+    this.baseExperience = baseExperience;
+    this.types = types;
+    this.height = height;
+    this.weight = weight;
+    this.abilities = abilities;
+    this.moves = moves;
   }
 }

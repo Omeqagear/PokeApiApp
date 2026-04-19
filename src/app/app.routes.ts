@@ -17,6 +17,11 @@ export const routes: Routes = [
       .then(m => m.EquipoPokemonComponent)
   },
   {
+    path: 'favorites',
+    loadComponent: () => import('./favorites/favorites.component')
+      .then(m => m.FavoritesComponent)
+  },
+  {
     path: 'photo/:id',
     loadComponent: () => import('./photo-pokemon/photo-pokemon.component')
       .then(m => m.PhotoPokemonComponent)

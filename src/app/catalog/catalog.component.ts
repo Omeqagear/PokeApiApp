@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ElementRef, ViewChild, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,7 +10,9 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of } from 'rxjs';
 import { PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
 import { DataServiceService } from '../services/data-service.service';
+import { TeamService } from '../services/team.service';
 import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
+import { SkeletonCardComponent } from '../shared/components/skeleton-card/skeleton-card.component';
 import { GenerationChipComponent } from '../shared/components/generation-chip/generation-chip.component';
 import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/pokeball-spinner.component';
 import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
@@ -49,6 +51,7 @@ const GENERATIONS: Generation[] = [
     MatProgressSpinnerModule,
     ReactiveFormsModule,
     PokeCardComponent,
+    SkeletonCardComponent,
     GenerationChipComponent,
     PokeballSpinnerComponent,
     EmptyStateComponent,
@@ -57,13 +60,17 @@ const GENERATIONS: Generation[] = [
   templateUrl: './catalog.component.html',
   styleUrls: ['./catalog.component.scss']
 })
-export class CatalogComponent implements OnInit {
+export class CatalogComponent implements OnInit, AfterViewInit, OnDestroy {
   private dataService = inject(DataServiceService);
+  private teamService = inject(TeamService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
+  @ViewChild('loadMoreTrigger') loadMoreTrigger!: ElementRef;
+
   generations = GENERATIONS;
   readonly limit = 40;
+  private observer!: IntersectionObserver;
 
   // Signal-based state
   pokemons = signal<PokemonSummary[]>([]);
@@ -93,9 +100,58 @@ export class CatalogComponent implements OnInit {
     this.searchMode() ? this.searchResults() : this.pokemons()
   );
 
+  skeletonArray = Array(12).fill(0);
+
   ngOnInit(): void {
     this.loadPokemonList();
     this.setupSearch();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+      event.preventDefault();
+      const searchInput = document.querySelector('.search-field input') as HTMLInputElement;
+      if (searchInput) {
+        searchInput.focus();
+      }
+    }
+
+    if (event.key >= '1' && event.key <= '9' && !(event.target instanceof HTMLInputElement)) {
+      const index = parseInt(event.key, 10) - 1;
+      if (index < this.generations.length) {
+        const gen = index === 0 ? null : this.generations[index];
+        this.selectGeneration(gen);
+      }
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.setupIntersectionObserver();
+  }
+
+  ngOnDestroy(): void {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
+
+  private setupIntersectionObserver(): void {
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && this.hasNext() && !this.loadingMore() && !this.searchMode()) {
+          this.loadMore();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    if (this.loadMoreTrigger) {
+      this.observer.observe(this.loadMoreTrigger.nativeElement);
+    }
   }
 
   private setupSearch(): void {
@@ -187,6 +243,8 @@ export class CatalogComponent implements OnInit {
         } else {
           this.loading.set(false);
         }
+
+        setTimeout(() => this.updateObserver(), 100);
       },
       error: (err) => {
         console.error('Error loading Pokemon list:', err);
@@ -197,6 +255,8 @@ export class CatalogComponent implements OnInit {
         } else {
           this.loading.set(false);
         }
+
+        setTimeout(() => this.updateObserver(), 100);
       }
     });
   }
@@ -204,6 +264,13 @@ export class CatalogComponent implements OnInit {
   loadMore(): void {
     this.currentOffset.update(current => current + this.limit);
     this.loadPokemonList(true);
+  }
+
+  private updateObserver(): void {
+    if (this.observer && this.loadMoreTrigger) {
+      this.observer.disconnect();
+      this.observer.observe(this.loadMoreTrigger.nativeElement);
+    }
   }
 
   selectGeneration(gen: Generation | null): void {
@@ -242,5 +309,107 @@ export class CatalogComponent implements OnInit {
 
   navigateToPokemon(id: number): void {
     this.router.navigate(['/photo', id]);
+  }
+
+  addToTeam(id: number, name: string, spriteUrl: string): void {
+    if (this.teamService.isTeamFull()) {
+      alert('Your team is full! Remove a Pokémon to add more.');
+      return;
+    }
+
+    const pokemon = new Pokemon(
+      id.toString(),
+      name,
+      spriteUrl,
+      'unknown',
+      '',
+      'unknown',
+      'unknown',
+      [],
+      0,
+      1,
+      0,
+      [],
+      0,
+      0,
+      [],
+      []
+    );
+
+    const added = this.teamService.addToTeam(pokemon);
+    if (added) {
+      this.showAddedFeedback(id);
+    } else {
+      alert('This Pokémon is already in your team!');
+    }
+  }
+
+  private showAddedFeedback(id: number): void {
+    const card = document.querySelector(`[data-pokemon-id="${id}"]`);
+    if (card) {
+      card.classList.add('added-to-team');
+      setTimeout(() => {
+        card.classList.remove('added-to-team');
+      }, 600);
+    }
+  }
+
+  isInTeam(id: number): boolean {
+    return this.teamService.isInTeam(id);
+  }
+}
+
+class Pokemon {
+  id: number;
+  name: string;
+  spriteUrl: string;
+  type1: string;
+  type2: string;
+  move1: string;
+  move2: string;
+  stats: any[];
+  totalStats: number;
+  generation: number;
+  baseExperience: number;
+  types: any[];
+  height: number;
+  weight: number;
+  abilities: any[];
+  moves: any[];
+
+  constructor(
+    id: string,
+    name: string,
+    spriteUrl: string,
+    type1: string,
+    type2: string,
+    move1: string,
+    move2: string,
+    stats: any[],
+    totalStats: number,
+    generation: number,
+    baseExperience: number,
+    types: any[],
+    height: number,
+    weight: number,
+    abilities: any[],
+    moves: any[]
+  ) {
+    this.id = typeof id === 'string' ? parseInt(id, 10) : id;
+    this.name = name;
+    this.spriteUrl = spriteUrl;
+    this.type1 = type1;
+    this.type2 = type2;
+    this.move1 = move1;
+    this.move2 = move2;
+    this.stats = stats;
+    this.totalStats = totalStats;
+    this.generation = generation;
+    this.baseExperience = baseExperience;
+    this.types = types;
+    this.height = height;
+    this.weight = weight;
+    this.abilities = abilities;
+    this.moves = moves;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, signal, DestroyRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,11 +8,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ThemeService } from '../shared/services/theme.service';
+import { TeamService } from '../services/team.service';
+import { FavoritesService } from '../services/favorites.service';
 
 interface NavItem {
   path: string;
   icon: string;
   label: string;
+  badge?: number;
 }
 
 @Component({
@@ -32,16 +35,21 @@ interface NavItem {
 export class SidebarComponent implements OnInit {
   private router = inject(Router);
   private themeService = inject(ThemeService);
+  private teamService = inject(TeamService);
+  private favoritesService = inject(FavoritesService);
 
   currentUrl = signal('/');
   isCollapsed = signal(false);
   isDark = this.themeService.theme;
+  teamCount = this.teamService.teamCount;
+  favoritesCount = this.favoritesService.favoritesCount;
 
-  navItems: NavItem[] = [
+  navItems = computed<NavItem[]>(() => [
     { path: '/', icon: 'home', label: 'Home' },
     { path: '/catalog', icon: 'grid_view', label: 'Catalog' },
-    { path: '/team', icon: 'groups', label: 'My Team' }
-  ];
+    { path: '/favorites', icon: 'favorite', label: 'Favorites', badge: this.favoritesCount() },
+    { path: '/team', icon: 'groups', label: 'My Team', badge: this.teamCount() }
+  ]);
 
   private destroyRef = inject(DestroyRef);
 

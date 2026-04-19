@@ -145,11 +145,17 @@
   <!-- Manual Tab (Original + Enhanced) -->
   @if (activeTab() === 'manual') {
     @if (teamPokemon().length === 0) {
-      <ds-empty-state 
+      <ds-empty-state
         icon="catching_pokemon"
-        title="Tu equipo está vacío"
-        message="¡Agrega Pokémon desde el catálogo o genera un equipo aleatorio!"
-      />
+        title="Your team is empty"
+        message="Add Pokémon from the catalog or generate a random team to get started on your adventure!"
+        actionLabel="Browse Catalog"
+        actionRoute="/catalog"
+        actionIcon="grid_view"
+        secondaryActionLabel="Random Team"
+        secondaryActionRoute="/team"
+        secondaryActionIcon="shuffle"
+      ></ds-empty-state>
     }
 
     @if (teamPokemon().length > 0) {

@@ -34,6 +34,12 @@
         <mat-icon>arrow_back</mat-icon>
       </button>
 
+      <!-- Keyboard Shortcuts Hint -->
+      <div class="keyboard-hints" aria-hidden="true">
+        <span class="hint"><kbd>←</kbd><kbd>→</kbd> Browse</span>
+        <span class="hint"><kbd>S</kbd> Shiny</span>
+      </div>
+
       <!-- Main Content -->
       <div class="main-content">
         <!-- Left: Pokemon Image -->
@@ -47,18 +53,55 @@
               (error)="handleImageError($event)"
             >
             <div class="image-glow" [ngClass]="'glow-' + (pokemon()!.types[0]?.type?.name || 'normal')"></div>
-            @if (hasShinySprite(pokemon()!)) {
+
+            <!-- Action Buttons -->
+            <div class="image-actions">
               <button
                 mat-mini-fab
-                class="shiny-toggle"
-                [class.active]="isShiny()"
-                (click)="toggleShiny()"
-                [matTooltip]="isShiny() ? 'Show normal' : 'Show shiny'"
-                aria-label="Toggle shiny version"
+                class="action-btn favorite-btn"
+                [class.active]="isFavorite()"
+                (click)="toggleFavorite()"
+                [matTooltip]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
+                aria-label="Toggle favorite"
               >
-                <mat-icon>auto_awesome</mat-icon>
+                <mat-icon>{{ isFavorite() ? 'favorite' : 'favorite_border' }}</mat-icon>
               </button>
-            }
+
+              @if (!isInTeam()) {
+                <button
+                  mat-mini-fab
+                  class="action-btn team-btn"
+                  (click)="addToTeam()"
+                  matTooltip="Add to team"
+                  aria-label="Add to team"
+                >
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              } @else {
+                <button
+                  mat-mini-fab
+                  class="action-btn in-team-btn"
+                  disabled
+                  matTooltip="In team"
+                  aria-label="In team"
+                >
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+              }
+
+              @if (hasShinySprite(pokemon()!)) {
+                <button
+                  mat-mini-fab
+                  class="shiny-toggle"
+                  [class.active]="isShiny()"
+                  (click)="toggleShiny()"
+                  [matTooltip]="isShiny() ? 'Show normal' : 'Show shiny'"
+                  aria-label="Toggle shiny version"
+                >
+                  <mat-icon>auto_awesome</mat-icon>
+                </button>
+              }
+            </div>
           </div>
         </div>
 
