@@ -164,6 +164,14 @@
             </div>
           </div>
 
+          <!-- Evolution Chain -->
+          @if (species()) {
+            <app-evolution-chain
+              [pokemonId]="pokemon()!.id"
+              [pokemonSpecies]="species()!"
+            ></app-evolution-chain>
+          }
+
           <!-- Bottom Navigation -->
           <div class="bottom-nav">
             <button mat-flat-button class="nav-action-btn team-btn" (click)="navigateToTeam()">

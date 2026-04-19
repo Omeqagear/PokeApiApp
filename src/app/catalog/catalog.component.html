@@ -39,6 +39,86 @@
     </div>
   </div>
 
+  <!-- Advanced Filters Toggle -->
+  <div class="advanced-filters-toggle">
+    <button mat-stroked-button (click)="toggleFiltersPanel()" [class.active]="showFilters() || hasActiveFilters()">
+      <mat-icon>tune</mat-icon>
+      Advanced Filters
+      @if (hasActiveFilters()) {
+        <span class="filter-badge">{{ selectedTypes().length + (statFilterActive() ? 1 : 0) }}</span>
+      }
+    </button>
+    @if (hasActiveFilters()) {
+      <button mat-button (click)="clearAllFilters()" class="clear-filters-btn">
+        Clear all
+      </button>
+    }
+  </div>
+
+  <!-- Advanced Filters Panel -->
+  @if (showFilters()) {
+    <div class="advanced-filters-panel">
+      <!-- Type Filter -->
+      <div class="filter-section">
+        <h4 class="filter-title">
+          <mat-icon>category</mat-icon>
+          Type
+        </h4>
+        <div class="type-chips">
+          @for (type of pokemonTypes; track type) {
+            <button
+              class="type-chip"
+              [class]="'type-' + type"
+              [class.selected]="isTypeSelected(type)"
+              (click)="toggleTypeFilter(type)"
+              [attr.aria-pressed]="isTypeSelected(type)"
+            >
+              {{ type }}
+            </button>
+          }
+        </div>
+        @if (selectedTypes().length > 0) {
+          <button mat-button (click)="clearTypeFilters()" class="clear-section-btn">
+            Clear types
+          </button>
+        }
+      </div>
+
+      <!-- Stat Filter -->
+      <div class="filter-section">
+        <h4 class="filter-title">
+          <mat-icon>show_chart</mat-icon>
+          Base Stat
+        </h4>
+        <div class="stat-filter-options">
+          @for (stat of stats; track stat.key) {
+            <button
+              mat-stroked-button
+              class="stat-filter-btn"
+              [class.active]="statFilterActive() === stat.key"
+              (click)="setStatFilter(stat.key)"
+            >
+              {{ stat.label }}
+            </button>
+          }
+        </div>
+        @if (statFilterActive()) {
+          <div class="stat-range">
+            <div class="stat-input">
+              <label>Min</label>
+              <input type="number" [value]="minStat()" (input)="updateMinStat(+$any($event.target).value)" min="0" max="255">
+            </div>
+            <span class="range-separator">to</span>
+            <div class="stat-input">
+              <label>Max</label>
+              <input type="number" [value]="maxStat()" (input)="updateMaxStat(+$any($event.target).value)" min="0" max="255">
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Search -->
   <div class="search-container">
     <form [formGroup]="searchForm" class="search-form">

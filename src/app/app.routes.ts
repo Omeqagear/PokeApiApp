@@ -22,6 +22,11 @@ export const routes: Routes = [
       .then(m => m.FavoritesComponent)
   },
   {
+    path: 'compare',
+    loadComponent: () => import('./compare/compare.component')
+      .then(m => m.CompareComponent)
+  },
+  {
     path: 'photo/:id',
     loadComponent: () => import('./photo-pokemon/photo-pokemon.component')
       .then(m => m.PhotoPokemonComponent)

@@ -119,6 +119,99 @@ export class EquipoPokemonComponent implements OnInit {
     this.teamService.refreshCount();
   }
 
+  exportTeam(): void {
+    if (this.teamPokemon().length === 0) return;
+
+    const teamData = this.teamPokemon().map(pokemon => ({
+      id: pokemon.id,
+      name: pokemon.name,
+      spriteUrl: pokemon.spriteUrl,
+      type1: pokemon.type1,
+      type2: pokemon.type2,
+      stats: pokemon.stats,
+      totalStats: pokemon.totalStats
+    }));
+
+    const dataStr = JSON.stringify(teamData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `pokedex-team-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
+
+  importTeam(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.onchange = (event: Event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          const teamData = JSON.parse(content);
+
+          if (!Array.isArray(teamData)) {
+            alert('Invalid team file format');
+            return;
+          }
+
+          const existingIds = this.teamPokemon().map(p => p.id);
+          let imported = 0;
+
+          teamData.forEach((data: any) => {
+            if (data.id && !existingIds.includes(data.id)) {
+              const pokemon = new Pokemon(
+                data.id.toString(),
+                data.name,
+                data.spriteUrl || '',
+                data.type1 || 'unknown',
+                data.type2 || '',
+                data.move1 || 'unknown',
+                data.move2 || 'unknown',
+                data.stats || [],
+                data.totalStats || 0,
+                data.generation || 1,
+                data.baseExperience || 0,
+                data.types || [],
+                data.height || 0,
+                data.weight || 0,
+                data.abilities || [],
+                data.moves || []
+              );
+
+              this.storageService.set(pokemon.id.toString(), pokemon);
+              imported++;
+            }
+          });
+
+          if (imported > 0) {
+            this.loadTeamFromStorage();
+            this.teamService.refreshCount();
+            alert(`Successfully imported ${imported} Pokémon!`);
+          } else {
+            alert('No new Pokémon to import (team may already have these)');
+          }
+        } catch (error) {
+          console.error('Error importing team:', error);
+          alert('Failed to import team. Invalid file format.');
+        }
+      };
+
+      reader.readAsText(file);
+    };
+
+    input.click();
+  }
+
   setActiveTab(tab: 'manual' | 'builder'): void {
     this.activeTab.set(tab);
   }

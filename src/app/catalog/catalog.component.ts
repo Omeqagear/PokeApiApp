@@ -38,6 +38,21 @@ const GENERATIONS: Generation[] = [
   { name: 'Gen IX', region: 'Paldea', startId: 906, endId: 1025, color: '#ff7675' },
 ];
 
+const POKEMON_TYPES = [
+  'normal', 'fire', 'water', 'electric', 'grass', 'ice',
+  'fighting', 'poison', 'ground', 'flying', 'psychic',
+  'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'
+];
+
+const STATS = [
+  { key: 'hp', label: 'HP' },
+  { key: 'attack', label: 'Attack' },
+  { key: 'defense', label: 'Defense' },
+  { key: 'special-attack', label: 'Sp. Atk' },
+  { key: 'special-defense', label: 'Sp. Def' },
+  { key: 'speed', label: 'Speed' }
+];
+
 @Component({
   selector: 'app-catalog',
   standalone: true,
@@ -69,6 +84,8 @@ export class CatalogComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('loadMoreTrigger') loadMoreTrigger!: ElementRef;
 
   generations = GENERATIONS;
+  pokemonTypes = POKEMON_TYPES;
+  stats = STATS;
   readonly limit = 40;
   private observer!: IntersectionObserver;
 
@@ -94,6 +111,13 @@ export class CatalogComponent implements OnInit, AfterViewInit, OnDestroy {
   searchResults = signal<PokemonSummary[]>([]);
   isSearching = signal(false);
   searchMode = signal(false);
+
+  // Advanced filters
+  selectedTypes = signal<string[]>([]);
+  minStat = signal<number>(0);
+  maxStat = signal<number>(255);
+  statFilterActive = signal<string | null>(null);
+  showFilters = signal(false);
 
   // Computed
   displayedPokemon = computed(() =>
@@ -356,6 +380,58 @@ export class CatalogComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isInTeam(id: number): boolean {
     return this.teamService.isInTeam(id);
+  }
+
+  toggleFiltersPanel(): void {
+    this.showFilters.update(v => !v);
+  }
+
+  toggleTypeFilter(type: string): void {
+    this.selectedTypes.update(types => {
+      if (types.includes(type)) {
+        return types.filter(t => t !== type);
+      }
+      return [...types, type];
+    });
+  }
+
+  isTypeSelected(type: string): boolean {
+    return this.selectedTypes().includes(type);
+  }
+
+  clearTypeFilters(): void {
+    this.selectedTypes.set([]);
+  }
+
+  setStatFilter(statKey: string | null): void {
+    if (this.statFilterActive() === statKey) {
+      this.statFilterActive.set(null);
+      this.minStat.set(0);
+      this.maxStat.set(255);
+    } else {
+      this.statFilterActive.set(statKey);
+      this.minStat.set(0);
+      this.maxStat.set(255);
+    }
+  }
+
+  updateMinStat(value: number): void {
+    this.minStat.set(Math.min(value, this.maxStat()));
+  }
+
+  updateMaxStat(value: number): void {
+    this.maxStat.set(Math.max(value, this.minStat()));
+  }
+
+  clearAllFilters(): void {
+    this.selectedTypes.set([]);
+    this.statFilterActive.set(null);
+    this.minStat.set(0);
+    this.maxStat.set(255);
+  }
+
+  hasActiveFilters(): boolean {
+    return this.selectedTypes().length > 0 || this.statFilterActive() !== null;
   }
 }
 

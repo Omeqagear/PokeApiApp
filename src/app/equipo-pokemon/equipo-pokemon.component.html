@@ -5,6 +5,16 @@
       <span>{{ teamPokemon().length }} Pokémon en tu equipo</span>
     </div>
     <div class="header-actions">
+      @if (teamPokemon().length > 0) {
+        <button mat-stroked-button (click)="exportTeam()" aria-label="Export team">
+          <mat-icon>download</mat-icon>
+          Export
+        </button>
+        <button mat-stroked-button (click)="importTeam()" aria-label="Import team">
+          <mat-icon>upload</mat-icon>
+          Import
+        </button>
+      }
       <button mat-flat-button color="warn" (click)="deleteTeam()" aria-label="Delete entire team">
         <mat-icon>delete_sweep</mat-icon>
         Eliminar equipo

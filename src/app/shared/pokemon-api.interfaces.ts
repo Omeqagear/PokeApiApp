@@ -91,5 +91,34 @@ export interface PokemonSpecies {
   name: string;
   is_legendary: boolean;
   is_mythical: boolean;
+  evolution_chain?: {
+    url: string;
+  };
+}
+
+export interface EvolutionChain {
+  id: number;
+  chain: EvolutionChainLink;
+}
+
+export interface EvolutionChainLink {
+  species: PokemonSummary;
+  evolution_details: EvolutionDetail[];
+  evolves_to: EvolutionChainLink[];
+}
+
+export interface EvolutionDetail {
+  item: PokemonSummary | null;
+  trigger: PokemonSummary;
+  min_level: number | null;
+  min_happiness: number | null;
+  min_beauty: number | null;
+  min_affection: number | null;
+  location: PokemonSummary | null;
+  held_item: PokemonSummary | null;
+  known_move: PokemonSummary | null;
+  known_move_type: PokemonSummary | null;
+  trade_species: PokemonSummary | null;
+  turn_upside_down: boolean;
 }
 

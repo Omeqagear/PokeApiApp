@@ -7,17 +7,18 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PokemonDetail } from '../shared/pokemon-api.interfaces';
+import { PokemonDetail, PokemonSpecies } from '../shared/pokemon-api.interfaces';
 import { TypeBadgeComponent } from '../shared/components/type-badge/type-badge.component';
 import { StatBarComponent } from '../shared/components/stat-bar/stat-bar.component';
 import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/pokeball-spinner.component';
+import { EvolutionChainComponent } from '../shared/components/evolution-chain/evolution-chain.component';
 import { capitalize, getStatShortName } from '../shared/utils/pokemon.utils';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-photo-pokemon',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule, TypeBadgeComponent, StatBarComponent, PokeballSpinnerComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule, TypeBadgeComponent, StatBarComponent, PokeballSpinnerComponent, EvolutionChainComponent],
   templateUrl: './photo-pokemon.component.html',
   styleUrls: ['./photo-pokemon.component.scss']
 })
@@ -30,6 +31,7 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
   pokemon = signal<PokemonDetail | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
+  species = signal<PokemonSpecies | null>(null);
   hasPrev = signal(true);
   hasNext = signal(true);
   prevId = signal(0);
@@ -75,6 +77,7 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.error.set(null);
     this.isShiny.set(false);
+    this.species.set(null);
 
     this.dataService.getPokemonDetail(id).pipe(
       takeUntil(this.destroy$)
@@ -82,15 +85,33 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
       next: (data: PokemonDetail) => {
         if (data && data.id) {
           this.pokemon.set(data);
+          this.loadSpecies(id);
           this.prefetchNeighbors(id);
         } else {
           this.error.set('Pokémon not found.');
+          this.loading.set(false);
         }
-        this.loading.set(false);
       },
       error: (err) => {
         console.error('Error loading Pokémon:', err);
         this.error.set('Failed to load Pokémon details. Please try again.');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  private loadSpecies(id: number): void {
+    this.dataService.getPokemonSpecies(id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (speciesData: PokemonSpecies) => {
+        if (speciesData && speciesData.id) {
+          this.species.set(speciesData);
+        }
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading species:', err);
         this.loading.set(false);
       }
     });

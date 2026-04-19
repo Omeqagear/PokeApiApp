@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, catchError, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { PokemonListResponse, PokemonDetail, PokemonSummary, PokemonSpecies } from '../shared/pokemon-api.interfaces';
+import { PokemonListResponse, PokemonDetail, PokemonSummary, PokemonSpecies, EvolutionChain } from '../shared/pokemon-api.interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +10,12 @@ import { PokemonListResponse, PokemonDetail, PokemonSummary, PokemonSpecies } fr
 export class DataServiceService {
   private readonly baseUrl = 'https://pokeapi.co/api/v2/pokemon';
   private readonly speciesUrl = 'https://pokeapi.co/api/v2/pokemon-species';
+  private readonly evolutionUrl = 'https://pokeapi.co/api/v2/evolution-chain';
   private allPokemonCache: PokemonSummary[] | null = null;
   private readonly maxPokemonCount = 1025;
   private pokemonDetailCache = new Map<number, PokemonDetail>();
   private pokemonSpeciesCache = new Map<number, PokemonSpecies>();
+  private evolutionChainCache = new Map<number, EvolutionChain>();
 
   constructor(private http: HttpClient) {}
 
@@ -112,5 +114,33 @@ export class DataServiceService {
         return of({} as PokemonSpecies);
       })
     );
+  }
+
+  getEvolutionChain(url: string): Observable<EvolutionChain> {
+    const chainId = this.extractChainId(url);
+    if (!chainId) {
+      return of({} as EvolutionChain);
+    }
+
+    if (this.evolutionChainCache.has(chainId)) {
+      return of(this.evolutionChainCache.get(chainId)!);
+    }
+
+    return this.http.get<EvolutionChain>(url).pipe(
+      tap((data) => {
+        if (data && data.id) {
+          this.evolutionChainCache.set(chainId, data);
+        }
+      }),
+      catchError((error) => {
+        console.error('Error fetching evolution chain:', error);
+        return of({} as EvolutionChain);
+      })
+    );
+  }
+
+  private extractChainId(url: string): number | null {
+    const matches = url.match(/\/evolution-chain\/(\d+)\//);
+    return matches ? parseInt(matches[1], 10) : null;
   }
 }

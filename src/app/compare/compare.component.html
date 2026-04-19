@@ -1,0 +1,221 @@
+<div class="compare-container">
+  <div class="page-header">
+    <h1>Compare Pokémon</h1>
+    <p class="subtitle">Select two Pokémon to compare their stats side by side</p>
+  </div>
+
+  <div class="search-section">
+    <div class="search-box" [class.has-pokemon]="selectedPokemon1()">
+      @if (selectedPokemon1()) {
+        <div class="selected-pokemon-card" [style.--type-color]="getTypeColor(selectedPokemon1()!.types[0].type.name)">
+          <img [src]="getSpriteUrl(selectedPokemon1()!)" [alt]="selectedPokemon1()!.name" class="pokemon-sprite">
+          <div class="pokemon-info">
+            <span class="pokemon-name">{{ capitalize(selectedPokemon1()!.name) }}</span>
+            <div class="pokemon-types">
+              @for (type of selectedPokemon1()!.types; track type.slot) {
+                <ds-type-badge [type]="type.type.name" size="sm"></ds-type-badge>
+              }
+            </div>
+          </div>
+          <button mat-icon-button (click)="clearPokemon(1)" class="clear-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <div class="search-input-wrapper">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search first Pokémon</mat-label>
+            <input matInput
+                   [ngModel]="searchQuery1()"
+                   (ngModelChange)="searchQuery1.set($event)"
+                   [matAutocomplete]="auto1"
+                   placeholder="e.g. Pikachu">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="selectPokemon1($event.option.value)">
+              @for (pokemon of searchPokemon(searchQuery1()); track pokemon.url) {
+                <mat-option [value]="pokemon">
+                  {{ capitalize(pokemon.name) }}
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+      }
+    </div>
+
+    <button mat-mini-fab color="primary" (click)="swapPokemon()" [disabled]="!selectedPokemon1() || !selectedPokemon2()" class="swap-btn">
+      <mat-icon>swap_horiz</mat-icon>
+    </button>
+
+    <div class="search-box" [class.has-pokemon]="selectedPokemon2()">
+      @if (selectedPokemon2()) {
+        <div class="selected-pokemon-card" [style.--type-color]="getTypeColor(selectedPokemon2()!.types[0].type.name)">
+          <img [src]="getSpriteUrl(selectedPokemon2()!)" [alt]="selectedPokemon2()!.name" class="pokemon-sprite">
+          <div class="pokemon-info">
+            <span class="pokemon-name">{{ capitalize(selectedPokemon2()!.name) }}</span>
+            <div class="pokemon-types">
+              @for (type of selectedPokemon2()!.types; track type.slot) {
+                <ds-type-badge [type]="type.type.name" size="sm"></ds-type-badge>
+              }
+            </div>
+          </div>
+          <button mat-icon-button (click)="clearPokemon(2)" class="clear-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <div class="search-input-wrapper">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search second Pokémon</mat-label>
+            <input matInput
+                   [ngModel]="searchQuery2()"
+                   (ngModelChange)="searchQuery2.set($event)"
+                   [matAutocomplete]="auto2"
+                   placeholder="e.g. Charmander">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="selectPokemon2($event.option.value)">
+              @for (pokemon of searchPokemon(searchQuery2()); track pokemon.url) {
+                <mat-option [value]="pokemon">
+                  {{ capitalize(pokemon.name) }}
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (selectedPokemon1() && selectedPokemon2()) {
+    <div class="comparison-results">
+      <div class="stats-comparison">
+        <h2>Stats Comparison</h2>
+        <div class="stats-grid">
+          @for (statName of statNames; track statName) {
+            <div class="stat-row">
+              <div class="stat-label">{{ getStatShortName(statName) }}</div>
+              <div class="stat-bar-container left">
+                <div class="stat-bar-fill"
+                     [style.width.%]="(getStatValue(selectedPokemon1()!, statName) / 255) * 100"
+                     [style.background-color]="getTypeColor(selectedPokemon1()!.types[0].type.name)">
+                </div>
+                <span class="stat-value">{{ getStatValue(selectedPokemon1()!, statName) }}</span>
+              </div>
+              <div class="stat-diff"
+                   [class.positive]="getStatDifference(selectedPokemon1()!, selectedPokemon2()!, statName) > 0"
+                   [class.negative]="getStatDifference(selectedPokemon1()!, selectedPokemon2()!, statName) < 0">
+                @if (getStatDifference(selectedPokemon1()!, selectedPokemon2()!, statName) > 0) {
+                  <mat-icon>arrow_upward</mat-icon>
+                } @else if (getStatDifference(selectedPokemon1()!, selectedPokemon2()!, statName) < 0) {
+                  <mat-icon>arrow_downward</mat-icon>
+                } @else {
+                  <span class="equal">=</span>
+                }
+              </div>
+              <div class="stat-bar-container right">
+                <div class="stat-bar-fill"
+                     [style.width.%]="(getStatValue(selectedPokemon2()!, statName) / 255) * 100"
+                     [style.background-color]="getTypeColor(selectedPokemon2()!.types[0].type.name)">
+                </div>
+                <span class="stat-value">{{ getStatValue(selectedPokemon2()!, statName) }}</span>
+              </div>
+            </div>
+          }
+          <div class="stat-row total">
+            <div class="stat-label">TOT</div>
+            <div class="stat-bar-container left">
+              <div class="stat-bar-fill total"
+                   [style.width.%]="(selectedPokemon1()!.stats.reduce((sum, s) => sum + s.base_stat, 0) / (255 * 6)) * 100"
+                   [style.background-color]="getTypeColor(selectedPokemon1()!.types[0].type.name)">
+              </div>
+              <span class="stat-value">{{ selectedPokemon1()!.stats.reduce((sum, s) => sum + s.base_stat, 0) }}</span>
+            </div>
+            <div class="stat-diff"></div>
+            <div class="stat-bar-container right">
+              <div class="stat-bar-fill total"
+                   [style.width.%]="(selectedPokemon2()!.stats.reduce((sum, s) => sum + s.base_stat, 0) / (255 * 6)) * 100"
+                   [style.background-color]="getTypeColor(selectedPokemon2()!.types[0].type.name)">
+              </div>
+              <span class="stat-value">{{ selectedPokemon2()!.stats.reduce((sum, s) => sum + s.base_stat, 0) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-compare">
+        <div class="detail-card" [style.--type-color]="getTypeColor(selectedPokemon1()!.types[0].type.name)">
+          <h3>{{ capitalize(selectedPokemon1()!.name) }}</h3>
+          <div class="detail-row">
+            <span class="detail-label">Height</span>
+            <span class="detail-value">{{ (selectedPokemon1()!.height / 10).toFixed(1) }} m</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Weight</span>
+            <span class="detail-value">{{ (selectedPokemon1()!.weight / 10).toFixed(1) }} kg</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Base Exp</span>
+            <span class="detail-value">{{ selectedPokemon1()!.base_experience || 'N/A' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Abilities</span>
+            <span class="detail-value abilities">
+              @for (ability of selectedPokemon1()!.abilities; track ability.slot) {
+                <span class="ability-badge" [class.hidden]="ability.is_hidden">
+                  {{ capitalize(ability.ability.name) }}
+                  @if (ability.is_hidden) {
+                    <span class="hidden-tag">(H)</span>
+                  }
+                </span>
+              }
+            </span>
+          </div>
+          <button mat-stroked-button (click)="navigateToPokemon(selectedPokemon1()!.id)" class="view-btn">
+            <mat-icon>visibility</mat-icon>
+            View Details
+          </button>
+        </div>
+
+        <div class="vs-badge">VS</div>
+
+        <div class="detail-card" [style.--type-color]="getTypeColor(selectedPokemon2()!.types[0].type.name)">
+          <h3>{{ capitalize(selectedPokemon2()!.name) }}</h3>
+          <div class="detail-row">
+            <span class="detail-label">Height</span>
+            <span class="detail-value">{{ (selectedPokemon2()!.height / 10).toFixed(1) }} m</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Weight</span>
+            <span class="detail-value">{{ (selectedPokemon2()!.weight / 10).toFixed(1) }} kg</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Base Exp</span>
+            <span class="detail-value">{{ selectedPokemon2()!.base_experience || 'N/A' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Abilities</span>
+            <span class="detail-value abilities">
+              @for (ability of selectedPokemon2()!.abilities; track ability.slot) {
+                <span class="ability-badge" [class.hidden]="ability.is_hidden">
+                  {{ capitalize(ability.ability.name) }}
+                  @if (ability.is_hidden) {
+                    <span class="hidden-tag">(H)</span>
+                  }
+                </span>
+              }
+            </span>
+          </div>
+          <button mat-stroked-button (click)="navigateToPokemon(selectedPokemon2()!.id)" class="view-btn">
+            <mat-icon>visibility</mat-icon>
+            View Details
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else if (!loading()) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">compare_arrows</mat-icon>
+      <p>Select two Pokémon to compare their stats</p>
+    </div>
+  }
+</div>

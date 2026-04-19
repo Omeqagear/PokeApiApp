@@ -1,0 +1,69 @@
+<div class="evolution-chain-container">
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading evolution chain...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (evolutionNodes().length > 0) {
+    <div class="evolution-chain">
+      <h3 class="chain-title">
+        <mat-icon>account_tree</mat-icon>
+        Evolution Chain
+        @if (chainId()) {
+          <span class="chain-id">#{{ chainId() }}</span>
+        }
+      </h3>
+
+      <div class="evolution-line">
+        @for (node of evolutionNodes(); track node.pokemonId; let i = $index; let last = $last) {
+          <div class="evolution-stage" [class.current-form]="node.isCurrentForm">
+            <a [routerLink]="['/photo', node.pokemonId]" class="pokemon-node">
+              <div class="sprite-wrapper" [class.has-sprite]="node.spriteUrl">
+                @if (node.spriteUrl) {
+                  <img [src]="node.spriteUrl" [alt]="capitalize(node.speciesName)" class="pokemon-sprite">
+                } @else {
+                  <div class="placeholder-sprite">
+                    <mat-icon>help_outline</mat-icon>
+                  </div>
+                }
+              </div>
+              <span class="pokemon-name">{{ capitalize(node.speciesName) }}</span>
+              <span class="pokemon-id">#{{ node.pokemonId.toString().padStart(4, '0') }}</span>
+            </a>
+
+            @if (node.evolutionDetails && !last) {
+              <div class="evolution-arrow">
+                <div class="arrow-line"></div>
+                <div class="arrow-head">
+                  <mat-icon>arrow_downward</mat-icon>
+                </div>
+                <div class="evolution-trigger">
+                  {{ node.evolutionDetails }}
+                </div>
+              </div>
+            }
+
+            @if (!node.evolutionDetails && !last && hasMultipleEvolutionsFrom(node)) {
+              <div class="evolution-branches">
+                @for (branch of getEvolvesToNodes(node); track branch.pokemonId) {
+                  <div class="branch-line"></div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (evolutionNodes().length === 1) {
+        <div class="no-evolution">
+          <mat-icon>block</mat-icon>
+          <p>This Pokémon does not evolve.</p>
+        </div>
+      }
+    </div>
+  }
