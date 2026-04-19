@@ -1,0 +1,84 @@
+// ============================================
+// POKEMON TYPE THEMES
+// Dynamic backgrounds and effects based on Pokemon type
+// ============================================
+
+@use '../tokens/colors';
+
+@mixin type-theme-classes {
+  @each $type, $color in colors.$pokemon-types {
+    // Background gradient classes
+    .bg-type-#{$type} {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba($color, 0.15) 50%, rgba($color, 0.08) 100%);
+    }
+
+    // Glow effect classes
+    .glow-type-#{$type} {
+      box-shadow: 0 0 40px rgba($color, 0.3);
+    }
+
+    // Text color classes
+    .text-type-#{$type} {
+      color: $color;
+    }
+
+    // Border color classes
+    .border-type-#{$type} {
+      border-color: $color;
+    }
+  }
+}
+
+// Type-based gradient for photo page backgrounds
+@mixin type-page-gradient($type) {
+  $color: colors.type-color($type);
+
+  @if $type == normal {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  } @else if $type == fire {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b1b 50%, #4a1942 100%);
+  } @else if $type == water {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1b2d3d 50%, #1b3a4a 100%);
+  } @else if $type == grass {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1b2d1b 50%, #1b4a2a 100%);
+  } @else if $type == electric {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d1b 50%, #3a3a1b 100%);
+  } @else if $type == ice {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1b2d3d 50%, #1b3a3a 100%);
+  } @else if $type == fighting {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b1b 50%, #3a1b1b 100%);
+  } @else if $type == poison {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b2d 50%, #3a1b3a 100%);
+  } @else if $type == ground {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d1b 50%, #3a2d1b 100%);
+  } @else if $type == flying {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1b1b2d 50%, #1b2d3a 100%);
+  } @else if $type == psychic {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b2d 50%, #3a1b2d 100%);
+  } @else if $type == bug {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1b2d1b 50%, #2d3a1b 100%);
+  } @else if $type == rock {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d2d 50%, #3a3a3a 100%);
+  } @else if $type == ghost {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1b1b2d 50%, #2d1b3a 100%);
+  } @else if $type == dragon {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1b1b2d 50%, #1b2d3a 100%);
+  } @else if $type == dark {
+    background: linear-gradient(135deg, #0a0a14 0%, #141420 50%, #1a1a28 100%);
+  } @else if $type == steel {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d2d 50%, #3a3a3a 100%);
+  } @else if $type == fairy {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b2d 50%, #3a1b3a 100%);
+  } @else {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  }
+}
+
+// Type glow effect for image section
+@mixin type-glow($type) {
+  $color: colors.type-color($type);
+
+  &.glow-#{$type} {
+    background: $color;
+  }
+}
