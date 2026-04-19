@@ -19,51 +19,46 @@
         }
       </h3>
 
-      <div class="evolution-line">
-        @for (node of evolutionNodes(); track node.pokemonId; let i = $index; let last = $last) {
-          <div class="evolution-stage" [class.current-form]="node.isCurrentForm">
-            <a [routerLink]="['/photo', node.pokemonId]" class="pokemon-node">
-              <div class="sprite-wrapper" [class.has-sprite]="node.spriteUrl">
-                @if (node.spriteUrl) {
-                  <img [src]="node.spriteUrl" [alt]="capitalize(node.speciesName)" class="pokemon-sprite">
-                } @else {
-                  <div class="placeholder-sprite">
-                    <mat-icon>help_outline</mat-icon>
-                  </div>
-                }
-              </div>
-              <span class="pokemon-name">{{ capitalize(node.speciesName) }}</span>
-              <span class="pokemon-id">#{{ node.pokemonId.toString().padStart(4, '0') }}</span>
-            </a>
-
-            @if (node.evolutionDetails && !last) {
-              <div class="evolution-arrow">
-                <div class="arrow-line"></div>
-                <div class="arrow-head">
-                  <mat-icon>arrow_downward</mat-icon>
-                </div>
-                <div class="evolution-trigger">
-                  {{ node.evolutionDetails }}
-                </div>
-              </div>
-            }
-
-            @if (!node.evolutionDetails && !last && hasMultipleEvolutionsFrom(node)) {
-              <div class="evolution-branches">
-                @for (branch of getEvolvesToNodes(node); track branch.pokemonId) {
-                  <div class="branch-line"></div>
-                }
-              </div>
-            }
-          </div>
-        }
-      </div>
-
       @if (evolutionNodes().length === 1) {
         <div class="no-evolution">
           <mat-icon>block</mat-icon>
           <p>This Pokémon does not evolve.</p>
         </div>
+      } @else {
+        <div class="evolution-line">
+          @for (node of evolutionNodes(); track node.pokemonId; let i = $index; let last = $last) {
+            <div class="evolution-stage" [class.current-form]="node.isCurrentForm">
+              <a [routerLink]="['/photo', node.pokemonId]" class="pokemon-node">
+                <div class="sprite-wrapper" [class.has-sprite]="node.spriteUrl">
+                  @if (node.spriteUrl) {
+                    <img [src]="node.spriteUrl" [alt]="capitalize(node.speciesName)" class="pokemon-sprite">
+                  } @else {
+                    <div class="placeholder-sprite">
+                      <mat-icon>help_outline</mat-icon>
+                    </div>
+                  }
+                </div>
+                <span class="pokemon-name">{{ capitalize(node.speciesName) }}</span>
+                <span class="pokemon-id">#{{ node.pokemonId.toString().padStart(4, '0') }}</span>
+              </a>
+            </div>
+
+            @if (!last) {
+              <div class="evolution-arrow">
+                <div class="arrow-line"></div>
+                <div class="arrow-head">
+                  <mat-icon>chevron_right</mat-icon>
+                </div>
+                @if (evolutionNodes()[i + 1]?.evolutionDetails) {
+                  <div class="evolution-trigger">
+                    {{ evolutionNodes()[i + 1]?.evolutionDetails }}
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
       }
     </div>
   }
+</div>
