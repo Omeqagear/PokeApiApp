@@ -8,7 +8,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of } from 'rxjs';
-import { PokemonSummary, PokemonListResponse, PokemonTypeEntry, PokemonAbilityEntry, PokemonMoveEntry } from '../shared/pokemon-api.interfaces';
+import { PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
+import { Pokemon } from '../shared/pokemon';
 import { DataServiceService } from '../services/data-service.service';
 import { TeamService } from '../services/team.service';
 import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
@@ -17,7 +18,6 @@ import { GenerationChipComponent } from '../shared/components/generation-chip/ge
 import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/pokeball-spinner.component';
 import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../shared/components/page-header/page-header.component';
-import { PokemonStat } from '../shared/pokemon';
 
 interface Generation {
   name: string;
@@ -433,60 +433,5 @@ export class CatalogComponent implements OnInit, AfterViewInit, OnDestroy {
 
   hasActiveFilters(): boolean {
     return this.selectedTypes().length > 0 || this.statFilterActive() !== null;
-  }
-}
-
-class Pokemon {
-  id: number;
-  name: string;
-  spriteUrl: string;
-  type1: string;
-  type2: string;
-  move1: string;
-  move2: string;
-  stats: PokemonStat[];
-  totalStats: number;
-  generation: number;
-  baseExperience: number;
-  types: PokemonTypeEntry[];
-  height: number;
-  weight: number;
-  abilities: PokemonAbilityEntry[];
-  moves: PokemonMoveEntry[];
-
-  constructor(
-    id: string,
-    name: string,
-    spriteUrl: string,
-    type1: string,
-    type2: string,
-    move1: string,
-    move2: string,
-    stats: PokemonStat[],
-    totalStats: number,
-    generation: number,
-    baseExperience: number,
-    types: PokemonTypeEntry[],
-    height: number,
-    weight: number,
-    abilities: PokemonAbilityEntry[],
-    moves: PokemonMoveEntry[]
-  ) {
-    this.id = typeof id === 'string' ? parseInt(id, 10) : id;
-    this.name = name;
-    this.spriteUrl = spriteUrl;
-    this.type1 = type1;
-    this.type2 = type2;
-    this.move1 = move1;
-    this.move2 = move2;
-    this.stats = stats;
-    this.totalStats = totalStats;
-    this.generation = generation;
-    this.baseExperience = baseExperience;
-    this.types = types;
-    this.height = height;
-    this.weight = weight;
-    this.abilities = abilities;
-    this.moves = moves;
   }
 }
