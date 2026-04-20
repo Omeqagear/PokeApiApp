@@ -1,0 +1,98 @@
+<ds-page-header title="Regional Pokédex" [showStats]="true">
+  <div stats aria-live="polite">
+    <mat-icon>book</mat-icon>
+    <span>
+      @if (pokedex()) {
+        {{ pokedex()!.pokemon_entries.length }} Pokémon in {{ pokedex()!.name | titlecase }}
+      } @else {
+        Select a Pokédex
+      }
+    </span>
+  </div>
+
+  <div class="pokedex-selector">
+    <div class="selector-label">
+      <mat-icon>filter_list</mat-icon>
+      <span>Select Pokédex</span>
+    </div>
+    <div class="pokedex-chips">
+      @for (option of pokedexOptions; track option.id) {
+        <button
+          class="pokedex-chip"
+          [class.active]="selectedPokedex()?.id === option.id"
+          (click)="selectPokedex(option)"
+        >
+          {{ option.displayName }}
+          <span class="chip-count">{{ option.count }}</span>
+        </button>
+      }
+    </div>
+  </div>
+</ds-page-header>
+
+@if (loading()) {
+  <div class="loading-container">
+    <ds-pokeball-spinner [size]="80" label="Loading Pokédex..."></ds-pokeball-spinner>
+  </div>
+}
+
+@if (error()) {
+  <ds-empty-state icon="error_outline" [title]="'Error'" [message]="error() ?? ''" actionLabel="Try Again" actionRoute="/catalog" actionIcon="refresh" [compact]="true"></ds-empty-state>
+}
+
+@if (!loading() && !error() && pokedex()) {
+  <div class="pokedex-info">
+    @if (pokedex()!.descriptions.length > 0) {
+      <p class="pokedex-description">{{ pokedex()!.descriptions[0].description }}</p>
+    }
+    @if (pokedex()!.region) {
+      <span class="region-badge">
+        <mat-icon>location_on</mat-icon>
+        {{ capitalize(pokedex()!.region?.name ?? '') }}
+      </span>
+    }
+  </div>
+
+  @if (pokedex()!.pokemon_entries.length > 0) {
+    <div class="pokedex-grid" role="list">
+      @for (entry of pokedex()!.pokemon_entries; track entry.entry_number; let i = $index) {
+        <div role="listitem" [attr.data-pokemon-id]="extractPokemonId(entry.pokemon_species.url)">
+          <ds-poke-card
+            [pokemon]="{
+              id: extractPokemonId(entry.pokemon_species.url),
+              name: capitalize(entry.pokemon_species.name),
+              spriteUrl: getSpriteUrl(extractPokemonId(entry.pokemon_species.url))
+            }"
+            (cardClick)="navigateToPokemon(extractPokemonId(entry.pokemon_species.url))"
+          >
+            <div badge>
+              <span class="entry-number">#{{ entry.entry_number }}</span>
+            </div>
+            <div actions>
+              @if (!isInTeam(extractPokemonId(entry.pokemon_species.url))) {
+                <button
+                  mat-icon-button
+                  class="add-team-btn"
+                  (click)="addToTeam(extractPokemonId(entry.pokemon_species.url), capitalize(entry.pokemon_species.name), getSpriteUrl(extractPokemonId(entry.pokemon_species.url))); $event.stopPropagation()"
+                  [attr.aria-label]="'Add ' + capitalize(entry.pokemon_species.name) + ' to team'"
+                  matTooltip="Add to team"
+                >
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              } @else {
+                <mat-icon class="in-team-icon" matTooltip="In team">check_circle</mat-icon>
+              }
+            </div>
+          </ds-poke-card>
+        </div>
+      }
+    </div>
+  } @else {
+    <ds-empty-state
+      icon="explore"
+      title="No Pokémon in this Pokédex"
+      message="This Pokédex doesn't have any entries yet. Try selecting a different Pokédex!"
+      [compact]="true"
+    ></ds-empty-state>
+  }
+}

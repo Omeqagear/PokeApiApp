@@ -1,0 +1,81 @@
+<ds-page-header title="Abilities Browser" [showStats]="true">
+  <div stats aria-live="polite">
+    <mat-icon>psychology</mat-icon>
+    <span>
+      @if (searchMode()) {
+        {{ searchResults().length }} result(s)
+      } @else {
+        {{ abilities().length }} Abilities
+      }
+    </span>
+  </div>
+
+  <div class="search-container">
+    <form [formGroup]="searchForm" class="search-form">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search abilities by name</mat-label>
+        <input matInput formControlName="searchInput" placeholder="e.g., levitate" aria-label="Search abilities by name" (keydown.ctrl.f)="$event.stopPropagation()" (keydown.meta.f)="$event.stopPropagation()">
+        <mat-icon matPrefix>search</mat-icon>
+        <span class="search-shortcut" matSuffix aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>
+        @if (searchForm.get('searchInput')?.value) {
+          <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()" type="button"><mat-icon>close</mat-icon></button>
+        }
+        @if (isSearching()) {
+          <mat-spinner matSuffix diameter="20"></mat-spinner>
+        }
+      </mat-form-field>
+    </form>
+  </div>
+</ds-page-header>
+
+@if (loading()) {
+  <div class="abilities-grid" role="list">
+    @for (item of skeletonArray; track $index) {
+      <ds-skeleton-card></ds-skeleton-card>
+    }
+  </div>
+}
+
+@if (error()) {
+  <ds-empty-state icon="error_outline" [title]="'Error'" [message]="error() ?? ''"></ds-empty-state>
+}
+
+@if (!loading() && !error()) {
+  @if (searchMode() && searchResults().length === 0 && !isSearching()) {
+    <ds-empty-state icon="search_off" title="No Abilities Found" message="We couldn't find any abilities matching your search. Try a different name." actionLabel="Clear Search" actionRoute="/abilities" actionIcon="clear" [compact]="true"></ds-empty-state>
+  }
+
+  @if (displayedAbilities().length > 0) {
+    <div class="abilities-grid" role="list">
+      @for (ability of displayedAbilities(); track ability.name; let i = $index) {
+        <div role="listitem" class="ability-card" (click)="navigateToAbility(extractAbilityId(ability.url))">
+          <div class="ability-card-header">
+            <span class="ability-id">#{{ extractAbilityId(ability.url) }}</span>
+          </div>
+          <div class="ability-card-body">
+            <h3 class="ability-name">{{ capitalize(ability.name) }}</h3>
+          </div>
+          <div class="ability-card-footer">
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading() && hasNext() && !searchMode()) {
+    <div #loadMoreTrigger class="load-more-trigger" aria-hidden="true"></div>
+    @if (loadingMore()) {
+      <div class="load-more-spinner">
+        <ds-pokeball-spinner [size]="60" label="Loading more..."></ds-pokeball-spinner>
+      </div>
+    }
+  }
+
+  @if (!loading() && !searchMode() && abilities().length > 0 && !hasNext()) {
+    <div class="pagination complete">
+      <mat-icon>check_circle</mat-icon>
+      <p>All {{ totalCount() }} abilities loaded!</p>
+    </div>
+  }
+}

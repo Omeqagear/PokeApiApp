@@ -43,9 +43,9 @@ import { PageHeaderComponent } from '../shared/components/page-header/page-heade
         icon="favorite_border"
         title="No favorites yet"
         message="Tap the heart icon on any Pokémon to save them here for quick access!"
-        actionLabel="Browse Catalog"
+        actionLabel="Browse Pokédex"
         actionRoute="/catalog"
-        actionIcon="grid_view"
+        actionIcon="book"
       ></ds-empty-state>
     }
 

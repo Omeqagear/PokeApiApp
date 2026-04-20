@@ -1,0 +1,120 @@
+<ds-page-header title="Moves Encyclopedia" [showStats]="true">
+  <div stats aria-live="polite">
+    <mat-icon>menu_book</mat-icon>
+    <span>
+      @if (searchMode()) {
+        {{ searchResults().length }} result(s)
+      } @else {
+        {{ moves().length }} Moves
+      }
+    </span>
+  </div>
+
+  <div class="advanced-filters-toggle">
+    <button mat-stroked-button (click)="toggleFiltersPanel()" [class.active]="showFilters() || hasActiveFilters()">
+      <mat-icon>tune</mat-icon>
+      Filters
+      @if (hasActiveFilters()) {
+        <span class="filter-badge">{{ (selectedType() ? 1 : 0) + (selectedDamageClass() ? 1 : 0) }}</span>
+      }
+    </button>
+    @if (hasActiveFilters()) {
+      <button mat-button (click)="clearAllFilters()" class="clear-filters-btn">Clear all</button>
+    }
+  </div>
+
+  @if (showFilters()) {
+    <div class="advanced-filters-panel">
+      <div class="filter-section">
+        <h4 class="filter-title"><mat-icon>category</mat-icon> Type</h4>
+        <div class="type-chips">
+          @for (type of moveTypes; track type) {
+            <button class="type-chip" [class]="'type-' + type" [class.selected]="selectedType() === type" (click)="toggleTypeFilter(type)" [attr.aria-pressed]="selectedType() === type">
+              {{ type }}
+            </button>
+          }
+        </div>
+      </div>
+      <div class="filter-section">
+        <h4 class="filter-title"><mat-icon>swords</mat-icon> Damage Class</h4>
+        <div class="damage-class-chips">
+          @for (dc of damageClasses; track dc.key) {
+            <button class="damage-class-chip" [class.selected]="selectedDamageClass() === dc.key" (click)="toggleDamageClassFilter(dc.key)" [attr.aria-pressed]="selectedDamageClass() === dc.key">
+              <mat-icon>{{ dc.icon }}</mat-icon>
+              {{ dc.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="search-container">
+    <form [formGroup]="searchForm" class="search-form">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search moves by name</mat-label>
+        <input matInput formControlName="searchInput" placeholder="e.g., thunderbolt" aria-label="Search moves by name" (keydown.ctrl.f)="$event.stopPropagation()" (keydown.meta.f)="$event.stopPropagation()">
+        <mat-icon matPrefix>search</mat-icon>
+        <span class="search-shortcut" matSuffix aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>
+        @if (searchForm.get('searchInput')?.value) {
+          <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()" type="button"><mat-icon>close</mat-icon></button>
+        }
+        @if (isSearching()) {
+          <mat-spinner matSuffix diameter="20"></mat-spinner>
+        }
+      </mat-form-field>
+    </form>
+  </div>
+</ds-page-header>
+
+@if (loading()) {
+  <div class="moves-grid" role="list">
+    @for (item of skeletonArray; track $index) {
+      <ds-skeleton-card></ds-skeleton-card>
+    }
+  </div>
+}
+
+@if (error()) {
+  <ds-empty-state icon="error_outline" [title]="'Error'" [message]="error() ?? ''"></ds-empty-state>
+}
+
+@if (!loading() && !error()) {
+  @if (searchMode() && searchResults().length === 0 && !isSearching()) {
+    <ds-empty-state icon="search_off" title="No Moves Found" message="We couldn't find any moves matching your search. Try a different name." actionLabel="Clear Search" actionRoute="/moves" actionIcon="clear" [compact]="true"></ds-empty-state>
+  }
+
+  @if (displayedMoves().length > 0) {
+    <div class="moves-grid" role="list">
+      @for (move of displayedMoves(); track move.name; let i = $index) {
+        <div role="listitem" class="move-card" (click)="navigateToMove(extractMoveId(move.url))">
+          <div class="move-card-header">
+            <span class="move-id">#{{ extractMoveId(move.url) }}</span>
+          </div>
+          <div class="move-card-body">
+            <h3 class="move-name">{{ capitalize(move.name) }}</h3>
+          </div>
+          <div class="move-card-footer">
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading() && hasNext() && !searchMode()) {
+    <div #loadMoreTrigger class="load-more-trigger" aria-hidden="true"></div>
+    @if (loadingMore()) {
+      <div class="load-more-spinner">
+        <ds-pokeball-spinner [size]="60" label="Loading more..."></ds-pokeball-spinner>
+      </div>
+    }
+  }
+
+  @if (!loading() && !searchMode() && moves().length > 0 && !hasNext()) {
+    <div class="pagination complete">
+      <mat-icon>check_circle</mat-icon>
+      <p>All {{ totalCount() }} moves loaded!</p>
+    </div>
+  }
+}

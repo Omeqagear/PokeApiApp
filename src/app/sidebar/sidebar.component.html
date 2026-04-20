@@ -26,7 +26,7 @@
             <span class="nav-label">{{ item.label }}</span>
           }
           @if (item.badge && item.badge > 0 && !isCollapsed()) {
-            <span class="nav-badge">{{ item.badge }}/6</span>
+            <span class="nav-badge">{{ item.badge }}{{ item.path === '/team' ? '/6' : '' }}</span>
           }
         </a>
       </li>

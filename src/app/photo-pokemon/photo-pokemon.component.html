@@ -30,7 +30,7 @@
   @if (pokemon() && !loading()) {
     <div class="pokemon-container" [ngClass]="'bg-' + (pokemon()!.types[0]?.type?.name || 'normal')">
       <!-- Back Button -->
-      <button mat-icon-button (click)="navigateToCatalog()" class="back-btn" aria-label="Back to catalog">
+      <button mat-icon-button (click)="navigateToCatalog()" class="back-btn" aria-label="Back to Pokédex">
         <mat-icon>arrow_back</mat-icon>
       </button>
 
@@ -178,9 +178,9 @@
               <mat-icon>group</mat-icon>
               My Team
             </button>
-            <button mat-stroked-button class="nav-action-btn catalog-btn" (click)="navigateToCatalog()">
-              <mat-icon>grid_view</mat-icon>
-              Catalog
+            <button mat-stroked-button class="nav-action-btn pokedex-btn" (click)="navigateToCatalog()">
+              <mat-icon>book</mat-icon>
+              Pokédex
             </button>
           </div>
         </div>
