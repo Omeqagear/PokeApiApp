@@ -1,0 +1,71 @@
+<ds-page-header [title]="getEnglishName()" [showStats]="true">
+  <div stats aria-live="polite">
+    <mat-icon>psychology</mat-icon>
+    <span>Ability #{{ abilityId() }}</span>
+  </div>
+</ds-page-header>
+
+@if (loading()) {
+  <div class="detail-container">
+    <ds-pokeball-spinner [size]="80" label="Loading ability details..."></ds-pokeball-spinner>
+  </div>
+}
+
+@if (error()) {
+  <ds-empty-state icon="error_outline" [title]="'Error'" [message]="error() ?? ''" actionLabel="Back to Abilities" actionRoute="/abilities" actionIcon="arrow_back" [compact]="true"></ds-empty-state>
+}
+
+@if (!loading() && !error() && ability()) {
+  <div class="ability-detail-container">
+    @if (getEnglishEffect()) {
+      <div class="effect-section">
+        <h3><mat-icon>description</mat-icon> Effect</h3>
+        <p class="effect-text">{{ getEnglishEffect() }}</p>
+        @if (getEnglishShortEffect()) {
+          <p class="short-effect"><strong>Short effect:</strong> {{ getEnglishShortEffect() }}</p>
+        }
+      </div>
+    }
+
+    @if (getEnglishFlavorTexts().length > 0) {
+      <div class="flavor-section">
+        <h3><mat-icon>format_quote</mat-icon> Flavor Text</h3>
+        <div class="flavor-entries">
+          @for (entry of getEnglishFlavorTexts(); track entry.version) {
+            <div class="flavor-entry">
+              <span class="flavor-text">{{ entry.text }}</span>
+              <span class="flavor-version">{{ entry.version }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (ability()!.pokemon && ability()!.pokemon.length > 0) {
+      <div class="pokemon-section">
+        <h3><mat-icon>groups</mat-icon> Pokémon with this Ability ({{ ability()!.pokemon.length }})</h3>
+        <div class="pokemon-grid">
+          @for (entry of ability()!.pokemon | slice:0:24; track entry.pokemon.name) {
+            <a [routerLink]="getPokemonWithAbility(entry.pokemon)" class="pokemon-card">
+              <img [src]="getSpriteUrl(entry.pokemon)" [alt]="entry.pokemon.name" loading="lazy" />
+              <span class="pokemon-name">{{ capitalize(entry.pokemon.name) }}</span>
+              @if (entry.is_hidden) {
+                <span class="hidden-badge" title="Hidden Ability">H</span>
+              }
+            </a>
+          }
+          @if (ability()!.pokemon.length > 24) {
+            <span class="pokemon-more">+{{ ability()!.pokemon.length - 24 }} more</span>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="back-link">
+      <a routerLink="/abilities" mat-stroked-button>
+        <mat-icon>arrow_back</mat-icon>
+        Back to Abilities
+      </a>
+    </div>
+  </div>
+}

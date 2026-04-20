@@ -28,9 +28,9 @@ interface Feature {
 export class HomeComponent {
   features: Feature[] = [
     {
-      icon: 'grid_view',
-      title: 'Browse Catalog',
-      description: 'Explore all 1025+ Pokémon with search and filters',
+      icon: 'book',
+      title: 'Regional Pokédex',
+      description: 'Browse Pokémon by region: Kanto, Johto, Paldea and more',
       route: '/catalog'
     },
     {
@@ -38,6 +38,24 @@ export class HomeComponent {
       title: 'Search by ID',
       description: 'Find any Pokémon instantly by ID number',
       route: '/catalog'
+    },
+    {
+      icon: 'book',
+      title: 'Regional Pokédex',
+      description: 'Browse Pokémon by region: Kanto, Johto, Paldea and more',
+      route: '/catalog'
+    },
+    {
+      icon: 'menu_book',
+      title: 'Moves Encyclopedia',
+      description: 'Explore 900+ moves with power, accuracy, and effects',
+      route: '/moves'
+    },
+    {
+      icon: 'psychology',
+      title: 'Abilities Browser',
+      description: 'Discover 300+ abilities and which Pokémon have them',
+      route: '/abilities'
     },
     {
       icon: 'groups',
@@ -50,6 +68,12 @@ export class HomeComponent {
       title: 'Random Team',
       description: 'Generate a random team with one click for quick battles',
       route: '/team'
+    },
+    {
+      icon: 'compare_arrows',
+      title: 'Compare Pokémon',
+      description: 'Side-by-side stat comparison of any two Pokémon',
+      route: '/compare'
     }
   ];
 }

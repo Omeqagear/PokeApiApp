@@ -8,8 +8,8 @@ export const routes: Routes = [
   },
   {
     path: 'catalog',
-    loadComponent: () => import('./catalog/catalog.component')
-      .then(m => m.CatalogComponent)
+    loadComponent: () => import('./regional-pokedex/regional-pokedex.component')
+      .then(m => m.RegionalPokedexComponent)
   },
   {
     path: 'team',
@@ -30,6 +30,26 @@ export const routes: Routes = [
     path: 'photo/:id',
     loadComponent: () => import('./photo-pokemon/photo-pokemon.component')
       .then(m => m.PhotoPokemonComponent)
+  },
+  {
+    path: 'moves',
+    loadComponent: () => import('./moves/moves.component')
+      .then(m => m.MovesComponent)
+  },
+  {
+    path: 'move/:id',
+    loadComponent: () => import('./moves/move-detail/move-detail.component')
+      .then(m => m.MoveDetailComponent)
+  },
+  {
+    path: 'abilities',
+    loadComponent: () => import('./abilities/abilities.component')
+      .then(m => m.AbilitiesComponent)
+  },
+  {
+    path: 'abilities/:id',
+    loadComponent: () => import('./abilities/ability-detail/ability-detail.component')
+      .then(m => m.AbilityDetailComponent)
   },
   {
     path: '**',

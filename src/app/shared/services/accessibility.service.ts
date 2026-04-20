@@ -48,7 +48,7 @@ export class AccessibilityService {
 
   private getPageName(url: string): string {
     if (url === '/' || url === '') return 'Home';
-    if (url.startsWith('/catalog')) return 'Pokemon Catalog';
+    if (url.startsWith('/catalog')) return 'Pokédex';
     if (url.startsWith('/team')) return 'My Team';
     if (url.startsWith('/photo')) return 'Pokemon Details';
     return url;
