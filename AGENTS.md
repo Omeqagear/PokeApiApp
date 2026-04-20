@@ -18,6 +18,8 @@
 - `/` -> `HomeComponent`
 - `/catalog` -> `CatalogComponent`
 - `/team` -> `EquipoPokemonComponent`
+- `/favorites` -> `FavoritesComponent`
+- `/compare` -> `CompareComponent`
 - `/photo/:id` -> `PhotoPokemonComponent`
 
 ## Type System

@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PokemonDetail, PokemonSpecies } from '../shared/pokemon-api.interfaces';
+import { Pokemon } from '../shared/pokemon';
 import { TypeBadgeComponent } from '../shared/components/type-badge/type-badge.component';
 import { StatBarComponent } from '../shared/components/stat-bar/stat-bar.component';
 import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/pokeball-spinner.component';
@@ -254,60 +255,5 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
     if (added) {
       this.teamService.refreshCount();
     }
-  }
-}
-
-class Pokemon {
-  id: number;
-  name: string;
-  spriteUrl: string;
-  type1: string;
-  type2: string;
-  move1: string;
-  move2: string;
-  stats: any[];
-  totalStats: number;
-  generation: number;
-  baseExperience: number;
-  types: any[];
-  height: number;
-  weight: number;
-  abilities: any[];
-  moves: any[];
-
-  constructor(
-    id: string,
-    name: string,
-    spriteUrl: string,
-    type1: string,
-    type2: string,
-    move1: string,
-    move2: string,
-    stats: any[],
-    totalStats: number,
-    generation: number,
-    baseExperience: number,
-    types: any[],
-    height: number,
-    weight: number,
-    abilities: any[],
-    moves: any[]
-  ) {
-    this.id = typeof id === 'string' ? parseInt(id, 10) : id;
-    this.name = name;
-    this.spriteUrl = spriteUrl;
-    this.type1 = type1;
-    this.type2 = type2;
-    this.move1 = move1;
-    this.move2 = move2;
-    this.stats = stats;
-    this.totalStats = totalStats;
-    this.generation = generation;
-    this.baseExperience = baseExperience;
-    this.types = types;
-    this.height = height;
-    this.weight = weight;
-    this.abilities = abilities;
-    this.moves = moves;
   }
 }

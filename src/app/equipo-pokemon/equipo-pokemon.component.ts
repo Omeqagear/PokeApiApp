@@ -10,7 +10,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { forkJoin, of, catchError } from 'rxjs';
 import { Pokemon } from '../shared/pokemon';
-import { PokemonDetail } from '../shared/pokemon-api.interfaces';
+import { PokemonDetail, PokemonMoveEntry } from '../shared/pokemon-api.interfaces';
 import { DataServiceService } from '../services/data-service.service';
 import { StorageService } from '../services/storage.service';
 import { TeamService } from '../services/team.service';
@@ -25,7 +25,7 @@ import {
 import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
 import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../shared/components/page-header/page-header.component';
-import { getGeneration } from '../shared/utils/pokemon.utils';
+import { PokemonTransformerService } from '../shared/types/pokemon-transformer.service';
 
 @Component({
   selector: 'app-equipo-pokemon',
@@ -57,6 +57,7 @@ export class EquipoPokemonComponent implements OnInit {
   private storageService = inject(StorageService);
   private teamBuilderService = inject(TeamBuilderService);
   private teamService = inject(TeamService);
+  private pokemonTransformer = inject(PokemonTransformerService);
   private router = inject(Router);
 
   teamPokemon = signal<Pokemon[]>([]);
@@ -167,26 +168,43 @@ export class EquipoPokemonComponent implements OnInit {
           const existingIds = this.teamPokemon().map(p => p.id);
           let imported = 0;
 
-          teamData.forEach((data: any) => {
+          teamData.forEach((data: {
+            id: number;
+            name: string;
+            spriteUrl?: string;
+            type1?: string;
+            type2?: string;
+            move1?: string;
+            move2?: string;
+            stats?: { name: string; value: number }[];
+            totalStats?: number;
+            generation?: number;
+            baseExperience?: number;
+            types?: { slot: number; type: { name: string; url: string } }[];
+            height?: number;
+            weight?: number;
+            abilities?: { is_hidden: boolean; slot: number; ability: { name: string; url: string } }[];
+            moves?: PokemonMoveEntry[];
+          }) => {
             if (data.id && !existingIds.includes(data.id)) {
               const pokemon = new Pokemon(
-                data.id.toString(),
-                data.name,
-                data.spriteUrl || '',
-                data.type1 || 'unknown',
-                data.type2 || '',
-                data.move1 || 'unknown',
-                data.move2 || 'unknown',
-                data.stats || [],
-                data.totalStats || 0,
-                data.generation || 1,
-                data.baseExperience || 0,
-                data.types || [],
-                data.height || 0,
-                data.weight || 0,
-                data.abilities || [],
-                data.moves || []
-              );
+            data.id.toString(),
+            data.name,
+            data.spriteUrl || '',
+            data.type1 || 'unknown',
+            data.type2 || '',
+            data.move1 || 'unknown',
+            data.move2 || 'unknown',
+            data.stats || [],
+            data.totalStats || 0,
+            data.generation || 1,
+            data.baseExperience || 0,
+            data.types || [],
+            data.height || 0,
+            data.weight || 0,
+            data.abilities || [],
+            data.moves || []
+          );
 
               this.storageService.set(pokemon.id.toString(), pokemon);
               imported++;
@@ -260,27 +278,24 @@ export class EquipoPokemonComponent implements OnInit {
       if (team) {
         this.generatedTeam.set(team);
 
-        const newTeam: Pokemon[] = team.pokemon.map(p => {
-          const pokemon = new Pokemon(
-            p.id.toString(),
-            p.name,
-            p.spriteUrl,
-            p.type1,
-            p.type2,
-            p.move1,
-            p.move2,
-            p.stats,
-            p.totalStats,
-            p.generation,
-            p.baseExperience,
-            p.types || [],
-            p.height || 0,
-            p.weight || 0,
-            p.abilities || [],
-            p.moves || []
-          );
-          return pokemon;
-        });
+        const newTeam: Pokemon[] = team.pokemon.map(p => new Pokemon(
+          p.id.toString(),
+          p.name,
+          p.spriteUrl,
+          p.type1,
+          p.type2,
+          p.move1,
+          p.move2,
+          p.stats || [],
+          p.totalStats,
+          p.generation,
+          p.baseExperience,
+          p.types || [],
+          p.height || 0,
+          p.weight || 0,
+          p.abilities || [],
+          p.moves || []
+        ));
 
         this.deleteTeam();
         newTeam.forEach(pokemon => {
@@ -321,27 +336,24 @@ export class EquipoPokemonComponent implements OnInit {
       if (team) {
         this.generatedTeam.set(team);
 
-        const newTeam: Pokemon[] = team.pokemon.map(p => {
-          const pokemon = new Pokemon(
-            p.id.toString(),
-            p.name,
-            p.spriteUrl,
-            p.type1,
-            p.type2,
-            p.move1,
-            p.move2,
-            p.stats,
-            p.totalStats,
-            p.generation,
-            p.baseExperience,
-            p.types || [],
-            p.height || 0,
-            p.weight || 0,
-            p.abilities || [],
-            p.moves || []
-          );
-          return pokemon;
-        });
+        const newTeam: Pokemon[] = team.pokemon.map(p => new Pokemon(
+          p.id.toString(),
+          p.name,
+          p.spriteUrl,
+          p.type1,
+          p.type2,
+          p.move1,
+          p.move2,
+          p.stats || [],
+          p.totalStats,
+          p.generation,
+          p.baseExperience,
+          p.types || [],
+          p.height || 0,
+          p.weight || 0,
+          p.abilities || [],
+          p.moves || []
+        ));
 
         this.deleteTeam();
         newTeam.forEach(pokemon => {
@@ -390,7 +402,7 @@ export class EquipoPokemonComponent implements OnInit {
       const data = await response.json();
 
       this.validPokemonIds = data.results
-        .map((p: any) => {
+        .map((p: { url: string }) => {
           const match = p.url.match(/\/pokemon\/(\d+)\/$/);
           return match ? parseInt(match[1], 10) : null;
         })
@@ -487,28 +499,10 @@ export class EquipoPokemonComponent implements OnInit {
           return;
         }
 
-        const newTeam: Pokemon[] = validResults.map(data => {
-          const stats = data.stats.map(s => ({ name: s.stat.name, value: s.base_stat }));
-          const totalStats = stats.reduce((sum, s) => sum + s.value, 0);
-          return new Pokemon(
-            data.id.toString(),
-            data.name,
-            data.sprites.front_default || '',
-            data.types[0]?.type.name ?? 'unknown',
-            data.types[1]?.type.name ?? '',
-            data.moves[0]?.move.name ?? 'unknown',
-            data.moves[1]?.move.name ?? '',
-            stats,
-            totalStats,
-            getGeneration(data.id),
-            data.base_experience,
-            data.types,
-            data.height,
-            data.weight,
-            data.abilities,
-            data.moves
-          );
-        });
+        // Convert API PokemonDetail to internal Pokemon model
+        const newTeam: Pokemon[] = validResults.map((data) => 
+          this.pokemonTransformer.convertToInternalPokemon(data)
+        );
 
         newTeam.forEach(pokemon => {
           this.storageService.set(pokemon.id.toString(), pokemon);

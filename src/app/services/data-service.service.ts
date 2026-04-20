@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, catchError, tap } from 'rxjs';
+import { Observable, of, catchError, tap, retry } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { PokemonListResponse, PokemonDetail, PokemonSummary, PokemonSpecies, EvolutionChain } from '../shared/pokemon-api.interfaces';
 
@@ -11,8 +11,8 @@ export class DataServiceService {
   private readonly baseUrl = 'https://pokeapi.co/api/v2/pokemon';
   private readonly speciesUrl = 'https://pokeapi.co/api/v2/pokemon-species';
   private readonly evolutionUrl = 'https://pokeapi.co/api/v2/evolution-chain';
-  private allPokemonCache: PokemonSummary[] | null = null;
   private readonly maxPokemonCount = 1025;
+  private allPokemonCache: PokemonSummary[] | null = null;
   private pokemonDetailCache = new Map<number, PokemonDetail>();
   private pokemonSpeciesCache = new Map<number, PokemonSpecies>();
   private evolutionChainCache = new Map<number, EvolutionChain>();
@@ -29,15 +29,17 @@ export class DataServiceService {
   }
 
   getPokemonDetail(id: number): Observable<PokemonDetail> {
-    if (id <= 0 || id > this.maxPokemonId) {
+    if (id <= 0 || id > this.maxPokemonCount) {
       return of({} as PokemonDetail);
     }
 
-    if (this.pokemonDetailCache.has(id)) {
-      return of(this.pokemonDetailCache.get(id)!);
+    const cached = this.pokemonDetailCache.get(id);
+    if (cached) {
+      return of(cached);
     }
 
     return this.http.get<PokemonDetail>(`${this.baseUrl}/${id}/`).pipe(
+      retry(2),
       tap((data) => {
         if (data && data.id) {
           this.pokemonDetailCache.set(id, data);
@@ -48,10 +50,6 @@ export class DataServiceService {
         return of({} as PokemonDetail);
       })
     );
-  }
-
-  private get maxPokemonId(): number {
-    return this.maxPokemonCount;
   }
 
   /**
@@ -95,12 +93,13 @@ export class DataServiceService {
   }
 
   getPokemonSpecies(id: number): Observable<PokemonSpecies> {
-    if (id <= 0 || id > this.maxPokemonId) {
+    if (id <= 0 || id > this.maxPokemonCount) {
       return of({} as PokemonSpecies);
     }
 
-    if (this.pokemonSpeciesCache.has(id)) {
-      return of(this.pokemonSpeciesCache.get(id)!);
+    const cachedSpecies = this.pokemonSpeciesCache.get(id);
+    if (cachedSpecies) {
+      return of(cachedSpecies);
     }
 
     return this.http.get<PokemonSpecies>(`${this.speciesUrl}/${id}/`).pipe(
@@ -122,8 +121,9 @@ export class DataServiceService {
       return of({} as EvolutionChain);
     }
 
-    if (this.evolutionChainCache.has(chainId)) {
-      return of(this.evolutionChainCache.get(chainId)!);
+    const cachedEvolution = this.evolutionChainCache.get(chainId);
+    if (cachedEvolution) {
+      return of(cachedEvolution);
     }
 
     return this.http.get<EvolutionChain>(url).pipe(

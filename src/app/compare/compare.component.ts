@@ -10,7 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { DataServiceService } from '../services/data-service.service';
-import { PokemonDetail, PokemonSummary } from '../shared/pokemon-api.interfaces';
+import { PokemonDetail, PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
 import { TypeBadgeComponent } from '../shared/components/type-badge/type-badge.component';
 import { capitalize, getStatShortName } from '../shared/utils/pokemon.utils';
 import { of } from 'rxjs';
@@ -55,7 +55,7 @@ export class CompareComponent implements OnInit {
 
   private loadAllPokemonNames(): void {
     this.dataService.getPokemonNames(1025, 0).pipe(
-      catchError(() => of({ count: 0, next: null, previous: null, results: [] } as any))
+      catchError(() => of({ count: 0, next: null, previous: null, results: [] } as PokemonListResponse))
     ).subscribe(data => {
       if (data?.results) {
         this.pokemonOptions.set(data.results);

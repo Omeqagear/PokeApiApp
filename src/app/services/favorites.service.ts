@@ -38,7 +38,7 @@ export class FavoritesService {
     this.storageService.set(this.FAVORITES_KEY, this._favorites());
   }
 
-  addFavorite(pokemon: Pokemon | { id: number; name: string; spriteUrl?: string; types?: any[] }): boolean {
+  addFavorite(pokemon: Pokemon | { id: number; name: string; spriteUrl?: string; types?: { type: { name: string } }[] }): boolean {
     const currentFavorites = this._favorites();
 
     if (currentFavorites.some(f => f.id === pokemon.id)) {
@@ -69,7 +69,7 @@ export class FavoritesService {
     this.saveFavorites();
   }
 
-  toggleFavorite(pokemon: Pokemon | { id: number; name: string; spriteUrl?: string; types?: any[] }): boolean {
+  toggleFavorite(pokemon: Pokemon | { id: number; name: string; spriteUrl?: string; types?: { type: { name: string } }[] }): boolean {
     if (this.isFavorite(pokemon.id)) {
       this.removeFavorite(pokemon.id);
       return false;

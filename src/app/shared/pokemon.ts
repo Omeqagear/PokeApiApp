@@ -1,3 +1,5 @@
+import { PokemonAbilityEntry, PokemonMoveEntry, PokemonTypeEntry } from './pokemon-api.interfaces';
+
 export interface PokemonStat {
     name: string;
     value: number;
@@ -15,11 +17,11 @@ export class Pokemon {
     totalStats: number;
     generation: number;
     baseExperience: number;
-    types: any[];
+    types: PokemonTypeEntry[];
     height: number;
     weight: number;
-    abilities: any[];
-    moves: any[];
+    abilities: PokemonAbilityEntry[];
+    moves: PokemonMoveEntry[];
 
     constructor(
         id: number | string,
@@ -33,11 +35,11 @@ export class Pokemon {
         totalStats = 0,
         generation = 1,
         baseExperience = 0,
-        types: any[] = [],
+        types: PokemonTypeEntry[] = [],
         height = 0,
         weight = 0,
-        abilities: any[] = [],
-        moves: any[] = []
+        abilities: PokemonAbilityEntry[] = [],
+        moves: PokemonMoveEntry[] = []
     ) {
         this.id = typeof id === 'string' ? parseInt(id, 10) : id;
         this.name = name;

@@ -3,7 +3,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-const cache = new Map<string, HttpResponse<any>>();
+const cache = new Map<string, HttpResponse<unknown>>();
 const timestamps = new Map<string, number>();
 const MAX_AGE = 5 * 60 * 1000; // 5 minutes
 

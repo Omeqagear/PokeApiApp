@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of } from 'rxjs';
-import { PokemonSummary, PokemonListResponse } from '../shared/pokemon-api.interfaces';
+import { PokemonSummary, PokemonListResponse, PokemonTypeEntry, PokemonAbilityEntry, PokemonMoveEntry } from '../shared/pokemon-api.interfaces';
 import { DataServiceService } from '../services/data-service.service';
 import { TeamService } from '../services/team.service';
 import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
@@ -17,6 +17,7 @@ import { GenerationChipComponent } from '../shared/components/generation-chip/ge
 import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/pokeball-spinner.component';
 import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../shared/components/page-header/page-header.component';
+import { PokemonStat } from '../shared/pokemon';
 
 interface Generation {
   name: string;
@@ -443,15 +444,15 @@ class Pokemon {
   type2: string;
   move1: string;
   move2: string;
-  stats: any[];
+  stats: PokemonStat[];
   totalStats: number;
   generation: number;
   baseExperience: number;
-  types: any[];
+  types: PokemonTypeEntry[];
   height: number;
   weight: number;
-  abilities: any[];
-  moves: any[];
+  abilities: PokemonAbilityEntry[];
+  moves: PokemonMoveEntry[];
 
   constructor(
     id: string,
@@ -461,15 +462,15 @@ class Pokemon {
     type2: string,
     move1: string,
     move2: string,
-    stats: any[],
+    stats: PokemonStat[],
     totalStats: number,
     generation: number,
     baseExperience: number,
-    types: any[],
+    types: PokemonTypeEntry[],
     height: number,
     weight: number,
-    abilities: any[],
-    moves: any[]
+    abilities: PokemonAbilityEntry[],
+    moves: PokemonMoveEntry[]
   ) {
     this.id = typeof id === 'string' ? parseInt(id, 10) : id;
     this.name = name;

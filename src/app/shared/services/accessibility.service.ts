@@ -30,7 +30,9 @@ export class AccessibilityService {
     this.liveRegion.setAttribute('aria-live', priority);
     this.liveRegion.textContent = '';
     setTimeout(() => {
-      this.liveRegion!.textContent = message;
+      if (this.liveRegion) {
+        this.liveRegion.textContent = message;
+      }
     }, 100);
   }
 

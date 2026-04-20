@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { DataServiceService } from './data-service.service';
-import { PokemonDetail, PokemonSpecies } from '../shared/pokemon-api.interfaces';
+import { PokemonDetail, PokemonSpecies, PokemonMoveEntry } from '../shared/pokemon-api.interfaces';
 import { Pokemon } from '../shared/pokemon';
 
 export interface TeamArchetype {
@@ -32,11 +32,11 @@ export interface PokemonWithStats extends Pokemon {
   totalStats: number;
   generation: number;
   baseExperience: number;
-  types: any[];
+  types: { slot: number; type: { name: string; url: string } }[];
   height: number;
   weight: number;
-  abilities: any[];
-  moves: any[];
+  abilities: { is_hidden: boolean; slot: number; ability: { name: string; url: string } }[];
+  moves: PokemonMoveEntry[];
 }
 
 export interface GenerationFilter {
@@ -249,8 +249,9 @@ export class TeamBuilderService {
       const requests: Observable<PokemonDetail | null>[] = [];
       for (let i = 0; i < batchSize && offset + i <= maxId; i++) {
         const id = offset + i;
-        if (this.pokemonCache.has(id)) {
-          requests.push(of(this.pokemonCache.get(id)!));
+        const cachedPokemon = this.pokemonCache.get(id);
+        if (cachedPokemon) {
+          requests.push(of(cachedPokemon));
         } else {
           requests.push(this.dataService.getPokemonDetail(id).pipe(
             catchError(() => of(null))
@@ -285,8 +286,9 @@ export class TeamBuilderService {
     const available = pool.filter(p => !usedIds.has(p.id));
 
     if (role.preferredTypes && role.preferredTypes.length > 0) {
+      const preferredTypes = role.preferredTypes;
       const typeMatch = available.filter(p =>
-        p.types.some((t: any) => role.preferredTypes!.includes(t.type.name))
+        p.types.some(t => preferredTypes.includes(t.type.name))
       );
       if (typeMatch.length > 0) {
         return this.sortByStats(typeMatch, role.priorityStats)[0] || null;
@@ -384,8 +386,9 @@ export class TeamBuilderService {
     for (let i = 0; i < pool.length; i += batchSize) {
       const batch = pool.slice(i, i + batchSize);
       const requests = batch.map(p => {
-        if (this.speciesCache.has(p.id)) {
-          return of(this.speciesCache.get(p.id)!);
+        const cachedSpecies = this.speciesCache.get(p.id);
+        if (cachedSpecies) {
+          return of(cachedSpecies);
         }
         return this.dataService.getPokemonSpecies(p.id).pipe(
           catchError(() => of(null))
@@ -411,9 +414,9 @@ export class TeamBuilderService {
   }
 
   async isLegendary(pokemonId: number): Promise<boolean> {
-    if (this.speciesCache.has(pokemonId)) {
-      const species = this.speciesCache.get(pokemonId)!;
-      return species.is_legendary || species.is_mythical;
+    const cachedSpecies = this.speciesCache.get(pokemonId);
+    if (cachedSpecies) {
+      return cachedSpecies.is_legendary || cachedSpecies.is_mythical;
     }
 
     return new Promise<boolean>(resolve => {

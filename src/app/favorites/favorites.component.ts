@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { FavoritesService } from '../services/favorites.service';
 import { TeamService } from '../services/team.service';
+import { Pokemon } from '../shared/pokemon';
 import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
 import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../shared/components/page-header/page-header.component';
@@ -153,7 +154,7 @@ export class FavoritesComponent {
     }
   }
 
-  addToTeam(pokemon: any): void {
+  addToTeam(pokemon: { id: number; name: string; spriteUrl?: string; types?: { type: { name: string } }[] }): void {
     if (this.teamService.isTeamFull()) {
       alert('Your team is full! Remove a Pokémon to add more.');
       return;
@@ -167,7 +168,7 @@ export class FavoritesComponent {
     const pokemonObj = new Pokemon(
       pokemon.id.toString(),
       pokemon.name,
-      pokemon.spriteUrl,
+      pokemon.spriteUrl || '',
       pokemon.types?.[0]?.type?.name || 'unknown',
       pokemon.types?.[1]?.type?.name || '',
       'unknown',
@@ -176,7 +177,7 @@ export class FavoritesComponent {
       0,
       1,
       0,
-      pokemon.types || [],
+      pokemon.types?.map(t => ({ slot: t.type.name === 'unknown' ? 0 : 1, type: { name: t.type.name, url: '' } })) || [],
       0,
       0,
       [],
@@ -199,60 +200,5 @@ export class FavoritesComponent {
       card.classList.add('added-to-team');
       setTimeout(() => card.classList.remove('added-to-team'), 600);
     }
-  }
-}
-
-class Pokemon {
-  id: number;
-  name: string;
-  spriteUrl: string;
-  type1: string;
-  type2: string;
-  move1: string;
-  move2: string;
-  stats: any[];
-  totalStats: number;
-  generation: number;
-  baseExperience: number;
-  types: any[];
-  height: number;
-  weight: number;
-  abilities: any[];
-  moves: any[];
-
-  constructor(
-    id: string,
-    name: string,
-    spriteUrl: string,
-    type1: string,
-    type2: string,
-    move1: string,
-    move2: string,
-    stats: any[],
-    totalStats: number,
-    generation: number,
-    baseExperience: number,
-    types: any[],
-    height: number,
-    weight: number,
-    abilities: any[],
-    moves: any[]
-  ) {
-    this.id = typeof id === 'string' ? parseInt(id, 10) : id;
-    this.name = name;
-    this.spriteUrl = spriteUrl;
-    this.type1 = type1;
-    this.type2 = type2;
-    this.move1 = move1;
-    this.move2 = move2;
-    this.stats = stats;
-    this.totalStats = totalStats;
-    this.generation = generation;
-    this.baseExperience = baseExperience;
-    this.types = types;
-    this.height = height;
-    this.weight = weight;
-    this.abilities = abilities;
-    this.moves = moves;
   }
 }
