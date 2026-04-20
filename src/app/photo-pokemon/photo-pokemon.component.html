@@ -1,57 +1,190 @@
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P">
-<body id="forest">
-  <div id="pokedex">
-
-    <div class="sensor">
-      <button></button>
+<div class="pokemon-page">
+  <!-- Navigation Arrows (always visible) -->
+  @if (pokemonId()) {
+    <div class="nav-arrows">
+      <button mat-icon-button class="nav-btn prev-btn" [disabled]="!hasPrev()" (click)="navigateToPokemon(prevId())" aria-label="Previous Pokémon">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button mat-icon-button class="nav-btn next-btn" [disabled]="!hasNext()" (click)="navigateToPokemon(nextId())" aria-label="Next Pokémon">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
+  }
 
-    <div class="camera-display">
-      <img src="{{img}}"/>
+  @if (loading()) {
+    <div class="loading-container">
+      <ds-pokeball-spinner label="Loading Pokémon..."></ds-pokeball-spinner>
     </div>
+  }
 
-    <div class="divider"></div>
-
-    <div class="stats-display">
-      <h1>Pokédex</h1>
-      <h2>{{ pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1) }}</h2>
-      <h2>Pokémon ID: #{{ id }}</h2>
-      <br>
-      <h3>Type</h3>
-      <ul>
-        <li *ngIf="types1[0] != undefined">{{ types1[0].charAt(0).toUpperCase() + types1[0].slice(1) }}</li>
-        <li *ngIf="types2[0] != undefined">{{ types2[0].charAt(0).toUpperCase() + types2[0].slice(1) }}</li>
-      </ul>
-      <h3>Moves</h3>
-      <ul>
-        <li *ngIf="moves1[0] != undefined">{{ moves1[0].charAt(0).toUpperCase() + moves1[0].slice(1) }}</li>
-        <li *ngIf="moves2[0] != undefined">{{ moves2[0].charAt(0).toUpperCase() + moves2[0].slice(1) }}</li>
-      </ul>
+  @if (error()) {
+    <div class="error-container">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button color="warn" (click)="navigateToCatalog()">
+        Return to Catalog
+      </button>
     </div>
+  }
 
-    <div class="botom-actions">
-      <div id="actions">
-        <button class="a"><img src="./assets/images/pokeball.png" width="40px" height="45px" (click)="AddPokemonToTeam()"> </button>
+  @if (pokemon() && !loading()) {
+    <div class="pokemon-container" [ngClass]="'bg-' + (pokemon()!.types[0]?.type?.name || 'normal')">
+      <!-- Back Button -->
+      <button mat-icon-button (click)="navigateToCatalog()" class="back-btn" aria-label="Back to catalog">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+      <!-- Keyboard Shortcuts Hint -->
+      <div class="keyboard-hints" aria-hidden="true">
+        <span class="hint"><kbd>←</kbd><kbd>→</kbd> Browse</span>
+        <span class="hint"><kbd>S</kbd> Shiny</span>
       </div>
 
-      <div id="cross">
-        <button class="cross-button up"></button>
-        <button class="cross-button right" (click)="prevID()"></button>
-        <button class="cross-button down"></button>
-        <button class="cross-button left" (click)="nextID()"></button>
-        <div class="cross-button center"> </div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Left: Pokemon Image -->
+        <div class="image-section">
+          <div class="pokemon-id-badge">#{{ pokemon()!.id | number:'3.0-0' }}</div>
+          <div class="image-wrapper">
+            <img
+              class="pokemon-main-img"
+              [src]="getSpriteUrl(pokemon()!)"
+              [alt]="capitalize(pokemon()!.name)"
+              (error)="handleImageError($event)"
+            >
+            <div class="image-glow" [ngClass]="'glow-' + (pokemon()!.types[0]?.type?.name || 'normal')"></div>
+
+            <!-- Action Buttons -->
+            <div class="image-actions">
+              <button
+                mat-mini-fab
+                class="action-btn favorite-btn"
+                [class.active]="isFavorite()"
+                (click)="toggleFavorite()"
+                [matTooltip]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
+                aria-label="Toggle favorite"
+              >
+                <mat-icon>{{ isFavorite() ? 'favorite' : 'favorite_border' }}</mat-icon>
+              </button>
+
+              @if (!isInTeam()) {
+                <button
+                  mat-mini-fab
+                  class="action-btn team-btn"
+                  (click)="addToTeam()"
+                  matTooltip="Add to team"
+                  aria-label="Add to team"
+                >
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              } @else {
+                <button
+                  mat-mini-fab
+                  class="action-btn in-team-btn"
+                  disabled
+                  matTooltip="In team"
+                  aria-label="In team"
+                >
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+              }
+
+              @if (hasShinySprite(pokemon()!)) {
+                <button
+                  mat-mini-fab
+                  class="shiny-toggle"
+                  [class.active]="isShiny()"
+                  (click)="toggleShiny()"
+                  [matTooltip]="isShiny() ? 'Show normal' : 'Show shiny'"
+                  aria-label="Toggle shiny version"
+                >
+                  <mat-icon>auto_awesome</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Pokemon Info -->
+        <div class="info-section">
+          <h1 class="pokemon-name">{{ capitalize(pokemon()!.name) }}</h1>
+
+          <!-- Types -->
+          <div class="types-container" aria-label="Pokémon types">
+            @for (type of pokemon()!.types; track $index) {
+              <ds-type-badge [type]="type.type.name" variant="ghost"></ds-type-badge>
+            }
+          </div>
+
+          <!-- Physical Info -->
+          <div class="physical-info">
+            <div class="info-item">
+              <span class="info-label">Height</span>
+              <span class="info-value">{{ (pokemon()!.height / 10).toFixed(1) }} m</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Weight</span>
+              <span class="info-value">{{ (pokemon()!.weight / 10).toFixed(1) }} kg</span>
+            </div>
+          </div>
+
+          <!-- Abilities -->
+          <div class="info-block">
+            <h2 class="block-title">Abilities</h2>
+            <div class="abilities-list">
+              @for (ability of pokemon()!.abilities; track $index) {
+                <span class="ability-tag">
+                  {{ capitalize(ability.ability.name) }}
+                  @if (ability.is_hidden) {
+                    <span class="hidden-badge">Hidden</span>
+                  }
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- Stats with Progress Bars -->
+          <div class="stats-block" aria-describedby="stats-description">
+            <h2 class="block-title">Base Stats</h2>
+            <span id="stats-description" class="sr-only">Base statistics for {{ capitalize(pokemon()!.name) }}</span>
+            <div class="stats-container">
+              @for (stat of pokemon()!.stats; track stat.stat.name) {
+                <ds-stat-bar [label]="stat.stat.name" [value]="stat.base_stat"></ds-stat-bar>
+              }
+            </div>
+          </div>
+
+          <!-- Moves -->
+          <div class="info-block">
+            <h2 class="block-title">Moves</h2>
+            <div class="moves-list">
+              @for (move of pokemon()!.moves.slice(0, 8); track $index) {
+                <span class="move-tag">{{ capitalize(move.move.name) }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Evolution Chain -->
+          @if (species()) {
+            <app-evolution-chain
+              [pokemonId]="pokemon()!.id"
+              [pokemonSpecies]="species()!"
+            ></app-evolution-chain>
+          }
+
+          <!-- Bottom Navigation -->
+          <div class="bottom-nav">
+            <button mat-flat-button class="nav-action-btn team-btn" (click)="navigateToTeam()">
+              <mat-icon>group</mat-icon>
+              My Team
+            </button>
+            <button mat-stroked-button class="nav-action-btn catalog-btn" (click)="navigateToCatalog()">
+              <mat-icon>grid_view</mat-icon>
+              Catalog
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="bottom-modes">
-        <button class="level-button"></button>
-        <button class="level-button"></button>
-        <button class="level-button"></button>
-        <button class="level-button"></button>
-
-        <button class="pokedex-mode black-button" (click)="frontImg()">Front</button>
-        <button class="game-mode black-button" (click)="backImag()">Back</button>
-    </div>
-
-  </div>
-</body>
+  }
+</div>

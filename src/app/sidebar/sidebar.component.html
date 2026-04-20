@@ -1,25 +1,55 @@
-<nav>
-  <ul>
-    <li>
-      <a routerLink="" [class.activated]="currentUrl== '/'" [class.hover]="link1" (mouseover)="link1=true" (mouseout)="link1=false">
-        <i class="material-icons">home</i>
-      </a>
-    </li>
-    <li>
-      <a routerLink="catalog" [class.activated]="currentUrl == '/catalog'" [class.hover]="link2" (mouseover)="link2=true" (mouseout)="link2=false">
-        <i class="material-icons">shop</i>
-      </a>
-    </li>
-    <li>
-      <a routerLink="details" [class.activated]="currentUrl == '/details'" [class.hover]="link3" (mouseover)="link3=true" (mouseout)="link3=false">
-        <i class="material-icons">library_books</i>
-      </a>
-    </li>
-    <li>
-        <a routerLink="team" [class.activated]="currentUrl == '/team'" [class.hover]="link4" (mouseover)="link4=true" (mouseout)="link4=false">
-          <i class="material-icons">trip_origin</i>
+<nav [class.collapsed]="isCollapsed()">
+  <div class="sidebar-header">
+    <div class="logo">
+      <mat-icon>nature_people</mat-icon>
+      @if (!isCollapsed()) {
+        <span class="logo-text">Pokédex</span>
+      }
+    </div>
+    <button class="toggle-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+      <mat-icon>{{ isCollapsed() ? 'menu_open' : 'menu' }}</mat-icon>
+    </button>
+  </div>
+
+  <ul class="nav-list">
+    @for (item of navItems(); track item.path) {
+      <li>
+        <a 
+          [routerLink]="item.path"
+          [class.active]="isActive(item.path)"
+          matRipple
+          [matRippleDisabled]="false"
+          [attr.aria-label]="item.label"
+        >
+          <mat-icon>{{ item.icon }}</mat-icon>
+          @if (!isCollapsed()) {
+            <span class="nav-label">{{ item.label }}</span>
+          }
+          @if (item.badge && item.badge > 0 && !isCollapsed()) {
+            <span class="nav-badge">{{ item.badge }}/6</span>
+          }
         </a>
-    </li>
-    
+      </li>
+    }
   </ul>
+
+  <div class="sidebar-footer">
+    <button 
+      class="theme-toggle" 
+      (click)="toggleTheme()" 
+      [attr.aria-label]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+      matRipple
+    >
+      <mat-icon>{{ isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      @if (!isCollapsed()) {
+        <span class="theme-label">{{ isDark() ? 'Light Mode' : 'Dark Mode' }}</span>
+      }
+    </button>
+    @if (!isCollapsed()) {
+      <div class="footer-text">
+        <small>Angular 21 • Pokédex</small>
+      </div>
+    }
+  </div>
 </nav>
+

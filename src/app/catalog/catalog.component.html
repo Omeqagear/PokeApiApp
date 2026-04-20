@@ -1,11 +1,242 @@
-<h1>Catálogo de Pokémon</h1>
-<mat-grid-list cols="6" [@listStagger]="pokemons$">
-    <mat-grid-tile *ngFor="let item of pokemons$ | slice:0:10000; let i=index;">
-        <mat-card  (click)="onItem(item)" [routerLink]= "['/photo', onItem(item) ]">
-            <mat-card-header>
-              <mat-card-title class="pokeName">{{ (item.name).charAt(0).toUpperCase() + (item.name).slice(1) }}</mat-card-title>
-            </mat-card-header>
-            <img class="pokeImg" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{((item.url).split('/').splice(6,7,1))[0] }}.png" >
-        </mat-card>
-    </mat-grid-tile>
-</mat-grid-list>
+<ds-page-header title="Catálogo de Pokémon" [showStats]="true">
+  <div stats aria-live="polite">
+    <mat-icon>collections</mat-icon>
+    <span>
+      @if (searchMode()) {
+        {{ searchResults().length }} result(s)
+      } @else {
+        {{ pokemons().length }} Pokémon
+        @if (selectedGeneration()) {
+          in {{ selectedGeneration()!.region }}
+        } @else {
+          of {{ totalCount() }} total
+        }
+      }
+    </span>
+  </div>
+
+  <!-- Generation Filter -->
+  <div class="generation-filter">
+    <div class="filter-label">
+      <mat-icon>filter_list</mat-icon>
+      <span>Generation</span>
+    </div>
+    <div class="generation-chips">
+      <ds-generation-chip
+        name="All"
+        [active]="!selectedGeneration()"
+        (clicked)="selectGeneration(null)"
+      ></ds-generation-chip>
+      @for (gen of generations; track gen.name) {
+        <ds-generation-chip
+          [name]="gen.name"
+          [region]="gen.region"
+          [color]="gen.color"
+          [active]="selectedGeneration()?.name === gen.name"
+          (clicked)="selectGeneration(gen)"
+        ></ds-generation-chip>
+      }
+    </div>
+  </div>
+
+  <!-- Advanced Filters Toggle -->
+  <div class="advanced-filters-toggle">
+    <button mat-stroked-button (click)="toggleFiltersPanel()" [class.active]="showFilters() || hasActiveFilters()">
+      <mat-icon>tune</mat-icon>
+      Advanced Filters
+      @if (hasActiveFilters()) {
+        <span class="filter-badge">{{ selectedTypes().length + (statFilterActive() ? 1 : 0) }}</span>
+      }
+    </button>
+    @if (hasActiveFilters()) {
+      <button mat-button (click)="clearAllFilters()" class="clear-filters-btn">
+        Clear all
+      </button>
+    }
+  </div>
+
+  <!-- Advanced Filters Panel -->
+  @if (showFilters()) {
+    <div class="advanced-filters-panel">
+      <!-- Type Filter -->
+      <div class="filter-section">
+        <h4 class="filter-title">
+          <mat-icon>category</mat-icon>
+          Type
+        </h4>
+        <div class="type-chips">
+          @for (type of pokemonTypes; track type) {
+            <button
+              class="type-chip"
+              [class]="'type-' + type"
+              [class.selected]="isTypeSelected(type)"
+              (click)="toggleTypeFilter(type)"
+              [attr.aria-pressed]="isTypeSelected(type)"
+            >
+              {{ type }}
+            </button>
+          }
+        </div>
+        @if (selectedTypes().length > 0) {
+          <button mat-button (click)="clearTypeFilters()" class="clear-section-btn">
+            Clear types
+          </button>
+        }
+      </div>
+
+      <!-- Stat Filter -->
+      <div class="filter-section">
+        <h4 class="filter-title">
+          <mat-icon>show_chart</mat-icon>
+          Base Stat
+        </h4>
+        <div class="stat-filter-options">
+          @for (stat of stats; track stat.key) {
+            <button
+              mat-stroked-button
+              class="stat-filter-btn"
+              [class.active]="statFilterActive() === stat.key"
+              (click)="setStatFilter(stat.key)"
+            >
+              {{ stat.label }}
+            </button>
+          }
+        </div>
+        @if (statFilterActive()) {
+          <div class="stat-range">
+            <div class="stat-input">
+              <label>Min</label>
+              <input type="number" [value]="minStat()" (input)="updateMinStat(+$any($event.target).value)" min="0" max="255">
+            </div>
+            <span class="range-separator">to</span>
+            <div class="stat-input">
+              <label>Max</label>
+              <input type="number" [value]="maxStat()" (input)="updateMaxStat(+$any($event.target).value)" min="0" max="255">
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Search -->
+  <div class="search-container">
+    <form [formGroup]="searchForm" class="search-form">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search Pokémon by ID or name</mat-label>
+        <input matInput formControlName="searchInput" placeholder="e.g., 25 or Pikachu" aria-label="Search Pokémon by ID or name" (keydown.ctrl.f)="$event.stopPropagation()" (keydown.meta.f)="$event.stopPropagation()">
+        <mat-icon matPrefix>search</mat-icon>
+        <span class="search-shortcut" matSuffix aria-hidden="true">
+          <kbd>Ctrl</kbd><kbd>K</kbd>
+        </span>
+        @if (searchForm.get('searchInput')?.value) {
+          <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()" type="button">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+        @if (isSearching()) {
+          <mat-spinner matSuffix diameter="20"></mat-spinner>
+        }
+      </mat-form-field>
+    </form>
+    @if (searchMode() && searchResults().length > 0) {
+      <div class="search-badge">
+        <mat-icon>filter_list</mat-icon>
+        <span>Showing search results</span>
+      </div>
+    }
+  </div>
+</ds-page-header>
+
+@if (loading()) {
+  <div class="catalog-grid" role="list">
+    @for (item of skeletonArray; track $index) {
+      <ds-skeleton-card [showTypes]="true"></ds-skeleton-card>
+    }
+  </div>
+}
+
+@if (error()) {
+  <ds-empty-state icon="error_outline" [title]="'Error'" [message]="error() ?? ''"></ds-empty-state>
+}
+
+@if (!loading() && !error()) {
+  @if (searchMode() && searchResults().length === 0 && !isSearching()) {
+    <ds-empty-state
+      icon="search_off"
+      title="No Pokémon Found"
+      message="We couldn't find any Pokémon matching your search. Try a different name or ID number."
+      actionLabel="Clear Search"
+      actionRoute="/catalog"
+      actionIcon="clear"
+      [compact]="true"
+    ></ds-empty-state>
+  }
+
+  @if (!searchMode() && pokemons().length === 0) {
+    <ds-empty-state
+      icon="explore"
+      title="No Pokémon Available"
+      message="Looks like this generation doesn't have any Pokémon yet. Try selecting a different generation!"
+      actionLabel="View All Pokémon"
+      actionRoute="/catalog"
+      actionIcon="grid_view"
+      [compact]="true"
+    ></ds-empty-state>
+  }
+
+  @if (displayedPokemon().length > 0) {
+    <div class="catalog-grid" role="list">
+      @for (item of displayedPokemon(); track item.name; let i = $index) {
+        <div role="listitem" [attr.data-pokemon-id]="extractPokemonId(item.url)">
+          <ds-poke-card
+            [pokemon]="{
+              id: extractPokemonId(item.url),
+              name: capitalize(item.name),
+              spriteUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + extractPokemonId(item.url) + '.png'
+            }"
+            (cardClick)="navigateToPokemon(extractPokemonId(item.url))"
+          >
+            <div actions>
+              @if (!isInTeam(extractPokemonId(item.url))) {
+                <button
+                  mat-icon-button
+                  class="add-team-btn"
+                  (click)="addToTeam(extractPokemonId(item.url), capitalize(item.name), 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + extractPokemonId(item.url) + '.png'); $event.stopPropagation()"
+                  [attr.aria-label]="'Add ' + capitalize(item.name) + ' to team'"
+                  matTooltip="Add to team"
+                >
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              } @else {
+                <mat-icon class="in-team-icon" matTooltip="In team">check_circle</mat-icon>
+              }
+            </div>
+          </ds-poke-card>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading() && hasNext() && !searchMode()) {
+    <div #loadMoreTrigger class="load-more-trigger" aria-hidden="true"></div>
+    @if (loadingMore()) {
+      <div class="load-more-spinner">
+        <ds-pokeball-spinner [size]="60" label="Loading more..."></ds-pokeball-spinner>
+      </div>
+    }
+  }
+
+  @if (!loading() && !searchMode() && pokemons().length > 0 && !hasNext()) {
+    <div class="pagination complete">
+      <mat-icon>check_circle</mat-icon>
+      <p>
+        @if (selectedGeneration()) {
+          All {{ totalCount() }} Pokémon from {{ selectedGeneration()!.region }} loaded!
+        } @else {
+          All {{ totalCount() }} Pokémon loaded!
+        }
+      </p>
+    </div>
+  }
+}

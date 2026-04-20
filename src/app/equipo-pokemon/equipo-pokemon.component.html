@@ -1,15 +1,189 @@
-<h1>Equipo Pokémon</h1>
-<p><button mat-flat-button class="mat_buttom" color="warn" (click)="deleteTeam()">Eliminar equipo</button>
-<button mat-flat-button class="mat_buttom" color="primary" (click)="genRandomTeam()">Equipo aleatorio</button></p>
-<br>
-<mat-grid-list cols="3">
-    <mat-grid-tile *ngFor="let item of pokemonTeam;let i=index;" [@fadeInOut]>
-        <mat-card class="example-card">
-            <img src="../assets/images/pokeball.png" width="20%" height="20%">
-            <img class="img" [src]="pokemonTeam[i].getImage()" width="90%" height="90%">
-            <button mat-flat-button class="mat_buttom_del"color="warn" (click)="deletePokemon(item)">Eliminar</button>
-        </mat-card>
-    </mat-grid-tile>
-</mat-grid-list>
+<div class="team-page">
+  <ds-page-header title="Equipo Pokémon" [showStats]="true">
+    <div stats aria-live="polite">
+      <mat-icon>collections</mat-icon>
+      <span>{{ teamPokemon().length }} Pokémon in your Team</span>
+    </div>
+    <div class="header-actions">
+      @if (teamPokemon().length > 0) {
+        <button mat-stroked-button (click)="exportTeam()" aria-label="Export team">
+          <mat-icon>download</mat-icon>
+          Export
+        </button>
+        <button mat-stroked-button (click)="importTeam()" aria-label="Import team">
+          <mat-icon>upload</mat-icon>
+          Import
+        </button>
+      }
+      <button mat-flat-button color="warn" (click)="deleteTeam()" aria-label="Delete entire team">
+        <mat-icon>delete_sweep</mat-icon>
+        Delete Team
+      </button>
+      <button mat-flat-button color="primary" (click)="genRandomTeam()" aria-label="Generate random team">
+        <mat-icon>shuffle</mat-icon>
+        Random Team
+      </button>
+    </div>
+  </ds-page-header>
 
+  <!-- Tab Switcher -->
+  <div class="tab-switcher" role="tablist" aria-label="Team management tabs">
+    <button 
+      mat-stroked-button 
+      [class.active]="activeTab() === 'manual'"
+      (click)="setActiveTab('manual')"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'manual'"
+      aria-controls="manual-tab-panel"
+      id="manual-tab"
+    >
+      <mat-icon>people</mat-icon>
+      Manual
+    </button>
+    <button 
+      mat-stroked-button 
+      [class.active]="activeTab() === 'builder'"
+      (click)="setActiveTab('builder')"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'builder'"
+      aria-controls="builder-tab-panel"
+      id="builder-tab"
+    >
+      <mat-icon>build</mat-icon>
+      Team Builder
+    </button>
+  </div>
 
+  <!-- Team Builder Tab -->
+  @if (activeTab() === 'builder') {
+    <div class="builder-section" [@fadeInOut] id="builder-tab-panel" role="tabpanel" aria-labelledby="builder-tab">
+      <h2>Generate META Team</h2>
+      
+      <!-- Legendary Toggle -->
+      <div class="builder-group legendary-toggle-group">
+        <mat-slide-toggle 
+          [checked]="includeLegendary()" 
+          (change)="includeLegendary.set($event.checked)"
+          class="legendary-toggle">
+          <mat-icon class="toggle-icon">stars</mat-icon>
+          Include Legendary Pokémon
+        </mat-slide-toggle>
+      </div>
+      
+      <!-- Archetype Selection -->
+      <div class="builder-group">
+        <h2>Team Archetype</h2>
+        <div class="archetype-grid" role="listbox" aria-label="Team archetype selection">
+          @for (archetype of teamArchetypes; track archetype.id) {
+            <mat-card 
+              class="archetype-card" 
+              [class.selected]="selectedArchetype()?.id === archetype.id"
+              (click)="selectArchetype(archetype)"
+              (keydown.enter)="selectArchetype(archetype)"
+              (keydown.space)="selectArchetype(archetype); $event.preventDefault()"
+              tabindex="0"
+              role="option"
+              [attr.aria-selected]="selectedArchetype()?.id === archetype.id"
+              [attr.aria-label]="archetype.name + ': ' + archetype.description"
+            >
+              <mat-icon class="archetype-icon">{{ archetype.icon }}</mat-icon>
+              <h3>{{ archetype.name }}</h3>
+              <p>{{ archetype.description }}</p>
+            </mat-card>
+          }
+        </div>
+      </div>
+
+      <!-- Generation Filter -->
+      <div class="builder-group">
+        <h2>Generation Filter (Optional)</h2>
+        <div class="generation-chips">
+          @for (gen of generations; track gen.name) {
+            <button
+              mat-stroked-button
+              class="gen-chip"
+              [class.active]="selectedGeneration()?.name === gen.name"
+              (click)="selectGeneration(gen)"
+              [attr.aria-pressed]="selectedGeneration()?.name === gen.name"
+            >
+              {{ gen.name }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <div class="builder-actions">
+        <button 
+          mat-flat-button 
+          color="primary" 
+          (click)="generateMetaTeam()"
+          [disabled]="!selectedArchetype() || isGenerating()"
+          aria-label="Generate META team"
+        >
+          @if (isGenerating()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            <mat-icon>auto_awesome</mat-icon>
+          }
+          Generate META Team
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      @if (isGenerating()) {
+        <div class="progress-container" aria-live="polite">
+          <mat-progress-bar mode="determinate" [value]="generationProgress()"></mat-progress-bar>
+          <p>Generating optimal team...</p>
+        </div>
+      }
+
+      <!-- Generated Team Preview -->
+      @if (generatedTeam()) {
+        <div class="generated-team-preview">
+          <h2>Generated Team: {{ generatedTeam()!.archetype.name }}</h2>
+          <p class="team-strategy">{{ generatedTeam()!.archetype.strategy }}</p>
+          <div class="synergy-badge">
+            <mat-icon>star</mat-icon>
+            Synergy: {{ generatedTeam()!.synergyScore }}%
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Manual Tab (Original + Enhanced) -->
+  @if (activeTab() === 'manual') {
+    @if (teamPokemon().length === 0) {
+      <ds-empty-state
+        icon="catching_pokemon"
+        title="Your team is empty"
+        message="Add Pokémon from the catalog or generate a random team to get started on your adventure!"
+        actionLabel="Browse Catalog"
+        actionRoute="/catalog"
+      ></ds-empty-state>
+    }
+
+    @if (teamPokemon().length > 0) {
+      <div class="catalog-grid" role="list" aria-label="Your Pokémon team">
+        @for (item of teamPokemon(); track item.id; let i = $index) {
+          <div role="listitem">
+            <ds-poke-card
+              [pokemon]="item"
+              [clickable]="true"
+              (cardClick)="navigateToPokemon(item.id)"
+            >
+              <div actions>
+                <button mat-icon-button color="primary" class="view-btn" (click)="navigateToPokemon(item.id); $event.stopPropagation()" [attr.aria-label]="'View ' + item.name">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deletePokemon(item); $event.stopPropagation()" class="delete-btn" [attr.aria-label]="'Remove ' + item.name + ' from team'">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </ds-poke-card>
+          </div>
+        }
+      </div>
+    }
+  }

@@ -1,0 +1,154 @@
+// ============================================
+// POKEMON TYPE COLORS
+// Official Pokemon type colors
+// ============================================
+
+$pokemon-types: (
+  normal:   #A8A878,
+  fire:     #F08030,
+  water:    #6890F0,
+  electric: #F8D030,
+  grass:    #78C850,
+  ice:      #98D8D8,
+  fighting: #C03028,
+  poison:   #A040A0,
+  ground:   #E0C068,
+  flying:   #A890F0,
+  psychic:  #F85888,
+  bug:      #A8B820,
+  rock:     #B8A038,
+  ghost:    #705898,
+  dragon:   #7038F8,
+  dark:     #705848,
+  steel:    #B8B8D0,
+  fairy:    #EE99AC
+);
+
+// ============================================
+// BRAND COLORS - LINEAR-STRIPE HYBRID
+// Stripe purple with Linear's restraint
+// ============================================
+
+$brand-primary: #8b5cf6;
+$brand-primary-light: #a78bfa;
+$brand-primary-dark: #7c3aed;
+
+$brand-secondary: #6366f1;
+$brand-secondary-light: #818cf8;
+$brand-secondary-dark: #4f46e5;
+
+$brand-accent: #ec4899;
+
+// ============================================
+// SEMANTIC COLORS
+// ============================================
+
+$color-success: #10b981;
+$color-success-light: #34d399;
+$color-success-dark: #059669;
+$color-success-bg: rgba(16, 185, 129, 0.08);
+
+$color-warning: #f59e0b;
+$color-warning-light: #fbbf24;
+$color-warning-dark: #d97706;
+$color-warning-bg: rgba(245, 158, 11, 0.08);
+
+$color-danger: #ef4444;
+$color-danger-light: #f87171;
+$color-danger-dark: #dc2626;
+$color-danger-bg: rgba(239, 68, 68, 0.08);
+
+$color-info: #3b82f6;
+$color-info-light: #60a5fa;
+$color-info-dark: #2563eb;
+$color-info-bg: rgba(59, 130, 246, 0.08);
+
+// ============================================
+// NEUTRAL SCALE - LINEAR WARM GRAYS
+// Warmer grays, less blue-ish than pure dark
+// ============================================
+
+$gray-50: #fafafa;
+$gray-100: #f4f4f4;
+$gray-200: #e4e4e4;
+$gray-300: #d3d3d3;
+$gray-400: #a1a1a1;
+$gray-500: #737373;
+$gray-600: #525252;
+$gray-700: #404040;
+$gray-800: #262626;
+$gray-900: #171717;
+
+// Dark mode variants
+$gray-50-dark: #0a0a0a;
+$gray-100-dark: #141414;
+$gray-200-dark: #1f1f1f;
+$gray-300-dark: #2a2a2a;
+$gray-400-dark: #404040;
+$gray-500-dark: #525252;
+$gray-600-dark: #3f3f3f;
+$gray-700-dark: #262626;
+$gray-800-dark: #1a1a1a;
+$gray-900-dark: #0f0f0f;
+
+// ============================================
+// CSS CUSTOM PROPERTIES
+// ============================================
+
+:root {
+  // Brand (Stripe purple)
+  --brand-primary: #{$brand-primary};
+  --brand-primary-light: #{$brand-primary-light};
+  --brand-primary-dark: #{$brand-primary-dark};
+  --brand-secondary: #{$brand-secondary};
+  --brand-secondary-light: #{$brand-secondary-light};
+  --brand-secondary-dark: #{$brand-secondary-dark};
+  --brand-accent: #{$brand-accent};
+
+  // Semantic
+  --color-success: #{$color-success};
+  --color-success-light: #{$color-success-light};
+  --color-success-dark: #{$color-success-dark};
+  --color-success-bg: #{$color-success-bg};
+  --color-warning: #{$color-warning};
+  --color-warning-light: #{$color-warning-light};
+  --color-warning-dark: #{$color-warning-dark};
+  --color-warning-bg: #{$color-warning-bg};
+  --color-danger: #{$color-danger};
+  --color-danger-light: #{$color-danger-light};
+  --color-danger-dark: #{$color-danger-dark};
+  --color-danger-bg: #{$color-danger-bg};
+  --color-info: #{$color-info};
+  --color-info-light: #{$color-info-light};
+  --color-info-dark: #{$color-info-dark};
+  --color-info-bg: #{$color-info-bg};
+
+  // Neutrals (default to light mode)
+  --gray-50: #{$gray-50};
+  --gray-100: #{$gray-100};
+  --gray-200: #{$gray-200};
+  --gray-300: #{$gray-300};
+  --gray-400: #{$gray-400};
+  --gray-500: #{$gray-500};
+  --gray-600: #{$gray-600};
+  --gray-700: #{$gray-700};
+  --gray-800: #{$gray-800};
+  --gray-900: #{$gray-900};
+
+  // Pokemon Types
+  @each $type, $color in $pokemon-types {
+    --type-#{$type}: #{$color};
+  }
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+@function type-color($type) {
+  @return map-get($pokemon-types, $type);
+}
+
+@function brand-gradient($angle: 135deg) {
+  @return linear-gradient($angle, $brand-primary 0%, $brand-secondary 100%);
+}

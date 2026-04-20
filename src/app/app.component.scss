@@ -1,0 +1,30 @@
+#container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-primary, #ffffff);
+}
+
+#content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 0;
+  transition: margin-left 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 100vh;
+
+  .sidebar-collapsed & {
+    margin-left: 56px;
+  }
+}
+
+@media (max-width: 768px) {
+  #content {
+    margin-left: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  #content {
+    margin-left: 56px;
+    padding: 0 8px;
+  }
+}

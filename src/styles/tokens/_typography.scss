@@ -1,0 +1,190 @@
+// ============================================
+// TYPOGRAPHY SYSTEM
+// Font families, type scale, weights, line heights
+// ============================================
+
+// ============================================
+// FONT FAMILIES
+// ============================================
+
+$font-family-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+
+// ============================================
+// TYPE SCALE
+// Based on a 1.25 modular scale (major third)
+// ============================================
+
+$font-size-xs: 0.75rem;     // 12px
+$font-size-sm: 0.875rem;    // 14px
+$font-size-base: 1rem;      // 16px
+$font-size-lg: 1.125rem;    // 18px
+$font-size-xl: 1.25rem;     // 20px
+$font-size-2xl: 1.5rem;     // 24px
+$font-size-3xl: 1.875rem;   // 30px
+$font-size-4xl: 2.25rem;    // 36px
+$font-size-5xl: 3rem;       // 48px
+$font-size-6xl: 3.75rem;    // 60px
+
+// ============================================
+// FONT WEIGHTS
+// ============================================
+
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-extrabold: 800;
+
+// ============================================
+// LINE HEIGHTS
+// ============================================
+
+$line-height-tight: 1.2;
+$line-height-snug: 1.375;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.625;
+$line-height-loose: 2;
+
+// ============================================
+// LETTER SPACING
+// ============================================
+
+$letter-spacing-tight: -0.025em;
+$letter-spacing-normal: 0;
+$letter-spacing-wide: 0.025em;
+$letter-spacing-wider: 0.05em;
+$letter-spacing-widest: 0.1em;
+
+// ============================================
+// TYPOGRAPHY PRESETS
+// Reusable heading and text styles
+// ============================================
+
+$heading-1: (
+  font-size: $font-size-6xl,
+  font-weight: $font-weight-extrabold,
+  line-height: $line-height-tight,
+  letter-spacing: $letter-spacing-tight
+);
+
+$heading-2: (
+  font-size: $font-size-5xl,
+  font-weight: $font-weight-extrabold,
+  line-height: $line-height-tight,
+  letter-spacing: $letter-spacing-tight
+);
+
+$heading-3: (
+  font-size: $font-size-4xl,
+  font-weight: $font-weight-bold,
+  line-height: $line-height-tight,
+  letter-spacing: $letter-spacing-normal
+);
+
+$heading-4: (
+  font-size: $font-size-3xl,
+  font-weight: $font-weight-bold,
+  line-height: $line-height-snug,
+  letter-spacing: $letter-spacing-normal
+);
+
+$heading-5: (
+  font-size: $font-size-2xl,
+  font-weight: $font-weight-semibold,
+  line-height: $line-height-snug,
+  letter-spacing: $letter-spacing-normal
+);
+
+$heading-6: (
+  font-size: $font-size-xl,
+  font-weight: $font-weight-semibold,
+  line-height: $line-height-snug,
+  letter-spacing: $letter-spacing-wide
+);
+
+$body-lg: (
+  font-size: $font-size-lg,
+  font-weight: $font-weight-normal,
+  line-height: $line-height-relaxed
+);
+
+$body-base: (
+  font-size: $font-size-base,
+  font-weight: $font-weight-normal,
+  line-height: $line-height-normal
+);
+
+$body-sm: (
+  font-size: $font-size-sm,
+  font-weight: $font-weight-normal,
+  line-height: $line-height-normal
+);
+
+$body-xs: (
+  font-size: $font-size-xs,
+  font-weight: $font-weight-normal,
+  line-height: $line-height-normal
+);
+
+$caption: (
+  font-size: $font-size-xs,
+  font-weight: $font-weight-medium,
+  line-height: $line-height-normal,
+  letter-spacing: $letter-spacing-wide
+);
+
+$overline: (
+  font-size: $font-size-xs,
+  font-weight: $font-weight-semibold,
+  line-height: $line-height-normal,
+  letter-spacing: $letter-spacing-widest,
+  text-transform: uppercase
+);
+
+// ============================================
+// CSS CUSTOM PROPERTIES
+// ============================================
+
+:root {
+  // Font Families
+  --font-family-heading: #{$font-family-heading};
+  --font-family-body: #{$font-family-body};
+  --font-family-mono: #{$font-family-mono};
+
+  // Font Sizes
+  --font-size-xs: #{$font-size-xs};
+  --font-size-sm: #{$font-size-sm};
+  --font-size-base: #{$font-size-base};
+  --font-size-lg: #{$font-size-lg};
+  --font-size-xl: #{$font-size-xl};
+  --font-size-2xl: #{$font-size-2xl};
+  --font-size-3xl: #{$font-size-3xl};
+  --font-size-4xl: #{$font-size-4xl};
+  --font-size-5xl: #{$font-size-5xl};
+  --font-size-6xl: #{$font-size-6xl};
+
+  // Font Weights
+  --font-weight-light: #{$font-weight-light};
+  --font-weight-normal: #{$font-weight-normal};
+  --font-weight-medium: #{$font-weight-medium};
+  --font-weight-semibold: #{$font-weight-semibold};
+  --font-weight-bold: #{$font-weight-bold};
+  --font-weight-extrabold: #{$font-weight-extrabold};
+
+  // Line Heights
+  --line-height-tight: #{$line-height-tight};
+  --line-height-snug: #{$line-height-snug};
+  --line-height-normal: #{$line-height-normal};
+  --line-height-relaxed: #{$line-height-relaxed};
+  --line-height-loose: #{$line-height-loose};
+
+  // Letter Spacing
+  --letter-spacing-tight: #{$letter-spacing-tight};
+  --letter-spacing-normal: #{$letter-spacing-normal};
+  --letter-spacing-wide: #{$letter-spacing-wide};
+  --letter-spacing-wider: #{$letter-spacing-wider};
+  --letter-spacing-widest: #{$letter-spacing-widest};
+}
