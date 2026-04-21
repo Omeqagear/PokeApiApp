@@ -47,8 +47,13 @@ export class SidebarComponent implements OnInit {
   navItems = computed<NavItem[]>(() => [
     { path: '/', icon: 'home', label: 'Home' },
     { path: '/catalog', icon: 'book', label: 'Pokédex' },
+    { path: '/evolution-chains', icon: 'account_tree', label: 'Evolutions' },
     { path: '/moves', icon: 'menu_book', label: 'Moves' },
     { path: '/abilities', icon: 'psychology', label: 'Abilities' },
+    { path: '/battle-strategy', icon: 'bolt', label: 'Battle' },
+    { path: '/types', icon: 'category', label: 'Types' },
+    { path: '/locations', icon: 'map', label: 'Locations' },
+    { path: '/natures', icon: 'psychology_alt', label: 'Natures' },
     { path: '/compare', icon: 'compare_arrows', label: 'Compare' },
     { path: '/favorites', icon: 'favorite', label: 'Favorites', badge: this.favoritesCount() },
     { path: '/team', icon: 'groups', label: 'My Team', badge: this.teamCount() }

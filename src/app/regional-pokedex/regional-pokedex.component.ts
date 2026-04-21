@@ -1,16 +1,22 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs';
 import { DataServiceService } from '../services/data-service.service';
 import { PokedexDetail } from '../shared/pokemon-api.interfaces';
 import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/pokeball-spinner.component';
 import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../shared/components/page-header/page-header.component';
 import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
+import { TypeBadgeComponent } from '../shared/components/type-badge/type-badge.component';
 import { capitalize, getOfficialArtworkUrl } from '../shared/utils/pokemon.utils';
 import { TeamService } from '../services/team.service';
+import { ProgressService } from '../services/progress.service';
 import { Pokemon } from '../shared/pokemon';
 
 interface PokedexOption {
@@ -59,6 +65,9 @@ const POKEDEX_OPTIONS: PokedexOption[] = [
     RouterModule,
     MatButtonModule,
     MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+    ReactiveFormsModule,
     PokeballSpinnerComponent,
     EmptyStateComponent,
     PageHeaderComponent,
@@ -70,19 +79,48 @@ const POKEDEX_OPTIONS: PokedexOption[] = [
 export class RegionalPokedexComponent implements OnInit {
   private dataService = inject(DataServiceService);
   private teamService = inject(TeamService);
+  private progressService = inject(ProgressService);
   private router = inject(Router);
 
   pokedexOptions = POKEDEX_OPTIONS;
 
+  searchControl = new FormControl('');
+
   selectedPokedex = signal<PokedexOption | null>(null);
   pokedex = signal<PokedexDetail | null>(null);
   loading = signal(true);
-  loadingDetail = signal(false);
   error = signal<string | null>(null);
+  searchTerm = signal('');
+
+  filteredEntries = computed(() => {
+    const entries = this.pokedex()?.pokemon_entries || [];
+    const term = this.searchTerm().toLowerCase().trim();
+
+    if (!term) return entries;
+
+    return entries.filter(entry =>
+      entry.pokemon_species.name.toLowerCase().includes(term)
+    );
+  });
+
+  viewedCount = computed(() => {
+    let count = 0;
+    this.filteredEntries().forEach(entry => {
+      const id = this.extractPokemonId(entry.pokemon_species.url);
+      if (this.progressService.isViewed(id)) count++;
+    });
+    return count;
+  });
 
   ngOnInit(): void {
     this.selectedPokedex.set(POKEDEX_OPTIONS[0]);
     this.loadPokedex(POKEDEX_OPTIONS[0].id);
+
+    this.searchControl.valueChanges.pipe(
+      debounceTime(200)
+    ).subscribe(value => {
+      this.searchTerm.set(value ?? '');
+    });
   }
 
   private loadPokedex(id: number): void {
@@ -107,9 +145,11 @@ export class RegionalPokedexComponent implements OnInit {
 
   selectPokedex(option: PokedexOption): void {
     this.selectedPokedex.set(option);
-    this.loadingDetail.set(true);
     this.loadPokedex(option.id);
-    setTimeout(() => this.loadingDetail.set(false), 0);
+  }
+
+  clearSearch(): void {
+    this.searchControl.setValue('');
   }
 
   extractPokemonId(url: string): number {
@@ -152,5 +192,9 @@ export class RegionalPokedexComponent implements OnInit {
 
   isInTeam(id: number): boolean {
     return this.teamService.isInTeam(id);
+  }
+
+  isViewed(id: number): boolean {
+    return this.progressService.isViewed(id);
   }
 }

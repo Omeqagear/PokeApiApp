@@ -1,0 +1,105 @@
+<div class="locations-container">
+  <ds-page-header title="Locations" subtitle="Explore regions and where to find Pokémon"></ds-page-header>
+
+  <div class="search-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search locations</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Enter location name..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="region-chips">
+    <button
+      mat-button
+      [class.active]="selectedRegion() === 'all'"
+      (click)="selectRegion('all')"
+    >
+      <mat-icon>public</mat-icon>
+      All Regions
+    </button>
+    @for (region of filteredRegions(); track region.name) {
+      <button
+        mat-button
+        [class.active]="selectedRegion() === region.name"
+        (click)="selectRegion(region.name)"
+      >
+        <mat-icon>{{ region.icon }}</mat-icon>
+        {{ region.displayName }}
+      </button>
+    }
+  </div>
+
+  @if (loadingLocations()) {
+    <div class="loading-container">
+      <ds-pokeball-spinner [size]="60" label="Loading locations..."></ds-pokeball-spinner>
+    </div>
+  } @else if (filteredLocations().length === 0) {
+    <ds-empty-state
+      icon="location_off"
+      title="No locations found"
+      message="Try adjusting your search or selecting a different region"
+    ></ds-empty-state>
+  } @else {
+    <div class="locations-list">
+      @for (location of filteredLocations(); track location.id) {
+        <div class="location-card" [class.expanded]="expandedLocationId() === location.id">
+          <div class="location-header" (click)="toggleLocation(location)">
+            <div class="location-info">
+              <h3 class="location-name">{{ location.name | titlecase }}</h3>
+              <span class="location-region">{{ location.region | titlecase }}</span>
+            </div>
+            <div class="location-meta">
+              <span class="area-count">{{ location.areaCount }} area{{ location.areaCount !== 1 ? 's' : '' }}</span>
+              <mat-icon class="expand-icon">
+                {{ expandedLocationId() === location.id ? 'expand_less' : 'expand_more' }}
+              </mat-icon>
+            </div>
+          </div>
+
+          @if (expandedLocationId() === location.id) {
+            <div class="location-content">
+              @if (loadingArea() && !locationAreas()[location.id]) {
+                <div class="loading-areas">
+                  <ds-pokeball-spinner [size]="40" label="Loading areas..."></ds-pokeball-spinner>
+                </div>
+              } @else if (locationAreas()[location.id]) {
+                @for (area of locationAreas()[location.id]; track area.areaName) {
+                  <div class="area-section">
+                    <h4 class="area-name">{{ area.areaName | titlecase }}</h4>
+                    @if (area.pokemon.length === 0) {
+                      <p class="no-pokemon">No Pokémon found in this area</p>
+                    } @else {
+                      <div class="pokemon-grid">
+                        @for (p of area.pokemon; track p.name) {
+                          <div class="pokemon-encounter">
+                            <img
+                              [src]="p.spriteUrl"
+                              [alt]="p.name"
+                              class="pokemon-sprite"
+                              loading="lazy"
+                              (error)="onSpriteError($event, p.id)"
+                            />
+                            <span class="pokemon-name">{{ p.name | titlecase }}</span>
+                            <div class="encounter-details">
+                              <span class="max-chance">Max: {{ p.maxChance }}%</span>
+                              <div class="methods">
+                                @for (method of p.methods; track method) {
+                                  <span class="method-badge">{{ formatMethodName(method) }}</span>
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,228 @@
+.evolution-chains-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+.controls-section {
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.search-field {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+.trigger-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.trigger-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--border, #e4e4e4);
+  border-radius: 24px;
+  background: var(--surface, #ffffff);
+  color: var(--text-secondary, #525252);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--primary, #8b5cf6);
+    color: var(--primary, #8b5cf6);
+    background: rgba(139, 92, 246, 0.05);
+  }
+
+  &.active {
+    border-color: var(--primary, #8b5cf6);
+    background: var(--primary, #8b5cf6);
+    color: #ffffff;
+
+    mat-icon {
+      color: #ffffff;
+    }
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &.skeleton {
+    width: 100px;
+    height: 36px;
+    background: linear-gradient(90deg, var(--gray-100, #f4f4f4) 25%, var(--gray-200, #e4e4e4) 50%, var(--gray-100, #f4f4f4) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border: none;
+    cursor: default;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.chains-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.chain-card {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border, #e4e4e4);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary, #8b5cf6);
+
+    .chain-card-image::after {
+      opacity: 0.1;
+    }
+  }
+}
+
+.chain-card-image {
+  position: relative;
+  height: 200px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--primary, #8b5cf6);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  img {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    z-index: 1;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.1);
+  }
+}
+
+.chain-card-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.chain-card-content {
+  padding: 16px;
+}
+
+.chain-card-name {
+  margin: 0 0 8px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary, #171717);
+  letter-spacing: -0.01em;
+}
+
+.chain-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.chain-stages,
+.chain-branches {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #525252);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--primary, #8b5cf6);
+  }
+}
+
+.loading-more {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.scroll-anchor {
+  height: 1px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .evolution-chains-container {
+    padding: 0 16px 40px;
+  }
+
+  .chains-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .chain-card-image {
+    height: 160px;
+
+    img {
+      width: 110px;
+      height: 110px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .chains-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .trigger-chip {
+    padding: 6px 12px;
+    font-size: 0.8125rem;
+  }
+}

@@ -11,7 +11,7 @@
   padding: 56px 40px;
   min-height: 460px;
   gap: 40px;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: var(--bg-secondary);
   border-radius: 0 0 20px 20px;
   margin-bottom: 48px;
   position: relative;
@@ -90,7 +90,7 @@
       opacity: 0.85;
       max-width: 500px;
       font-weight: 400;
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--text-secondary);
     }
 
     .hero-actions {
@@ -247,10 +247,10 @@
 
 .stats {
   padding: 40px;
-  background: linear-gradient(135deg, #fafafa 0%, #f4f4f4 100%);
+  background: var(--bg-secondary);
   border-radius: 16px;
   margin: 0 40px 56px;
-  border: 0.5px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
+  border: 0.5px solid var(--border-subtle);
 
   .stats-grid {
     display: grid;

@@ -38,12 +38,13 @@
       <div class="keyboard-hints" aria-hidden="true">
         <span class="hint"><kbd>←</kbd><kbd>→</kbd> Browse</span>
         <span class="hint"><kbd>S</kbd> Shiny</span>
+        <span class="hint"><kbd>?</kbd> All</span>
       </div>
 
-      <!-- Main Content -->
-      <div class="main-content">
-        <!-- Left: Pokemon Image -->
-        <div class="image-section">
+      <!-- Main Grid Layout -->
+      <div class="pokemon-grid">
+        <!-- Row 1: Sprite (top-left) + Header Info (top-right) -->
+        <div class="grid-sprite">
           <div class="pokemon-id-badge">#{{ pokemon()!.id | number:'3.0-0' }}</div>
           <div class="image-wrapper">
             <img
@@ -105,18 +106,14 @@
           </div>
         </div>
 
-        <!-- Right: Pokemon Info -->
-        <div class="info-section">
+        <!-- Header: Name, Types, Physical Info -->
+        <div class="grid-header">
           <h1 class="pokemon-name">{{ capitalize(pokemon()!.name) }}</h1>
-
-          <!-- Types -->
           <div class="types-container" aria-label="Pokémon types">
             @for (type of pokemon()!.types; track $index) {
               <ds-type-badge [type]="type.type.name" variant="ghost"></ds-type-badge>
             }
           </div>
-
-          <!-- Physical Info -->
           <div class="physical-info">
             <div class="info-item">
               <span class="info-label">Height</span>
@@ -127,8 +124,33 @@
               <span class="info-value">{{ (pokemon()!.weight / 10).toFixed(1) }} kg</span>
             </div>
           </div>
+        </div>
 
-          <!-- Abilities -->
+        <!-- Row 2: Stats Bars (left) + Radar Chart (right) -->
+        <div class="grid-stats">
+          <div class="stats-block" aria-describedby="stats-description">
+            <h2 class="block-title">Base Stats</h2>
+            <span id="stats-description" class="sr-only">Base statistics for {{ capitalize(pokemon()!.name) }}</span>
+            <div class="stats-container">
+              @for (stat of pokemon()!.stats; track stat.stat.name) {
+                <ds-stat-bar [label]="stat.stat.name" [value]="stat.base_stat"></ds-stat-bar>
+              }
+            </div>
+            <div class="total-stats">
+              <span class="total-label">Total</span>
+              <span class="total-value">{{ getTotalStats() }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-radar">
+          @if (pokemon()) {
+            <app-stats-radar [stats]="pokemon()!.stats.map(s => ({ name: s.stat.name, value: s.base_stat }))"></app-stats-radar>
+          }
+        </div>
+
+        <!-- Row 3: Abilities (left) + Moves (right) -->
+        <div class="grid-abilities">
           <div class="info-block">
             <h2 class="block-title">Abilities</h2>
             <div class="abilities-list">
@@ -142,19 +164,9 @@
               }
             </div>
           </div>
+        </div>
 
-          <!-- Stats with Progress Bars -->
-          <div class="stats-block" aria-describedby="stats-description">
-            <h2 class="block-title">Base Stats</h2>
-            <span id="stats-description" class="sr-only">Base statistics for {{ capitalize(pokemon()!.name) }}</span>
-            <div class="stats-container">
-              @for (stat of pokemon()!.stats; track stat.stat.name) {
-                <ds-stat-bar [label]="stat.stat.name" [value]="stat.base_stat"></ds-stat-bar>
-              }
-            </div>
-          </div>
-
-          <!-- Moves -->
+        <div class="grid-moves">
           <div class="info-block">
             <h2 class="block-title">Moves</h2>
             <div class="moves-list">
@@ -163,28 +175,37 @@
               }
             </div>
           </div>
+        </div>
 
-          <!-- Evolution Chain -->
-          @if (species()) {
-            <app-evolution-chain
-              [pokemonId]="pokemon()!.id"
-              [pokemonSpecies]="species()!"
-            ></app-evolution-chain>
+        <!-- Row 4: Sprite Gallery (full width) -->
+        <div class="grid-gallery">
+          @if (pokemonId()) {
+            <app-sprite-gallery [pokemonId]="pokemonId()!" [isShiny]="isShiny()"></app-sprite-gallery>
           }
+        </div>
 
-          <!-- Bottom Navigation -->
-          <div class="bottom-nav">
-            <button mat-flat-button class="nav-action-btn team-btn" (click)="navigateToTeam()">
-              <mat-icon>group</mat-icon>
-              My Team
-            </button>
-            <button mat-stroked-button class="nav-action-btn pokedex-btn" (click)="navigateToCatalog()">
-              <mat-icon>book</mat-icon>
-              Pokédex
-            </button>
-          </div>
+        <!-- Row 5: Species Detail (full width) -->
+        <div class="grid-species">
+          @if (pokemonId()) {
+            <app-species-detail [pokemonId]="pokemonId()!" [speciesData]="species()"></app-species-detail>
+          }
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="grid-bottom-nav">
+          <button mat-flat-button class="nav-action-btn team-btn" (click)="navigateToTeam()">
+            <mat-icon>group</mat-icon>
+            My Team
+          </button>
+          <button mat-stroked-button class="nav-action-btn pokedex-btn" (click)="navigateToCatalog()">
+            <mat-icon>book</mat-icon>
+            Pokédex
+          </button>
         </div>
       </div>
     </div>
   }
+
+  <!-- Shortcuts Modal -->
+  <app-shortcuts-modal></app-shortcuts-modal>
 </div>

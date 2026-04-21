@@ -1,0 +1,148 @@
+<div class="species-detail-container" *ngIf="loading(); else loadedOrError">
+  <div class="spinner-wrapper">
+    <div class="spinner"></div>
+    <p>Loading species data...</p>
+  </div>
+</div>
+
+<ng-template #loadedOrError>
+  <div class="species-detail-container" *ngIf="error(); else loaded">
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  </div>
+
+  <ng-template #loaded>
+    <div class="species-detail-container" *ngIf="species()">
+      <section class="genus-header">
+        <h2 class="species-name">{{ capitalize(species()?.name || '') }}</h2>
+        <span class="genus-text">{{ getGenus() }}</span>
+        <div class="badges-row">
+          <span class="badge legendary" *ngIf="species()?.is_legendary">
+            <mat-icon>star</mat-icon> Legendary
+          </span>
+          <span class="badge mythical" *ngIf="species()?.is_mythical">
+            <mat-icon>auto_awesome</mat-icon> Mythical
+          </span>
+          <span class="badge baby" *ngIf="species()?.is_baby">
+            <mat-icon>child_care</mat-icon> Baby
+          </span>
+        </div>
+      </section>
+
+      <section class="flavor-text-section">
+        <blockquote class="flavor-text" *ngFor="let text of getFlavorTexts()">
+          "{{ text }}"
+        </blockquote>
+      </section>
+
+      <section class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Capture Rate</span>
+          <span class="stat-value">{{ species()?.capture_rate }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Base Happiness</span>
+          <span class="stat-value">{{ species()?.base_happiness }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Hatch Counter</span>
+          <span class="stat-value">{{ species()?.hatch_counter }} cycles</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Growth Rate</span>
+          <span class="stat-value">{{ capitalize(growthRateName()) }}</span>
+        </div>
+      </section>
+
+      <section class="egg-groups-section">
+        <h3 class="section-title">Egg Groups</h3>
+        <mat-chip-listbox class="egg-groups-chips">
+          <mat-chip-option *ngFor="let group of getEggGroupNames()" class="egg-group-chip">
+            {{ group }}
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </section>
+
+      <section class="appearance-section">
+        <div class="appearance-item">
+          <span class="label">Color</span>
+          <span class="value">
+            <span class="color-dot" [style.background-color]="species()?.color?.name === 'unknown' ? '#888' : getColorHex(species()?.color?.name)"></span>
+            {{ capitalize(species()?.color?.name || '') }}
+          </span>
+        </div>
+        <div class="appearance-item">
+          <span class="label">Shape</span>
+          <span class="value">{{ capitalize(species()?.shape?.name || 'Unknown') }}</span>
+        </div>
+        <div class="appearance-item">
+          <span class="label">Habitat</span>
+          <span class="value">{{ species()?.habitat ? capitalize(species()?.habitat?.name ?? '') : 'Unknown' }}</span>
+        </div>
+      </section>
+
+      <section class="gender-ratio-section">
+        <h3 class="section-title">Gender Ratio</h3>
+        <div class="gender-bar-wrapper">
+          <ng-container *ngIf="getGenderRatio().genderless; else gendered">
+            <span class="genderless-text">Genderless</span>
+          </ng-container>
+          <ng-template #gendered>
+            <div class="gender-bar">
+              <div class="gender-male" [style.width.%]="getGenderRatio().male">
+                <span *ngIf="getGenderRatio().male > 10">♂ {{ getGenderRatio().male }}%</span>
+              </div>
+              <div class="gender-female" [style.width.%]="getGenderRatio().female">
+                <span *ngIf="getGenderRatio().female > 10">♀ {{ getGenderRatio().female }}%</span>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </section>
+
+      <section class="pokedex-entries-section" *ngIf="getPokedexEntries().length > 0">
+        <h3 class="section-title">Pokédex Entries</h3>
+        <table class="pokedex-table">
+          <thead>
+            <tr>
+              <th>Pokédex</th>
+              <th>Entry #</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of getPokedexEntries(); trackBy: trackByEntry">
+              <td>{{ capitalize(entry.pokedex.name) }}</td>
+              <td>{{ entry.entry_number }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="varieties-section" *ngIf="getVarieties().length > 1">
+        <h3 class="section-title">Forms</h3>
+        <div class="varieties-grid">
+          <a *ngFor="let v of getVarieties(); trackBy: trackByVariety"
+             [routerLink]="['/photo', getPokemonIdFromUrl(v.pokemon.url)]"
+             class="variety-link"
+             [class.is-default]="v.is_default">
+            <img [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + getPokemonIdFromUrl(v.pokemon.url) + '.png'"
+                 [alt]="v.pokemon.name"
+                 (error)="onImageError($event)" />
+            <span>{{ capitalize(v.pokemon.name) }}</span>
+            <span class="default-badge" *ngIf="v.is_default">Default</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="evolution-section" *ngIf="getEvolutionChainUrl()">
+        <h3 class="section-title">Evolution Chain</h3>
+        <app-evolution-chain
+          [pokemonId]="pokemonId"
+          [pokemonSpecies]="{ evolution_chain: { url: getEvolutionChainUrl()! } }">
+        </app-evolution-chain>
+      </section>
+    </div>
+  </ng-template>
+</ng-template>

@@ -1,0 +1,245 @@
+<div class="battle-strategy-container">
+  <ds-page-header title="Battle Strategy" subtitle="Type matchups and damage calculator"></ds-page-header>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <ds-pokeball-spinner [size]="60" label="Loading type data..."></ds-pokeball-spinner>
+    </div>
+  } @else {
+    <div class="tab-switcher">
+      <button
+        mat-button
+        [class.active]="activeTab() === 'chart'"
+        (click)="setActiveTab('chart')"
+      >
+        <mat-icon>grid_on</mat-icon>
+        Type Chart
+      </button>
+      <button
+        mat-button
+        [class.active]="activeTab() === 'calculator'"
+        (click)="setActiveTab('calculator')"
+      >
+        <mat-icon>calculate</mat-icon>
+        Damage Calculator
+      </button>
+    </div>
+
+    @if (activeTab() === 'chart') {
+      <div class="type-chart-section">
+        <div class="chart-controls">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Filter types..." [(ngModel)]="typeSearch" />
+          </div>
+          <div class="view-toggle">
+            <button mat-button [class.active]="!selectedDefensiveTypes().length" (click)="clearDefensiveSelection()">
+              <mat-icon>grid_on</mat-icon>
+              Offensive Chart
+            </button>
+            <button mat-button [class.active]="selectedDefensiveTypes().length > 0" (click)="toggleDefensiveType('fire')">
+              <mat-icon>shield</mat-icon>
+              Defensive View
+            </button>
+          </div>
+        </div>
+
+        <div class="type-chart-wrapper">
+          <div class="type-chart-grid">
+            <div class="corner-cell"></div>
+            @for (defType of filteredTypes(); track defType) {
+              <div class="header-cell defending-header">
+                <ds-type-badge [type]="defType" size="sm" variant="solid"></ds-type-badge>
+              </div>
+            }
+
+            @for (atkType of filteredTypes(); track atkType) {
+              <div class="header-cell attacking-header">
+                <ds-type-badge [type]="atkType" size="sm" variant="solid"></ds-type-badge>
+              </div>
+              @for (defType of filteredTypes(); track defType) {
+                @let effectiveness = getEffectiveness(atkType, defType);
+                <div
+                  class="effectiveness-cell {{ getCellClass(effectiveness) }}"
+                  [class.highlighted]="isTypeSelected(atkType) || isTypeSelected(defType)"
+                  [class.row-selected]="isTypeSelected(atkType)"
+                  [class.column-selected]="isTypeSelected(defType)"
+                  (click)="selectType(atkType)"
+                  (mouseenter)="onCellHover(atkType, defType)"
+                  (mouseleave)="onCellLeave()"
+                >
+                  {{ getEffectivenessLabel(effectiveness) }}
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        @if (hoveredCell()) {
+          <div class="hover-tooltip">
+            <ds-type-badge [type]="hoveredCell()!.attackingType" size="sm" variant="solid"></ds-type-badge>
+            <span class="tooltip-arrow">vs</span>
+            <ds-type-badge [type]="hoveredCell()!.defendingType" size="sm" variant="solid"></ds-type-badge>
+            <span class="tooltip-result" [class]="getCellClass(hoveredCell()!.effectiveness)">
+              {{ hoveredCell()!.label }} ({{ getEffectivenessLabel(hoveredCell()!.effectiveness) }})
+            </span>
+          </div>
+        }
+
+        @if (selectedType()) {
+          <div class="type-info-panel">
+            <h3>{{ selectedType() | titlecase }} Type Matchups</h3>
+            <div class="matchup-groups">
+              <div class="matchup-group">
+                <h4><mat-icon>arrow_upward</mat-icon> Strong Against (2x)</h4>
+                <div class="type-badges">
+                  @for (type of moveRecommendations().strongAgainst; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  }
+                </div>
+              </div>
+              <div class="matchup-group">
+                <h4><mat-icon>arrow_downward</mat-icon> Weak Against (0.5x / 0x)</h4>
+                <div class="type-badges">
+                  @for (type of moveRecommendations().weakAgainst; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  }
+                </div>
+              </div>
+              <div class="matchup-group">
+                <h4><mat-icon>dangerous</mat-icon> Weak To (takes 2x)</h4>
+                <div class="type-badges">
+                  @for (type of moveRecommendations().weakTo; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  }
+                </div>
+              </div>
+              <div class="matchup-group">
+                <h4><mat-icon>shield</mat-icon> Resistant To (takes 0.5x / 0x)</h4>
+                <div class="type-badges">
+                  @for (type of moveRecommendations().resistantTo; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (selectedDefensiveTypes().length > 0) {
+          <div class="type-info-panel defensive-panel">
+            <div class="defensive-header">
+              <h3>Defensive Matchups</h3>
+              <div class="selected-types">
+                @for (type of selectedDefensiveTypes(); track type) {
+                  <ds-type-badge [type]="type" size="sm" variant="solid"></ds-type-badge>
+                }
+              </div>
+            </div>
+            <div class="matchup-groups">
+              <div class="matchup-group">
+                <h4><mat-icon>dangerous</mat-icon> Weak To ({{ defensiveMatchups().weakTo.length }})</h4>
+                <div class="type-badges">
+                  @for (type of defensiveMatchups().weakTo; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  } @empty {
+                    <span class="empty-msg">None</span>
+                  }
+                </div>
+              </div>
+              <div class="matchup-group">
+                <h4><mat-icon>shield</mat-icon> Resistant To ({{ defensiveMatchups().resistantTo.length }})</h4>
+                <div class="type-badges">
+                  @for (type of defensiveMatchups().resistantTo; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  } @empty {
+                    <span class="empty-msg">None</span>
+                  }
+                </div>
+              </div>
+              <div class="matchup-group">
+                <h4><mat-icon>block</mat-icon> Immune To ({{ defensiveMatchups().immuneTo.length }})</h4>
+                <div class="type-badges">
+                  @for (type of defensiveMatchups().immuneTo; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  } @empty {
+                    <span class="empty-msg">None</span>
+                  }
+                </div>
+              </div>
+              <div class="matchup-group">
+                <h4><mat-icon>swap_horiz</mat-icon> Neutral To ({{ defensiveMatchups().neutralTo.length }})</h4>
+                <div class="type-badges">
+                  @for (type of defensiveMatchups().neutralTo; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="ghost"></ds-type-badge>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (activeTab() === 'calculator') {
+      <div class="calculator-section">
+        <form [formGroup]="calculatorForm" class="calculator-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Attacking Type</mat-label>
+            <mat-select formControlName="attackingType">
+              @for (type of types; track type) {
+                <mat-option [value]="type">
+                  <ds-type-badge [type]="type" size="sm" variant="solid"></ds-type-badge>
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Defending Type(s)</mat-label>
+            <mat-select formControlName="defendingTypes" multiple>
+              @for (type of types; track type) {
+                <mat-option [value]="type">
+                  <ds-type-badge [type]="type" size="sm" variant="solid"></ds-type-badge>
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Power</mat-label>
+            <input matInput type="number" formControlName="power" min="0" max="255">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Level</mat-label>
+            <input matInput type="number" formControlName="level" min="1" max="100">
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" (click)="calculateDamage()" type="button">
+            <mat-icon>calculate</mat-icon>
+            Calculate Damage
+          </button>
+        </form>
+
+        @if (damageResult()) {
+          <div class="damage-result">
+            <div class="result-header">
+              <h3>Damage Result</h3>
+              <span class="effectiveness-badge" [class]="damageResult()!.effectiveness > 1 ? 'super-effective' : damageResult()!.effectiveness < 1 ? 'not-effective' : 'neutral'">
+                {{ damageResult()!.label }}
+              </span>
+            </div>
+            <div class="result-value">
+              <span class="damage-number">{{ damageResult()!.damage }}</span>
+              <span class="damage-label">damage</span>
+            </div>
+            <div class="result-details">
+              <p>Effectiveness: {{ damageResult()!.effectiveness }}x</p>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

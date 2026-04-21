@@ -1,25 +1,29 @@
-import { Component, OnInit, OnDestroy, signal, HostListener, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, HostListener, inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataServiceService } from '../services/data-service.service';
 import { FavoritesService } from '../services/favorites.service';
 import { TeamService } from '../services/team.service';
+import { ProgressService } from '../services/progress.service';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PokemonDetail, PokemonSpecies } from '../shared/pokemon-api.interfaces';
+import { PokemonDetail, PokemonSpeciesDetail } from '../shared/pokemon-api.interfaces';
 import { Pokemon } from '../shared/pokemon';
 import { TypeBadgeComponent } from '../shared/components/type-badge/type-badge.component';
 import { StatBarComponent } from '../shared/components/stat-bar/stat-bar.component';
 import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/pokeball-spinner.component';
-import { EvolutionChainComponent } from '../shared/components/evolution-chain/evolution-chain.component';
+import { SpeciesDetailComponent } from '../shared/components/species-detail/species-detail.component';
+import { SpriteGalleryComponent } from '../shared/components/sprite-gallery/sprite-gallery.component';
+import { ShortcutsModalComponent } from '../shared/components/shortcuts-modal/shortcuts-modal.component';
+import { StatsRadarComponent } from '../shared/components/stats-radar/stats-radar.component';
 import { capitalize, getStatShortName } from '../shared/utils/pokemon.utils';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-photo-pokemon',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule, TypeBadgeComponent, StatBarComponent, PokeballSpinnerComponent, EvolutionChainComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule, TypeBadgeComponent, StatBarComponent, PokeballSpinnerComponent, SpeciesDetailComponent, SpriteGalleryComponent, ShortcutsModalComponent, StatsRadarComponent],
   templateUrl: './photo-pokemon.component.html',
   styleUrls: ['./photo-pokemon.component.scss']
 })
@@ -27,12 +31,15 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private favoritesService = inject(FavoritesService);
   private teamService = inject(TeamService);
+  private progressService = inject(ProgressService);
+
+  @ViewChild(ShortcutsModalComponent) shortcutsModal!: ShortcutsModalComponent;
 
   pokemonId = signal<number | null>(null);
   pokemon = signal<PokemonDetail | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
-  species = signal<PokemonSpecies | null>(null);
+  species = signal<PokemonSpeciesDetail | null>(null);
   hasPrev = signal(true);
   hasNext = signal(true);
   prevId = signal(0);
@@ -79,6 +86,7 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.isShiny.set(false);
     this.species.set(null);
+    this.progressService.markViewed(id);
 
     this.dataService.getPokemonDetail(id).pipe(
       takeUntil(this.destroy$)
@@ -102,10 +110,10 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
   }
 
   private loadSpecies(id: number): void {
-    this.dataService.getPokemonSpecies(id).pipe(
+    this.dataService.getPokemonSpeciesDetail(id).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (speciesData: PokemonSpecies) => {
+      next: (speciesData: PokemonSpeciesDetail) => {
         if (speciesData && speciesData.id) {
           this.species.set(speciesData);
         }
@@ -162,12 +170,35 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
           this.toggleShiny();
         }
         break;
+      case 'f':
+      case 'F':
+        if (!event.ctrlKey && !event.metaKey && !(event.target instanceof HTMLInputElement)) {
+          this.toggleFavorite();
+        }
+        break;
+      case 't':
+      case 'T':
+        if (!event.ctrlKey && !event.metaKey && !(event.target instanceof HTMLInputElement)) {
+          this.addToTeam();
+        }
+        break;
+      case '?':
+        if (!(event.target instanceof HTMLInputElement)) {
+          this.shortcutsModal?.open();
+        }
+        break;
       case 'Escape':
         if (event.target instanceof HTMLInputElement) {
           (event.target as HTMLInputElement).blur();
         }
         break;
     }
+  }
+
+  getTotalStats(): number {
+    const p = this.pokemon();
+    if (!p) return 0;
+    return p.stats.reduce((sum, s) => sum + s.base_stat, 0);
   }
 
   capitalize = capitalize;
