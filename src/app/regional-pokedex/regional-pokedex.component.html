@@ -3,7 +3,7 @@
     <mat-icon>book</mat-icon>
     <span>
       @if (pokedex()) {
-        {{ pokedex()!.pokemon_entries.length }} Pokémon in {{ pokedex()!.name | titlecase }}
+        {{ filteredEntries().length }} / {{ pokedex()!.pokemon_entries.length }} Pokémon in {{ pokedex()!.name | titlecase }}
       } @else {
         Select a Pokédex
       }
@@ -27,6 +27,19 @@
         </button>
       }
     </div>
+  </div>
+
+  <div class="search-bar-container">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search Pokémon by name</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="e.g., pikachu, charizard">
+      <mat-icon matPrefix>search</mat-icon>
+      @if (searchControl.value) {
+        <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()" type="button">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
   </div>
 </ds-page-header>
 
@@ -53,10 +66,20 @@
     }
   </div>
 
-  @if (pokedex()!.pokemon_entries.length > 0) {
+  <div class="progress-section">
+    <div class="progress-header">
+      <mat-icon>visibility</mat-icon>
+      <span class="progress-text">{{ viewedCount() }} / {{ filteredEntries().length }} viewed</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" [style.width.%]="(filteredEntries().length > 0) ? (viewedCount() / filteredEntries().length * 100) : 0"></div>
+    </div>
+  </div>
+
+  @if (filteredEntries().length > 0) {
     <div class="pokedex-grid" role="list">
-      @for (entry of pokedex()!.pokemon_entries; track entry.entry_number; let i = $index) {
-        <div role="listitem" [attr.data-pokemon-id]="extractPokemonId(entry.pokemon_species.url)">
+      @for (entry of filteredEntries(); track entry.entry_number; let i = $index) {
+        <div role="listitem" [attr.data-pokemon-id]="extractPokemonId(entry.pokemon_species.url)" [class.viewed]="isViewed(extractPokemonId(entry.pokemon_species.url))">
           <ds-poke-card
             [pokemon]="{
               id: extractPokemonId(entry.pokemon_species.url),
@@ -89,9 +112,9 @@
     </div>
   } @else {
     <ds-empty-state
-      icon="explore"
-      title="No Pokémon in this Pokédex"
-      message="This Pokédex doesn't have any entries yet. Try selecting a different Pokédex!"
+      icon="search_off"
+      [title]="searchTerm() ? 'No Pokémon found' : 'No Pokémon available'"
+      [message]="searchTerm() ? 'Try a different search term.' : 'This Pokédex has no entries.'"
       [compact]="true"
     ></ds-empty-state>
   }

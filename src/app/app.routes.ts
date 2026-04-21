@@ -52,6 +52,31 @@ export const routes: Routes = [
       .then(m => m.AbilityDetailComponent)
   },
   {
+    path: 'evolution-chains',
+    loadComponent: () => import('./evolution-chains/evolution-chains.component')
+      .then(m => m.EvolutionChainsComponent)
+  },
+  {
+    path: 'battle-strategy',
+    loadComponent: () => import('./battle-strategy/battle-strategy.component')
+      .then(m => m.BattleStrategyComponent)
+  },
+  {
+    path: 'locations',
+    loadComponent: () => import('./locations/locations.component')
+      .then(m => m.LocationsComponent)
+  },
+  {
+    path: 'types',
+    loadComponent: () => import('./types-deep-dive/types-deep-dive.component')
+      .then(m => m.TypesDeepDiveComponent)
+  },
+  {
+    path: 'natures',
+    loadComponent: () => import('./natures-stats/natures-stats.component')
+      .then(m => m.NaturesStatsComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

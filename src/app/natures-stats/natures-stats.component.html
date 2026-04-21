@@ -1,0 +1,133 @@
+<div class="natures-stats-container">
+  <ds-page-header
+    title="Natures & Stats"
+    subtitle="Understand how natures affect Pokémon stats"
+  ></ds-page-header>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <ds-pokeball-spinner [size]="60"></ds-pokeball-spinner>
+    </div>
+  } @else if (error()) {
+    <ds-empty-state
+      [message]="error()!"
+      icon="error"
+    ></ds-empty-state>
+  } @else {
+    <mat-tab-group [(selectedIndex)]="activeTab" class="tabs-container">
+      <mat-tab label="Natures">
+        <div class="tab-content">
+          <div class="natures-grid">
+            @for (nature of natures(); track nature.name) {
+              <mat-card class="nature-card">
+                <mat-card-header>
+                  <mat-card-title class="nature-name">{{ nature.displayName }}</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  @if (nature.isNeutral) {
+                    <div class="stat-row neutral">
+                      <span class="stat-label">Stats</span>
+                      <span class="stat-value">—</span>
+                    </div>
+                  } @else {
+                    <div class="stat-row increased">
+                      <span class="stat-label">Increased</span>
+                      <span class="stat-value" [style.color]="getStatColor(nature.increasedStat)">
+                        +{{ nature.increasedStat }}
+                      </span>
+                    </div>
+                    <div class="stat-row decreased">
+                      <span class="stat-label">Decreased</span>
+                      <span class="stat-value" [style.color]="getStatColor(nature.decreasedStat)">
+                        −{{ nature.decreasedStat }}
+                      </span>
+                    </div>
+                  }
+                  <div class="flavor-section">
+                    <div class="flavor-row">
+                      <span class="flavor-label">Likes</span>
+                      <span class="flavor-value">{{ nature.likedFlavor || '—' }}</span>
+                    </div>
+                    <div class="flavor-row">
+                      <span class="flavor-label">Dislikes</span>
+                      <span class="flavor-value">{{ nature.dislikedFlavor || '—' }}</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Growth Rates">
+        <div class="tab-content">
+          <div class="growth-rates-grid">
+            @for (rate of growthRates(); track rate.name) {
+              <mat-card class="growth-rate-card" [class.expanded]="selectedGrowthRate() === rate">
+                <mat-card-header>
+                  <mat-card-title class="growth-rate-name">{{ rate.displayName }}</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="formula">
+                    <code>{{ rate.formula }}</code>
+                  </div>
+                  <div class="xp-curve">
+                    <h4>XP Curve</h4>
+                    <div class="xp-bars">
+                      @for (level of rate.levels; track level.level) {
+                        @if (level.level % 10 === 0 || level.level === 1 || level.level === 50 || level.level === 100) {
+                          <div class="xp-bar-item">
+                            <div class="xp-bar-label">Lv.{{ level.level }}</div>
+                            <div class="xp-bar-container">
+                              <div
+                                class="xp-bar-fill"
+                                [style.width.%]="(level.experience / getMaxXP(rate)) * 100"
+                              ></div>
+                            </div>
+                            <div class="xp-bar-value">{{ level.experience | number }}</div>
+                          </div>
+                        }
+                      }
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Characteristics">
+        <div class="tab-content">
+          <div class="characteristics-intro">
+            <p>
+              Characteristics are short descriptions that indicate which of a Pokémon's stats is its highest IV (Individual Value).
+              Each characteristic corresponds to the stat with the highest IV, helping trainers identify their Pokémon's potential.
+            </p>
+          </div>
+          <div class="characteristics-grid">
+            @for (entry of getCharacteristicGrouped() | keyvalue; track entry.key) {
+              <mat-card class="characteristic-card">
+                <mat-card-header>
+                  <mat-card-title class="characteristic-stat" [style.color]="getStatColor(entry.key)">
+                    {{ entry.key }}
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <ul class="characteristic-list">
+                    @for (char of entry.value; track char.id) {
+                      @for (desc of char.descriptions; track desc) {
+                        <li>{{ desc }}</li>
+                      }
+                    }
+                  </ul>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

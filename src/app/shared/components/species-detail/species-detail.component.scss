@@ -1,0 +1,413 @@
+:host {
+  --surface: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --primary: #6366f1;
+  --surface-light: rgba(255, 255, 255, 0.08);
+}
+
+.species-detail-container {
+  padding: 1.5rem;
+  color: var(--text-primary);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.spinner-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  gap: 1rem;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 0;
+  color: #ff6b6b;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+.genus-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+
+  .species-name {
+    font-size: 2rem;
+    font-weight: 800;
+    text-transform: capitalize;
+    margin: 0 0 0.25rem;
+    background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .genus-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .badges-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+
+      &.legendary {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.4);
+      }
+
+      &.mythical {
+        background: rgba(233, 30, 99, 0.2);
+        color: #e91e63;
+        border: 1px solid rgba(233, 30, 99, 0.4);
+      }
+
+      &.baby {
+        background: rgba(139, 195, 74, 0.2);
+        color: #8bc34a;
+        border: 1px solid rgba(139, 195, 74, 0.4);
+      }
+    }
+  }
+}
+
+.flavor-text-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .flavor-text {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+  }
+}
+
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+  margin: 0 0 0.75rem;
+}
+
+.egg-groups-section {
+  .egg-groups-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .egg-group-chip {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+    }
+  }
+}
+
+.appearance-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+
+  .appearance-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+    }
+
+    .value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: capitalize;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .color-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+.gender-ratio-section {
+  .gender-bar-wrapper {
+    .genderless-text {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .gender-bar {
+      display: flex;
+      height: 32px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+
+      .gender-male {
+        background: linear-gradient(135deg, #42a5f5, #1e88e5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        transition: width 0.3s ease;
+      }
+
+      .gender-female {
+        background: linear-gradient(135deg, #f06292, #e91e63);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        transition: width 0.3s ease;
+      }
+    }
+  }
+}
+
+.pokedex-entries-section {
+  .pokedex-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+
+    thead {
+      background: var(--surface-light);
+
+      th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid var(--border);
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        td {
+          padding: 0.6rem 1rem;
+          font-size: 0.9rem;
+          color: var(--text-primary);
+          text-transform: capitalize;
+        }
+      }
+    }
+  }
+}
+
+.varieties-section {
+  .varieties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+
+    .variety-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      position: relative;
+
+      &:hover {
+        background: var(--surface-light);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      &.is-default {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.1);
+      }
+
+      img {
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+        image-rendering: pixelated;
+      }
+
+      span {
+        font-size: 0.8rem;
+        text-transform: capitalize;
+        text-align: center;
+      }
+
+      .default-badge {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        font-size: 0.6rem;
+        padding: 0.15rem 0.4rem;
+        background: var(--primary);
+        color: #fff;
+        border-radius: 4px;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.evolution-section {
+  margin-top: 2rem;
+}
+
+@media (max-width: 600px) {
+  .species-detail-container {
+    padding: 1rem;
+  }
+
+  .genus-header {
+    .species-name {
+      font-size: 1.5rem;
+    }
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .appearance-section {
+    grid-template-columns: 1fr;
+  }
+
+  .varieties-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}

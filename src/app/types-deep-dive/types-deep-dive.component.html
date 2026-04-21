@@ -1,0 +1,149 @@
+<div class="types-deep-dive">
+  <ds-page-header title="Types" subtitle="Explore all 18 Pokémon types and their relationships"></ds-page-header>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <ds-pokeball-spinner [size]="80" label="Loading types..."></ds-pokeball-spinner>
+    </div>
+  } @else if (!selectedType()) {
+    <div class="types-grid">
+      @for (type of allTypes(); track type.id) {
+        <div
+          class="type-card"
+          [style.--type-color]="getTypeColor(type.name)"
+          (click)="selectType(type)"
+          (keydown.enter)="selectType(type)"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="capitalize(type.name) + ' type'"
+        >
+          <div class="type-card-icon">
+            <ds-type-badge [type]="type.name" size="lg" variant="solid"></ds-type-badge>
+          </div>
+          <div class="type-card-count">
+            {{ type.pokemon.length }} Pokémon
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="type-detail">
+      <div class="type-detail-header">
+        <button mat-icon-button (click)="goBack()" aria-label="Back to types">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <ds-type-badge [type]="selectedType()!.name" size="lg" variant="solid"></ds-type-badge>
+        <span class="type-detail-title">{{ capitalize(selectedType()!.name) }}</span>
+      </div>
+
+      <mat-tab-group [(selectedIndex)]="selectedTab" class="type-tabs">
+        <mat-tab label="Effectiveness">
+          <div class="effectiveness-tab">
+            @if (typeEffectiveness(); as eff) {
+              <div class="effectiveness-grid">
+                <div class="effectiveness-section">
+                  <h3>Weak To</h3>
+                  <div class="type-list">
+                    @for (typeName of eff.doubleDamageFrom; track typeName) {
+                      <ds-type-badge [type]="typeName" size="sm" variant="outline"></ds-type-badge>
+                    }
+                    @if (eff.doubleDamageFrom.length === 0) {
+                      <span class="none-text">None</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="effectiveness-section">
+                  <h3>Resistant To</h3>
+                  <div class="type-list">
+                    @for (typeName of eff.halfDamageFrom; track typeName) {
+                      <ds-type-badge [type]="typeName" size="sm" variant="outline"></ds-type-badge>
+                    }
+                    @if (eff.halfDamageFrom.length === 0) {
+                      <span class="none-text">None</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="effectiveness-section">
+                  <h3>Immune To</h3>
+                  <div class="type-list">
+                    @for (typeName of eff.noDamageFrom; track typeName) {
+                      <ds-type-badge [type]="typeName" size="sm" variant="outline"></ds-type-badge>
+                    }
+                    @if (eff.noDamageFrom.length === 0) {
+                      <span class="none-text">None</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="effectiveness-section">
+                  <h3>Strong Against</h3>
+                  <div class="type-list">
+                    @for (typeName of eff.doubleDamageTo; track typeName) {
+                      <ds-type-badge [type]="typeName" size="sm" variant="outline"></ds-type-badge>
+                    }
+                    @if (eff.doubleDamageTo.length === 0) {
+                      <span class="none-text">None</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="effectiveness-section">
+                  <h3>Not Very Effective Against</h3>
+                  <div class="type-list">
+                    @for (typeName of eff.halfDamageTo; track typeName) {
+                      <ds-type-badge [type]="typeName" size="sm" variant="outline"></ds-type-badge>
+                    }
+                    @if (eff.halfDamageTo.length === 0) {
+                      <span class="none-text">None</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="effectiveness-section">
+                  <h3>No Effect Against</h3>
+                  <div class="type-list">
+                    @for (typeName of eff.noDamageTo; track typeName) {
+                      <ds-type-badge [type]="typeName" size="sm" variant="outline"></ds-type-badge>
+                    }
+                    @if (eff.noDamageTo.length === 0) {
+                      <span class="none-text">None</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Pokémon">
+          <div class="pokemon-tab">
+            <div class="pokemon-grid">
+              @for (pokemon of typePokemon(); track pokemon.id) {
+                <ds-poke-card
+                  [pokemon]="pokemon"
+                  [showTypes]="true"
+                  (cardClick)="navigateToPokemon(pokemon.id)"
+                ></ds-poke-card>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Moves">
+          <div class="moves-tab">
+            <div class="moves-list">
+              @for (move of typeMoves(); track move.name) {
+                <div class="move-item" (click)="navigateToMove(move)">
+                  <span class="move-name">{{ capitalize(move.name) }}</span>
+                  <mat-icon>chevron_right</mat-icon>
+                </div>
+              }
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  }
+</div>
