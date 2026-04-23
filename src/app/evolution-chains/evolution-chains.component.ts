@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -43,18 +43,14 @@ interface ChainPreview {
   templateUrl: './evolution-chains.component.html',
   styleUrls: ['./evolution-chains.component.scss']
 })
-export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class EvolutionChainsComponent implements OnInit, OnDestroy {
   private dataService = inject(DataServiceService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
-  @ViewChild('scrollAnchor') scrollAnchor!: ElementRef;
-
   searchControl = new FormControl('');
-  chains = signal<ChainPreview[]>([]);
+  allChains = signal<ChainPreview[]>([]);
   loading = signal<boolean>(false);
-  loadingMore = signal<boolean>(false);
-  hasMore = signal<boolean>(true);
   totalCount = signal<number>(0);
   selectedTrigger = signal<string | null>(null);
   searchResults = signal<ChainPreview[]>([]);
@@ -62,16 +58,14 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
   triggers = signal<EvolutionTriggerDetail[]>([]);
   triggerLoading = signal<boolean>(false);
 
-  private offset = 0;
   private readonly limit = 20;
   private searchSubscription = new Subscription();
-  private observer: IntersectionObserver | null = null;
 
   displayChains = computed(() => {
     if (this.isSearching()) {
       return this.searchResults();
     }
-    return this.chains();
+    return this.allChains();
   });
 
   hasResults = computed(() => this.displayChains().length > 0);
@@ -82,13 +76,8 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
     this.setupSearch();
   }
 
-  ngAfterViewInit(): void {
-    this.setupIntersectionObserver();
-  }
-
   ngOnDestroy(): void {
     this.searchSubscription.unsubscribe();
-    this.observer?.disconnect();
   }
 
   private loadTriggers(): void {
@@ -100,18 +89,11 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   private loadChains(): void {
-    if (this.loadingMore() || !this.hasMore() || this.loading() || this.isSearching()) return;
+    this.loading.set(true);
 
-    if (this.offset === 0) {
-      this.loading.set(true);
-    } else {
-      this.loadingMore.set(true);
-    }
-
-    this.dataService.getAllEvolutionChains(this.limit, this.offset).pipe(
+    this.dataService.getAllEvolutionChains(this.limit, 0).pipe(
       switchMap(response => {
         this.totalCount.set(response.count);
-        this.hasMore.set(!!response.next);
         const chainUrls = response.results;
         const requests = chainUrls.map(item => {
           const id = extractPokemonId(item.url);
@@ -128,15 +110,9 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
       catchError(() => of([])),
       finalize(() => {
         this.loading.set(false);
-        this.loadingMore.set(false);
       })
     ).subscribe(previews => {
-      if (this.offset === 0) {
-        this.chains.set(previews);
-      } else {
-        this.chains.update(current => [...current, ...previews]);
-      }
-      this.offset += this.limit;
+      this.allChains.set(previews);
     });
   }
 
@@ -220,18 +196,6 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
 
-  private setupIntersectionObserver(): void {
-    this.observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && this.hasMore() && !this.loadingMore() && !this.loading()) {
-        this.loadChains();
-      }
-    }, { rootMargin: '200px' });
-
-    if (this.scrollAnchor?.nativeElement) {
-      this.observer.observe(this.scrollAnchor.nativeElement);
-    }
-  }
-
   onTriggerFilter(triggerName: string): void {
     if (this.selectedTrigger() === triggerName) {
       this.selectedTrigger.set(null);
@@ -264,13 +228,5 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
       'other': 'more_horiz'
     };
     return icons[triggerName] || 'help_outline';
-  }
-
-  onScroll(): void {
-    const pos = (document.documentElement.scrollTop || document.body.scrollTop) + window.innerHeight;
-    const max = document.documentElement.scrollHeight || document.body.scrollHeight;
-    if (max - pos <= 500 && this.hasMore() && !this.loadingMore() && !this.loading() && !this.isSearching()) {
-      this.loadChains();
-    }
   }
 }
