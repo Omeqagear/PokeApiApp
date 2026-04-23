@@ -67,7 +67,7 @@
   &.skeleton {
     width: 100px;
     height: 36px;
-    background: linear-gradient(90deg, var(--gray-100, #f4f4f4) 25%, var(--gray-200, #e4e4e4) 50%, var(--gray-100, #f4f4f4) 75%);
+    background: linear-gradient(90deg, var(--surface-card, #ffffff) 25%, var(--border-subtle, #E5D5C0) 50%, var(--surface-card, #ffffff) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border: none;
