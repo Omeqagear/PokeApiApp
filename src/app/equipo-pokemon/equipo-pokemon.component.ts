@@ -7,7 +7,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { trigger, state, style, transition, animate } from '@angular/animations';
 import { forkJoin, of, catchError } from 'rxjs';
 import { Pokemon } from '../shared/pokemon';
 import { PokemonDetail, PokemonMoveEntry } from '../shared/pokemon-api.interfaces';
@@ -45,12 +44,6 @@ import { PokemonTransformerService } from '../shared/types/pokemon-transformer.s
   ],
   templateUrl: './equipo-pokemon.component.html',
   styleUrls: ['./equipo-pokemon.component.scss'],
-  animations: [
-    trigger('fadeInOut', [
-      state('void', style({ opacity: 0 })),
-      transition('* <=> *', animate(300)),
-    ]),
-  ]
 })
 export class EquipoPokemonComponent implements OnInit {
   private dataService = inject(DataServiceService);

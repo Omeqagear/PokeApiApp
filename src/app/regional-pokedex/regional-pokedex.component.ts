@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ElementRef, ViewChildren, QueryList, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/
 import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../shared/components/page-header/page-header.component';
 import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
+import { SkeletonCardComponent } from '../shared/components/skeleton-card/skeleton-card.component';
 import { capitalize, getOfficialArtworkUrl } from '../shared/utils/pokemon.utils';
 import { TeamService } from '../services/team.service';
 import { ProgressService } from '../services/progress.service';
@@ -70,16 +71,22 @@ const POKEDEX_OPTIONS: PokedexOption[] = [
     PokeballSpinnerComponent,
     EmptyStateComponent,
     PageHeaderComponent,
-    PokeCardComponent
+    PokeCardComponent,
+    SkeletonCardComponent
   ],
   templateUrl: './regional-pokedex.component.html',
   styleUrls: ['./regional-pokedex.component.scss']
 })
-export class RegionalPokedexComponent implements OnInit {
+export class RegionalPokedexComponent implements OnInit, AfterViewInit, OnDestroy {
   private dataService = inject(DataServiceService);
   private teamService = inject(TeamService);
   private progressService = inject(ProgressService);
   private router = inject(Router);
+
+  private readonly PAGE_SIZE = 30;
+  private observer: IntersectionObserver | null = null;
+
+  @ViewChildren('scrollSentinel') scrollSentinels!: QueryList<ElementRef>;
 
   pokedexOptions = POKEDEX_OPTIONS;
 
@@ -90,9 +97,13 @@ export class RegionalPokedexComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   searchTerm = signal('');
+  visibleCount = signal(this.PAGE_SIZE);
+  isLoadingMore = signal(false);
+
+  allEntries = computed(() => this.pokedex()?.pokemon_entries || []);
 
   filteredEntries = computed(() => {
-    const entries = this.pokedex()?.pokemon_entries || [];
+    const entries = this.allEntries();
     const term = this.searchTerm().toLowerCase().trim();
 
     if (!term) return entries;
@@ -100,6 +111,19 @@ export class RegionalPokedexComponent implements OnInit {
     return entries.filter(entry =>
       entry.pokemon_species.name.toLowerCase().includes(term)
     );
+  });
+
+  visibleEntries = computed(() => {
+    const filtered = this.filteredEntries();
+    return filtered.slice(0, this.visibleCount());
+  });
+
+  hasMore = computed(() => this.visibleCount() < this.filteredEntries().length);
+
+  skeletonCount = computed(() => {
+    if (this.isLoadingMore()) return 0;
+    if (this.visibleEntries().length === 0 && this.loading()) return 12;
+    return 0;
   });
 
   viewedCount = computed(() => {
@@ -119,12 +143,53 @@ export class RegionalPokedexComponent implements OnInit {
       debounceTime(200)
     ).subscribe(value => {
       this.searchTerm.set(value ?? '');
+      this.visibleCount.set(this.PAGE_SIZE);
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.setupIntersectionObserver();
+    this.scrollSentinels.changes.subscribe(() => {
+      this.observeSentinel();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+  }
+
+  private setupIntersectionObserver(): void {
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && this.hasMore() && !this.isLoadingMore()) {
+          this.loadMore();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    this.observeSentinel();
+  }
+
+  private observeSentinel(): void {
+    this.observer?.disconnect();
+    const sentinel = this.scrollSentinels?.first?.nativeElement;
+    if (sentinel && this.observer) {
+      this.observer.observe(sentinel);
+    }
+  }
+
+  private loadMore(): void {
+    this.isLoadingMore.set(true);
+    setTimeout(() => {
+      this.visibleCount.update(count => count + this.PAGE_SIZE);
+      this.isLoadingMore.set(false);
+    }, 100);
   }
 
   private loadPokedex(id: number): void {
     this.loading.set(true);
     this.error.set(null);
+    this.visibleCount.set(this.PAGE_SIZE);
     this.dataService.getPokedexDetail(id).subscribe({
       next: (data) => {
         if (data && data.id) {
