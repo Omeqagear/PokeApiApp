@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, signal, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -155,14 +155,16 @@ interface SpriteVariant {
     }
   `]
 })
-export class SpriteGalleryComponent {
+export class SpriteGalleryComponent implements OnChanges {
   @Input() pokemonId = 0;
   @Input() isShiny = false;
 
   sprites = signal<SpriteVariant[]>([]);
 
-  ngOnChanges(): void {
-    this.loadSprites();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['pokemonId'] || changes['isShiny']) {
+      this.loadSprites();
+    }
   }
 
   private loadSprites(): void {

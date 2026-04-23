@@ -13,7 +13,6 @@ import { PokeballSpinnerComponent } from '../shared/components/pokeball-spinner/
 import { EmptyStateComponent } from '../shared/components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../shared/components/page-header/page-header.component';
 import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
-import { TypeBadgeComponent } from '../shared/components/type-badge/type-badge.component';
 import { capitalize, getOfficialArtworkUrl } from '../shared/utils/pokemon.utils';
 import { TeamService } from '../services/team.service';
 import { ProgressService } from '../services/progress.service';

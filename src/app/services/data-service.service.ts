@@ -31,6 +31,8 @@ export class DataServiceService {
   private readonly characteristicUrl = 'https://pokeapi.co/api/v2/characteristic';
   private readonly evolutionTriggerUrl = 'https://pokeapi.co/api/v2/evolution-trigger';
   private readonly maxPokemonCount = 1025;
+  private readonly cacheTTL = 1000 * 60 * 60 * 24; // 24 hours
+  private cacheTimestamps = new Map<string, number>();
   private allPokemonCache: PokemonSummary[] | null = null;
   private pokemonDetailCache = new Map<number, PokemonDetail>();
   private pokemonSpeciesCache = new Map<number, PokemonSpecies>();
@@ -55,6 +57,53 @@ export class DataServiceService {
 
   constructor(private http: HttpClient) {}
 
+  clearCache(): void {
+    this.pokemonDetailCache.clear();
+    this.pokemonSpeciesCache.clear();
+    this.pokemonSpeciesDetailCache.clear();
+    this.evolutionChainCache.clear();
+    this.abilityDetailCache.clear();
+    this.moveDetailCache.clear();
+    this.pokedexDetailCache.clear();
+    this.locationDetailCache.clear();
+    this.locationAreaDetailCache.clear();
+    this.typeDetailCache.clear();
+    this.natureDetailCache.clear();
+    this.eggGroupDetailCache.clear();
+    this.growthRateCache.clear();
+    this.allPokemonCache = null;
+    this.abilityListCache = null;
+    this.moveListCache = null;
+    this.pokedexListCache = null;
+    this.locationListCache = null;
+    this.typeListCache = null;
+    this.natureListCache = null;
+    this.eggGroupListCache = null;
+    this.cacheTimestamps.clear();
+  }
+
+  clearPokemonCache(): void {
+    this.pokemonDetailCache.clear();
+    this.pokemonSpeciesCache.clear();
+    this.pokemonSpeciesDetailCache.clear();
+    this.allPokemonCache = null;
+    this.cacheTimestamps.forEach((_, key) => {
+      if (key.startsWith('pokemon_') || key.startsWith('species_')) {
+        this.cacheTimestamps.delete(key);
+      }
+    });
+  }
+
+  private isCacheExpired(key: string): boolean {
+    const timestamp = this.cacheTimestamps.get(key);
+    if (!timestamp) return true;
+    return Date.now() - timestamp > this.cacheTTL;
+  }
+
+  private updateCacheTimestamp(key: string): void {
+    this.cacheTimestamps.set(key, Date.now());
+  }
+
   getPokemonNames(limit = 20, offset = 0): Observable<PokemonListResponse> {
     return this.http.get<PokemonListResponse>(`${this.baseUrl}/?limit=${limit}&offset=${offset}`).pipe(
       catchError((error) => {
@@ -69,8 +118,9 @@ export class DataServiceService {
       return of({} as PokemonDetail);
     }
 
+    const cacheKey = `pokemon_${id}`;
     const cached = this.pokemonDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
 
@@ -79,6 +129,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.pokemonDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -133,8 +184,9 @@ export class DataServiceService {
       return of({} as PokemonSpecies);
     }
 
+    const cacheKey = `species_basic_${id}`;
     const cachedSpecies = this.pokemonSpeciesCache.get(id);
-    if (cachedSpecies) {
+    if (cachedSpecies && !this.isCacheExpired(cacheKey)) {
       return of(cachedSpecies);
     }
 
@@ -142,6 +194,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.pokemonSpeciesCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -157,8 +210,9 @@ export class DataServiceService {
       return of({} as EvolutionChain);
     }
 
+    const cacheKey = `evolution_${chainId}`;
     const cachedEvolution = this.evolutionChainCache.get(chainId);
-    if (cachedEvolution) {
+    if (cachedEvolution && !this.isCacheExpired(cacheKey)) {
       return of(cachedEvolution);
     }
 
@@ -166,6 +220,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.evolutionChainCache.set(chainId, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -209,8 +264,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as AbilityDetail);
     }
+    const cacheKey = `ability_${id}`;
     const cached = this.abilityDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<AbilityDetail>(`${this.abilityUrl}/${id}/`).pipe(
@@ -218,6 +274,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.abilityDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -270,8 +327,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as MoveDetail);
     }
+    const cacheKey = `move_${id}`;
     const cached = this.moveDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<MoveDetail>(`${this.moveUrl}/${id}/`).pipe(
@@ -279,6 +337,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.moveDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -331,8 +390,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as PokedexDetail);
     }
+    const cacheKey = `pokedex_${id}`;
     const cached = this.pokedexDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<PokedexDetail>(`${this.pokedexUrl}/${id}/`).pipe(
@@ -340,6 +400,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.pokedexDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -363,8 +424,9 @@ export class DataServiceService {
     if (id <= 0 || id > this.maxPokemonCount) {
       return of({} as PokemonSpeciesDetail);
     }
+    const cacheKey = `species_${id}`;
     const cached = this.pokemonSpeciesDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<PokemonSpeciesDetail>(`${this.speciesUrl}/${id}/`).pipe(
@@ -372,6 +434,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.pokemonSpeciesDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -394,8 +457,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as EvolutionChain);
     }
+    const cacheKey = `evolution_${id}`;
     const cached = this.evolutionChainCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<EvolutionChain>(`${this.evolutionUrl}/${id}/`).pipe(
@@ -403,6 +467,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.evolutionChainCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -441,8 +506,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as LocationDetail);
     }
+    const cacheKey = `location_${id}`;
     const cached = this.locationDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<LocationDetail>(`${this.locationUrl}/${id}/`).pipe(
@@ -450,6 +516,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.locationDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -463,8 +530,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as LocationAreaDetail);
     }
+    const cacheKey = `location_area_${id}`;
     const cached = this.locationAreaDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<LocationAreaDetail>(`${this.locationAreaUrl}/${id}/`).pipe(
@@ -472,6 +540,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.locationAreaDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -510,8 +579,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as TypeDetail);
     }
+    const cacheKey = `type_${id}`;
     const cached = this.typeDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<TypeDetail>(`${this.typeUrl}/${id}/`).pipe(
@@ -519,6 +589,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.typeDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -535,8 +606,19 @@ export class DataServiceService {
           const id = parseInt(t.url.split('/').filter(Boolean).pop() ?? '0', 10);
           return this.getTypeDetail(id);
         });
-        return forkJoin(requests);
+        return this.batchRequests(requests, 6);
       })
+    );
+  }
+
+  private batchRequests<T>(requests: Observable<T>[], batchSize: number): Observable<T[]> {
+    const batches: Observable<T[]>[] = [];
+    for (let i = 0; i < requests.length; i += batchSize) {
+      const batch = requests.slice(i, i + batchSize);
+      batches.push(forkJoin(batch));
+    }
+    return forkJoin(batches).pipe(
+      map(results => results.flat())
     );
   }
 
@@ -569,8 +651,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as NatureDetail);
     }
+    const cacheKey = `nature_${id}`;
     const cached = this.natureDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<NatureDetail>(`${this.natureUrl}/${id}/`).pipe(
@@ -578,6 +661,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.natureDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -616,8 +700,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as EggGroupDetail);
     }
+    const cacheKey = `egg_group_${id}`;
     const cached = this.eggGroupDetailCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<EggGroupDetail>(`${this.eggGroupUrl}/${id}/`).pipe(
@@ -625,6 +710,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.eggGroupDetailCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {
@@ -638,8 +724,9 @@ export class DataServiceService {
     if (id <= 0) {
       return of({} as GrowthRateDetail);
     }
+    const cacheKey = `growth_rate_${id}`;
     const cached = this.growthRateCache.get(id);
-    if (cached) {
+    if (cached && !this.isCacheExpired(cacheKey)) {
       return of(cached);
     }
     return this.http.get<GrowthRateDetail>(`${this.growthRateUrl}/${id}/`).pipe(
@@ -647,6 +734,7 @@ export class DataServiceService {
       tap((data) => {
         if (data && data.id) {
           this.growthRateCache.set(id, data);
+          this.updateCacheTimestamp(cacheKey);
         }
       }),
       catchError((error) => {

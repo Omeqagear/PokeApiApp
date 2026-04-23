@@ -52,31 +52,91 @@ export class BattleStrategyComponent implements OnInit {
   readonly typeDetails = signal<TypeDetail[]>([]);
   readonly loading = signal(true);
   readonly selectedType = signal<string | null>(null);
+  readonly selectedAttackingTypes = signal<string[]>([]);
   readonly selectedDefensiveTypes = signal<string[]>([]);
+  readonly defensiveMode = signal(false);
   readonly damageResult = signal<{ damage: number; effectiveness: number; label: string } | null>(null);
   readonly hoveredCell = signal<TypeHoverInfo | null>(null);
-  readonly typeSearch = signal('');
+  readonly compareType1 = signal<string | null>(null);
+  readonly compareType2 = signal<string | null>(null);
 
-  filteredTypes = computed(() => {
-    const search = this.typeSearch().toLowerCase();
-    if (!search) return this.types;
-    return this.types.filter(t => t.includes(search));
+  comparisonResult = computed(() => {
+    const t1 = this.compareType1();
+    const t2 = this.compareType2();
+    if (!t1 || !t2) return null;
+    return this.getEffectiveness(t1, t2);
   });
 
   moveRecommendations = computed(() => {
-    const selected = this.selectedType();
-    if (!selected) return { strongAgainst: [], weakAgainst: [], resistantTo: [], weakTo: [] };
+    const selectedAttacking = this.selectedAttackingTypes();
+    const selectedSingle = this.selectedType();
+
+    if (selectedAttacking.length === 0 && !selectedSingle) {
+      return { strongAgainst: [], weakAgainst: [], resistantTo: [], weakTo: [] };
+    }
 
     const details = this.typeDetails();
-    const typeDetail = details.find(t => t.name === selected);
-    if (!typeDetail) return { strongAgainst: [], weakAgainst: [], resistantTo: [], weakTo: [] };
+    const typesToAnalyze = selectedAttacking.length > 0 ? selectedAttacking : (selectedSingle ? [selectedSingle] : []);
 
-    const strongAgainst = typeDetail.damage_relations.double_damage_to.map(t => t.name);
-    const weakAgainst = typeDetail.damage_relations.half_damage_to.map(t => t.name)
-      .concat(typeDetail.damage_relations.no_damage_to.map(t => t.name));
-    const weakTo = typeDetail.damage_relations.double_damage_from.map(t => t.name);
-    const resistantTo = typeDetail.damage_relations.half_damage_from.map(t => t.name)
-      .concat(typeDetail.damage_relations.no_damage_from.map(t => t.name));
+    const effectivenessMap = new Map<string, number>();
+
+    for (const atkType of typesToAnalyze) {
+      const typeDetail = details.find(t => t.name === atkType);
+      if (!typeDetail) continue;
+
+      for (const targetType of TYPES) {
+        const eff = this.getEffectiveness(atkType, targetType);
+        const current = effectivenessMap.get(targetType) ?? 1;
+        effectivenessMap.set(targetType, current * eff);
+      }
+    }
+
+    const strongAgainst: string[] = [];
+    const weakAgainst: string[] = [];
+    const resistantTo: string[] = [];
+    const weakTo: string[] = [];
+
+    effectivenessMap.forEach((eff, type) => {
+      if (eff >= 2) strongAgainst.push(type);
+      if (eff <= 0.5) {
+        weakAgainst.push(type);
+        if (eff < 1) resistantTo.push(type);
+      }
+      if (eff > 1) weakTo.push(type);
+    });
+
+    return { strongAgainst, weakAgainst, resistantTo, weakTo };
+  });
+
+  offensiveMatchups = computed(() => {
+    const selected = this.selectedAttackingTypes();
+    if (selected.length === 0) return { strongAgainst: [], weakAgainst: [], resistantTo: [], weakTo: [] };
+
+    const details = this.typeDetails();
+    const effectivenessMap = new Map<string, number>();
+
+    for (const atkType of selected) {
+      const typeDetail = details.find(t => t.name === atkType);
+      if (!typeDetail) continue;
+
+      for (const targetType of TYPES) {
+        const eff = this.getEffectiveness(atkType, targetType);
+        const current = effectivenessMap.get(targetType) ?? 1;
+        effectivenessMap.set(targetType, current * eff);
+      }
+    }
+
+    const strongAgainst: string[] = [];
+    const weakAgainst: string[] = [];
+    const resistantTo: string[] = [];
+    const weakTo: string[] = [];
+
+    effectivenessMap.forEach((eff, type) => {
+      if (eff >= 2) strongAgainst.push(type);
+      if (eff <= 0.5) weakAgainst.push(type);
+      if (eff < 1) resistantTo.push(type);
+      if (eff > 1) weakTo.push(type);
+    });
 
     return { strongAgainst, weakAgainst, resistantTo, weakTo };
   });
@@ -125,7 +185,9 @@ export class BattleStrategyComponent implements OnInit {
     attackingType: ['fire'],
     defendingTypes: [['normal']],
     power: [80],
-    level: [50]
+    level: [50],
+    attack: [100],
+    defense: [100]
   });
 
   ngOnInit(): void {
@@ -209,20 +271,58 @@ export class BattleStrategyComponent implements OnInit {
     this.selectedDefensiveTypes.set([]);
   }
 
+  toggleDefensiveMode(): void {
+    if (this.defensiveMode()) {
+      this.defensiveMode.set(false);
+      this.selectedDefensiveTypes.set([]);
+      this.selectedType.set(null);
+      this.selectedAttackingTypes.set([]);
+    } else {
+      this.defensiveMode.set(true);
+    }
+  }
+
+  toggleAttackingType(type: string): void {
+    const current = this.selectedAttackingTypes();
+    if (current.includes(type)) {
+      this.selectedAttackingTypes.set(current.filter(t => t !== type));
+    } else if (current.length < 2) {
+      this.selectedAttackingTypes.set([...current, type]);
+    }
+    if (current.includes(type) && current.length === 1) {
+      this.selectedType.set(null);
+      this.selectedAttackingTypes.set([]);
+    }
+  }
+
+  isAttackingTypeSelected(type: string): boolean {
+    return this.selectedAttackingTypes().includes(type);
+  }
+
+  selectDefensiveType(type: string): void {
+    if (!this.defensiveMode()) return;
+    this.toggleDefensiveType(type);
+  }
+
   calculateDamage(): void {
     const formValue = this.calculatorForm.value;
     const attackingType = formValue.attackingType || 'normal';
     const defendingTypes = formValue.defendingTypes || ['normal'];
     const power = formValue.power || 80;
     const level = formValue.level || 50;
+    const attack = formValue.attack || 100;
+    const defense = formValue.defense || 100;
+
+    if (defense <= 0) {
+      this.damageResult.set({ damage: 0, effectiveness: 0, label: 'Invalid defense stat' });
+      return;
+    }
 
     let effectiveness = 1;
     for (const defType of defendingTypes) {
       effectiveness *= this.getEffectiveness(attackingType, defType);
     }
 
-    const attack = 100;
-    const defense = 100;
     const damage = ((2 * level / 5 + 2) * power * attack / defense / 50 + 2) * effectiveness;
 
     let label = 'Normal damage';
@@ -249,5 +349,14 @@ export class BattleStrategyComponent implements OnInit {
 
   onCellLeave(): void {
     this.hoveredCell.set(null);
+  }
+
+  getComparisonLabel(effectiveness: number): string {
+    if (effectiveness === 0) return 'No effect';
+    if (effectiveness === 0.25) return 'Very resistant (0.25x)';
+    if (effectiveness === 0.5) return 'Resistant (0.5x)';
+    if (effectiveness === 2) return 'Super effective (2x)';
+    if (effectiveness === 4) return 'Very super effective (4x)';
+    return 'Normal (1x)';
   }
 }
