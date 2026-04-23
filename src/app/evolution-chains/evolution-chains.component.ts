@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormBuilder, FormControl } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of, forkJoin, finalize, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of, forkJoin, finalize, Subscription, Observable } from 'rxjs';
 import { DataServiceService } from '../services/data-service.service';
 import { EvolutionChain, EvolutionChainLink, EvolutionTriggerDetail } from '../shared/pokemon-api.interfaces';
 import { SkeletonCardComponent } from '../shared/components/skeleton-card/skeleton-card.component';
@@ -51,7 +51,6 @@ export class EvolutionChainsComponent implements OnInit, OnDestroy {
   searchControl = new FormControl('');
   allChains = signal<ChainPreview[]>([]);
   loading = signal<boolean>(false);
-  totalCount = signal<number>(0);
   selectedTrigger = signal<string | null>(null);
   searchResults = signal<ChainPreview[]>([]);
   isSearching = signal<boolean>(false);
@@ -90,48 +89,44 @@ export class EvolutionChainsComponent implements OnInit, OnDestroy {
   private loadChains(): void {
     this.loading.set(true);
     const allChains: ChainPreview[] = [];
-    let offset = 0;
     const limit = 100;
 
-    const loadBatch = (): void => {
-      this.dataService.getAllEvolutionChains(limit, offset).pipe(
+    const fetchBatch = (offset: number): Observable<{ chains: ChainPreview[]; hasMore: boolean }> => {
+      return this.dataService.getAllEvolutionChains(limit, offset).pipe(
         switchMap(response => {
           const chainUrls = response.results;
-          if (chainUrls.length === 0) return of([]);
+          if (chainUrls.length === 0) return of({ chains: [], hasMore: false });
           const requests = chainUrls.map(item => {
             const id = extractPokemonId(item.url);
-            return this.dataService.getEvolutionChainById(id).pipe(
-              catchError(() => of(null))
-            );
+            return this.dataService.getEvolutionChainById(id).pipe(catchError(() => of(null)));
           });
-          return forkJoin(requests);
-        }),
-        map(chains => {
-          const previews: ChainPreview[] = chains
-            .filter((chain): chain is EvolutionChain => chain !== null && !!chain && !!chain.id && !!chain.chain)
-            .map(chain => this.buildChainPreview(chain));
-          return previews;
-        }),
-        catchError(() => of([]))
-      ).subscribe(previews => {
-        allChains.push(...previews);
-        offset += limit;
-
-        this.dataService.getAllEvolutionChains(1, offset).pipe(
-          map(response => response.results.length > 0),
-          catchError(() => of(false))
-        ).subscribe(hasMore => {
-          if (hasMore) {
-            loadBatch();
-          } else {
-            this.allChains.set(allChains);
-            this.loading.set(false);
-          }
-        });
-      });
+          return forkJoin(requests).pipe(
+            map(chains => ({
+              chains: chains
+                .filter((c): c is EvolutionChain => !!c && !!c.id && !!c.chain)
+                .map(c => this.buildChainPreview(c)),
+              hasMore: !!response.next,
+            }))
+          );
+        })
+      );
     };
 
-    loadBatch();
+    const loadRecursive = (offset: number): Observable<void> => {
+      return fetchBatch(offset).pipe(
+        switchMap(result => {
+          allChains.push(...result.chains);
+          return result.hasMore ? loadRecursive(offset + limit) : of(undefined);
+        })
+      );
+    };
+
+    loadRecursive(0).pipe(
+      finalize(() => {
+        this.allChains.set(allChains);
+        this.loading.set(false);
+      })
+    ).subscribe();
   }
 
   private buildChainPreview(chain: EvolutionChain): ChainPreview {
