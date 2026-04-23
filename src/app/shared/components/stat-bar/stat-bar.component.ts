@@ -23,38 +23,41 @@ import { CommonModule } from '@angular/common';
   styles: [`
     .stat-row {
       display: grid;
-      grid-template-columns: 44px 36px 1fr;
+      grid-template-columns: 48px 40px 1fr;
       align-items: center;
       gap: 12px;
     }
 
     .stat-label {
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.7rem;
       font-weight: 700;
-      color: var(--text-tertiary, #737373);
+      color: var(--text-tertiary);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
     }
 
     .stat-value {
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.85rem;
       font-weight: 700;
-      color: var(--text-primary, #fafafa);
+      color: var(--text-primary);
       text-align: right;
       font-variant-numeric: tabular-nums;
     }
 
     .stat-bar-container {
-      height: 10px;
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 6px;
+      height: 14px;
+      background: var(--bg-tertiary);
+      border-radius: 4px;
       overflow: hidden;
       position: relative;
+      border: 2px solid var(--border-default);
     }
 
     .stat-bar {
       height: 100%;
-      border-radius: 6px;
+      border-radius: 2px;
       transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       min-width: 4px;
       position: relative;
@@ -66,8 +69,7 @@ import { CommonModule } from '@angular/common';
         left: 0;
         right: 0;
         height: 50%;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
-        border-radius: 6px 6px 0 0;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%);
       }
     }
   `]
@@ -93,10 +95,10 @@ export class StatBarComponent {
 
   barColor = computed(() => {
     const v = this.value;
-    if (v >= 150) return '#ff4081';
-    if (v >= 120) return '#ff7043';
-    if (v >= 90) return '#ffca28';
-    if (v >= 60) return '#66bb6a';
-    return '#42a5f5';
+    if (v >= 150) return '#E8453C';
+    if (v >= 120) return '#F06058';
+    if (v >= 90) return '#F5C518';
+    if (v >= 60) return '#78C850';
+    return '#4A6FA5';
   });
 }

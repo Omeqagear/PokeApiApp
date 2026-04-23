@@ -5,10 +5,11 @@
 
 // ============================================
 // FONT FAMILIES
+// Neo-brutalist: Bold display + clean body
 // ============================================
 
-$font-family-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-$font-family-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-heading: 'Outfit', 'Space Mono', -apple-system, BlinkMacSystemFont, sans-serif;
+$font-family-body: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 $font-family-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
 
 // ============================================
@@ -29,6 +30,7 @@ $font-size-6xl: 3.75rem;    // 60px
 
 // ============================================
 // FONT WEIGHTS
+// Neo-brutalist: heavier weights for impact
 // ============================================
 
 $font-weight-light: 300;
@@ -37,6 +39,7 @@ $font-weight-medium: 500;
 $font-weight-semibold: 600;
 $font-weight-bold: 700;
 $font-weight-extrabold: 800;
+$font-weight-black: 900;
 
 // ============================================
 // LINE HEIGHTS
@@ -65,7 +68,7 @@ $letter-spacing-widest: 0.1em;
 
 $heading-1: (
   font-size: $font-size-6xl,
-  font-weight: $font-weight-extrabold,
+  font-weight: $font-weight-black,
   line-height: $line-height-tight,
   letter-spacing: $letter-spacing-tight
 );
@@ -79,7 +82,7 @@ $heading-2: (
 
 $heading-3: (
   font-size: $font-size-4xl,
-  font-weight: $font-weight-bold,
+  font-weight: $font-weight-extrabold,
   line-height: $line-height-tight,
   letter-spacing: $letter-spacing-normal
 );
@@ -93,7 +96,7 @@ $heading-4: (
 
 $heading-5: (
   font-size: $font-size-2xl,
-  font-weight: $font-weight-semibold,
+  font-weight: $font-weight-bold,
   line-height: $line-height-snug,
   letter-spacing: $letter-spacing-normal
 );
@@ -173,6 +176,7 @@ $overline: (
   --font-weight-semibold: #{$font-weight-semibold};
   --font-weight-bold: #{$font-weight-bold};
   --font-weight-extrabold: #{$font-weight-extrabold};
+  --font-weight-black: #{$font-weight-black};
 
   // Line Heights
   --line-height-tight: #{$line-height-tight};
