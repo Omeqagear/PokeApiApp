@@ -56,7 +56,7 @@
 
   <!-- Team Builder Tab -->
   @if (activeTab() === 'builder') {
-    <div class="builder-section" [@fadeInOut] id="builder-tab-panel" role="tabpanel" aria-labelledby="builder-tab">
+    <div class="builder-section" @animate.enter @animate.leave id="builder-tab-panel" role="tabpanel" aria-labelledby="builder-tab">
       <h2>Generate META Team</h2>
       
       <!-- Legendary Toggle -->
