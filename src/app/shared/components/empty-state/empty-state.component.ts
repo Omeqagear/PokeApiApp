@@ -1,17 +1,15 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'ds-empty-state',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="empty-state" [class.compact]="compact">
       <div class="empty-icon-wrapper">
-        <mat-icon class="empty-icon">{{ icon }}</mat-icon>
+        <span class="empty-emoji">{{ icon }}</span>
         <div class="empty-icon-ring"></div>
       </div>
 
@@ -24,15 +22,15 @@ import { MatButtonModule } from '@angular/material/button';
       }
 
       @if (actionLabel && actionRoute) {
-        <a [routerLink]="actionRoute" mat-flat-button color="primary" class="empty-action">
-          <mat-icon>{{ actionIcon || 'arrow_forward' }}</mat-icon>
+        <a [routerLink]="actionRoute" class="btn btn-primary empty-action">
+          <span class="btn-icon">{{ actionIcon || '→' }}</span>
           {{ actionLabel }}
         </a>
       }
 
       @if (secondaryActionLabel && secondaryActionRoute) {
-        <a [routerLink]="secondaryActionRoute" mat-stroked-button class="empty-action secondary">
-          <mat-icon>{{ secondaryActionIcon || 'arrow_forward' }}</mat-icon>
+        <a [routerLink]="secondaryActionRoute" class="btn btn-secondary empty-action">
+          <span class="btn-icon">{{ secondaryActionIcon || '→' }}</span>
           {{ secondaryActionLabel }}
         </a>
       }
@@ -54,10 +52,8 @@ import { MatButtonModule } from '@angular/material/button';
       &.compact {
         padding: 40px 20px;
 
-        .empty-icon {
+        .empty-emoji {
           font-size: 56px;
-          width: 56px;
-          height: 56px;
         }
 
         .empty-title {
@@ -72,14 +68,12 @@ import { MatButtonModule } from '@angular/material/button';
 
     .empty-icon-wrapper {
       position: relative;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
 
-      .empty-icon {
+      .empty-emoji {
         font-size: 72px;
-        width: 72px;
-        height: 72px;
-        color: var(--text-tertiary, #737373);
-        opacity: 0.6;
+        display: block;
+        opacity: 0.7;
       }
 
       .empty-icon-ring {
@@ -87,10 +81,10 @@ import { MatButtonModule } from '@angular/material/button';
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 100px;
-        height: 100px;
-        border: 2px dashed var(--border-subtle, #e4e4e4);
-        border-radius: 50%;
+        width: 110px;
+        height: 110px;
+        border: 3px dashed var(--border-default);
+        border-radius: 4px;
         opacity: 0.5;
         animation: pulse-ring 3s ease-in-out infinite;
       }
@@ -98,42 +92,79 @@ import { MatButtonModule } from '@angular/material/button';
 
     @keyframes pulse-ring {
       0%, 100% {
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
         opacity: 0.3;
       }
       50% {
-        transform: translate(-50%, -50%) scale(1.1);
+        transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
         opacity: 0.5;
       }
     }
 
     .empty-title {
-      font-size: 1.5em;
-      font-weight: 600;
-      color: var(--text-primary, #171717);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6em;
+      font-weight: 800;
+      color: var(--text-primary);
       margin: 0 0 12px 0;
       letter-spacing: -0.02em;
+      text-transform: uppercase;
     }
 
     .empty-message {
       font-size: 1em;
-      color: var(--text-secondary, #525252);
-      margin: 0 0 28px 0;
+      color: var(--text-secondary);
+      margin: 0 0 32px 0;
       line-height: 1.6;
       max-width: 360px;
     }
 
     .empty-action {
-      margin: 6px;
-      border-radius: 10px !important;
+      margin: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      font-size: 0.9em;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+      transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      border: 3px solid var(--border-default);
 
-      mat-icon {
-        margin-right: 8px;
+      &.btn-primary {
+        background: var(--brand-primary);
+        color: var(--text-inverse);
+        box-shadow: 4px 4px 0px var(--border-default);
+
+        &:focus-visible {
+          outline: 3px solid var(--brand-primary);
+          outline-offset: 2px;
+        }
+
+        &:hover {
+          transform: translate(-2px, -2px);
+          box-shadow: 6px 6px 0px var(--border-default);
+        }
       }
 
-      &.secondary {
-        border-color: var(--border-default, #d3d3d3);
-        color: var(--text-secondary, #525252);
+      &.btn-secondary {
+        background: var(--surface-card);
+        color: var(--brand-secondary);
+        border-color: var(--brand-secondary);
+        box-shadow: 4px 4px 0px var(--border-default);
+
+        &:focus-visible {
+          outline: 3px solid var(--brand-primary);
+          outline-offset: 2px;
+        }
+
+        &:hover {
+          transform: translate(-2px, -2px);
+          box-shadow: 6px 6px 0px var(--border-default);
+        }
       }
     }
 
@@ -142,10 +173,8 @@ import { MatButtonModule } from '@angular/material/button';
         padding: 48px 16px;
       }
 
-      .empty-icon-wrapper .empty-icon {
+      .empty-icon-wrapper .empty-emoji {
         font-size: 56px;
-        width: 56px;
-        height: 56px;
       }
 
       .empty-title {
@@ -160,7 +189,7 @@ import { MatButtonModule } from '@angular/material/button';
   `]
 })
 export class EmptyStateComponent {
-  @Input() icon = 'search_off';
+  @Input() icon = '🔍';
   @Input() title = '';
   @Input() message = '';
   @Input() actionLabel = '';

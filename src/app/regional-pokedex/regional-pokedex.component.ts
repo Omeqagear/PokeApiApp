@@ -15,6 +15,7 @@ import { PageHeaderComponent } from '../shared/components/page-header/page-heade
 import { PokeCardComponent } from '../shared/components/poke-card/poke-card.component';
 import { SkeletonCardComponent } from '../shared/components/skeleton-card/skeleton-card.component';
 import { capitalize, getOfficialArtworkUrl } from '../shared/utils/pokemon.utils';
+import { getGenerationColor } from '../shared/utils/generation-colors';
 import { TeamService } from '../services/team.service';
 import { ProgressService } from '../services/progress.service';
 import { Pokemon } from '../shared/pokemon';
@@ -75,7 +76,10 @@ const POKEDEX_OPTIONS: PokedexOption[] = [
     SkeletonCardComponent
   ],
   templateUrl: './regional-pokedex.component.html',
-  styleUrls: ['./regional-pokedex.component.scss']
+  styleUrls: ['./regional-pokedex.component.scss'],
+  host: {
+    '[style.--generation-accent]': 'generationAccent()'
+  },
 })
 export class RegionalPokedexComponent implements OnInit, AfterViewInit, OnDestroy {
   private dataService = inject(DataServiceService);
@@ -99,6 +103,7 @@ export class RegionalPokedexComponent implements OnInit, AfterViewInit, OnDestro
   searchTerm = signal('');
   visibleCount = signal(this.PAGE_SIZE);
   isLoadingMore = signal(false);
+  generationAccent = signal<string>('#E8453C');
 
   allEntries = computed(() => this.pokedex()?.pokemon_entries || []);
 
@@ -137,6 +142,7 @@ export class RegionalPokedexComponent implements OnInit, AfterViewInit, OnDestro
 
   ngOnInit(): void {
     this.selectedPokedex.set(POKEDEX_OPTIONS[0]);
+    this.generationAccent.set(getGenerationColor(POKEDEX_OPTIONS[0].region));
     this.loadPokedex(POKEDEX_OPTIONS[0].id);
 
     this.searchControl.valueChanges.pipe(
@@ -209,6 +215,7 @@ export class RegionalPokedexComponent implements OnInit, AfterViewInit, OnDestro
 
   selectPokedex(option: PokedexOption): void {
     this.selectedPokedex.set(option);
+    this.generationAccent.set(getGenerationColor(option.region));
     this.loadPokedex(option.id);
   }
 

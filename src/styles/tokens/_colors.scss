@@ -25,19 +25,21 @@ $pokemon-types: (
 );
 
 // ============================================
-// BRAND COLORS - LINEAR-STRIPE HYBRID
-// Stripe purple with Linear's restraint
+// BRAND COLORS - CLASSIC POKÉMON
+// Pokéball red, logo blue, logo yellow
 // ============================================
 
-$brand-primary: #8b5cf6;
-$brand-primary-light: #a78bfa;
-$brand-primary-dark: #7c3aed;
+$brand-primary: #DC0A2D;
+$brand-primary-light: #E8304A;
+$brand-primary-dark: #B8082A;
 
-$brand-secondary: #6366f1;
-$brand-secondary-light: #818cf8;
-$brand-secondary-dark: #4f46e5;
+$brand-secondary: #3B4CCA;
+$brand-secondary-light: #5A6AE0;
+$brand-secondary-dark: #2A3BAA;
 
-$brand-accent: #ec4899;
+$brand-accent: #FFCB05;
+$brand-accent-light: #FFD840;
+$brand-accent-dark: #E0B000;
 
 // ============================================
 // SEMANTIC COLORS
@@ -96,7 +98,7 @@ $gray-900-dark: #0f0f0f;
 // ============================================
 
 :root {
-  // Brand (Stripe purple)
+  // Brand (Pokémon coral-red/slate-blue/gold)
   --brand-primary: #{$brand-primary};
   --brand-primary-light: #{$brand-primary-light};
   --brand-primary-dark: #{$brand-primary-dark};

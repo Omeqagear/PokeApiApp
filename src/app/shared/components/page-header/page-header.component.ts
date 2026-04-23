@@ -26,45 +26,49 @@ import { CommonModule } from '@angular/common';
   styles: [`
     .page-header {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 48px;
       padding: 0 20px;
+      position: relative;
     }
 
     .header-content {
-      margin-bottom: 24px;
+      margin-bottom: 28px;
     }
 
     .header-title {
-      font-size: 2.5em;
-      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(1.75rem, 5vw, 2.75rem);
+      font-weight: 900;
       margin: 0 0 16px 0;
-      background: linear-gradient(135deg, var(--brand-primary, #8b5cf6) 0%, var(--brand-secondary, #6366f1) 100%);
+      background: var(--gradient-brand);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       letter-spacing: -0.03em;
-      line-height: 1.2;
+      line-height: 1.1;
+      text-transform: uppercase;
     }
 
     .header-subtitle {
       font-size: 1.05em;
-      color: var(--text-tertiary, #737373);
+      color: var(--text-tertiary);
       margin: 0;
       line-height: 1.5;
+      font-weight: 500;
     }
 
     .header-stats {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 20px;
-      background: var(--surface-card, #ffffff);
-      border: 0.5px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
-      border-radius: 12px;
-      color: var(--text-secondary, #525252);
+      gap: 12px;
+      padding: 12px 24px;
+      background: var(--surface-card);
+      border: 3px solid var(--border-default);
+      border-radius: 4px;
+      color: var(--text-secondary);
       font-size: 0.95em;
-      font-weight: 500;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      font-weight: 600;
+      box-shadow: 4px 4px 0px var(--border-default);
     }
   `]
 })

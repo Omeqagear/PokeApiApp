@@ -1,7 +1,7 @@
 #container {
   display: flex;
   min-height: 100vh;
-  background: var(--bg-primary, #ffffff);
+  background: var(--bg-primary);
 }
 
 #content {
@@ -12,19 +12,19 @@
   min-height: 100vh;
 
   .sidebar-collapsed & {
-    margin-left: 56px;
+    margin-left: 64px;
   }
 }
 
 @media (max-width: 768px) {
   #content {
-    margin-left: 56px;
+    margin-left: 64px;
   }
 }
 
 @media (max-width: 480px) {
   #content {
-    margin-left: 56px;
+    margin-left: 64px;
     padding: 0 8px;
   }
 }
