@@ -18,8 +18,8 @@
   --text-secondary: #4A4A4A;
   --text-tertiary: #6B6B6B;
   --text-inverse: #ffffff;
-  --text-link: #E8453C;
-  --text-link-hover: #C73A32;
+  --text-link: #DC0A2D;
+  --text-link-hover: #B8082A;
 
   // Borders - bold, neo-brutalist style
   --border-subtle: #E5D5C0;
@@ -32,10 +32,10 @@
   --surface-input: #ffffff;
   --surface-input-hover: #FFF0E0;
 
-  // Gradients - Pokémon brand
-  --gradient-brand: linear-gradient(135deg, #E8453C 0%, #F5C518 100%);
-  --gradient-brand-hover: linear-gradient(135deg, #C73A32 0%, #D4A810 100%);
-  --gradient-hero: linear-gradient(135deg, #E8453C 0%, #F06058 50%, #F5C518 100%);
+  // Gradients - Classic Pokémon
+  --gradient-brand: linear-gradient(135deg, #DC0A2D 0%, #FFCB05 100%);
+  --gradient-brand-hover: linear-gradient(135deg, #B8082A 0%, #E0B000 100%);
+  --gradient-hero: linear-gradient(135deg, #DC0A2D 0%, #E8304A 50%, #FFCB05 100%);
   --gradient-page: linear-gradient(180deg, #FFFEF9 0%, #FFF8F0 100%);
 
   // Shadows - chunky, neo-brutalist

@@ -6,43 +6,43 @@
 @mixin dark-theme {
   color-scheme: dark;
 
-  // Backgrounds - deep, rich dark
-  --bg-primary: #1A1410;
-  --bg-secondary: #221C16;
-  --bg-tertiary: #2A2218;
-  --bg-elevated: #322A20;
+  // Backgrounds - dark with subtle red/blue warmth
+  --bg-primary: #0F0A0D;
+  --bg-secondary: #1A1418;
+  --bg-tertiary: #221A20;
+  --bg-elevated: #2A2028;
   --bg-overlay: rgba(0, 0, 0, 0.8);
 
   // Text - bright on dark
   --text-primary: #FFF8F0;
-  --text-secondary: #D4C4A8;
-  --text-tertiary: #A89878;
-  --text-inverse: #1A1A1A;
-  --text-link: #F06058;
-  --text-link-hover: #F5C518;
+  --text-secondary: #D4C4C8;
+  --text-tertiary: #A8989C;
+  --text-inverse: #0F0A0D;
+  --text-link: #E8304A;
+  --text-link-hover: #FFCB05;
 
   // Borders - bold, visible
-  --border-subtle: #3A3020;
-  --border-default: #4A3C2C;
-  --border-strong: #5A4C3C;
+  --border-subtle: #3A2A30;
+  --border-default: #4A3A40;
+  --border-strong: #5A4A50;
 
   // Surfaces
-  --surface-card: #2A2218;
-  --surface-card-hover: #322A20;
-  --surface-input: #221C16;
-  --surface-input-hover: #2A2218;
+  --surface-card: #221A20;
+  --surface-card-hover: #2A2028;
+  --surface-input: #1A1418;
+  --surface-input-hover: #221A20;
 
-  // Gradients - Pokémon brand neon
-  --gradient-brand: linear-gradient(135deg, #E8453C 0%, #F5C518 100%);
-  --gradient-brand-hover: linear-gradient(135deg, #F06058 0%, #F8D84E 100%);
-  --gradient-hero: linear-gradient(135deg, #2A2218 0%, #3A3020 50%, #E8453C 100%);
-  --gradient-page: linear-gradient(180deg, #1A1410 0%, #221C16 100%);
+  // Gradients - Classic Pokémon
+  --gradient-brand: linear-gradient(135deg, #DC0A2D 0%, #FFCB05 100%);
+  --gradient-brand-hover: linear-gradient(135deg, #E8304A 0%, #FFD840 100%);
+  --gradient-hero: linear-gradient(135deg, #1A1418 0%, #2A1A20 50%, #DC0A2D 100%);
+  --gradient-page: linear-gradient(180deg, #0F0A0D 0%, #1A1418 100%);
 
   // Shadows - chunky with dark offset
-  --shadow-card: 4px 4px 0px #0A0806;
-  --shadow-card-hover: 6px 6px 0px #0A0806;
-  --shadow-elevated: 8px 8px 0px #0A0806;
-  --shadow-sm: 2px 2px 0px #0A0806;
+  --shadow-card: 4px 4px 0px #050203;
+  --shadow-card-hover: 6px 6px 0px #050203;
+  --shadow-elevated: 8px 8px 0px #050203;
+  --shadow-sm: 2px 2px 0px #050203;
 
   // Pokemon Type backgrounds - neon tints
   --type-bg-normal: rgba(168, 168, 120, 0.22);
