@@ -28,16 +28,45 @@
     @if (activeTab() === 'chart') {
       <div class="type-chart-section">
         <div class="chart-controls">
-          <div class="search-box">
-            <mat-icon>search</mat-icon>
-            <input type="text" placeholder="Filter types..." [(ngModel)]="typeSearch" />
+          <div class="compare-box">
+            <h4>Compare Types</h4>
+            <div class="compare-inputs">
+              <mat-form-field appearance="outline" class="type-select">
+                <mat-label>Attacking Type</mat-label>
+                <mat-select [value]="compareType1()" (selectionChange)="compareType1.set($event.value)">
+                  <mat-option [value]="null">Select type...</mat-option>
+                  @for (type of types; track type) {
+                    <mat-option [value]="type">
+                      <ds-type-badge [type]="type" size="sm" variant="solid"></ds-type-badge>
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <span class="vs-label">vs</span>
+              <mat-form-field appearance="outline" class="type-select">
+                <mat-label>Defending Type</mat-label>
+                <mat-select [value]="compareType2()" (selectionChange)="compareType2.set($event.value)">
+                  <mat-option [value]="null">Select type...</mat-option>
+                  @for (type of types; track type) {
+                    <mat-option [value]="type">
+                      <ds-type-badge [type]="type" size="sm" variant="solid"></ds-type-badge>
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+            @if (comparisonResult() !== null) {
+              <div class="comparison-result" [class]="getCellClass(comparisonResult()!)">
+                {{ getComparisonLabel(comparisonResult()!) }}
+              </div>
+            }
           </div>
           <div class="view-toggle">
-            <button mat-button [class.active]="!selectedDefensiveTypes().length" (click)="clearDefensiveSelection()">
+            <button mat-button [class.active]="!defensiveMode()" (click)="clearDefensiveSelection(); defensiveMode.set(false); selectedType.set(null)">
               <mat-icon>grid_on</mat-icon>
               Offensive Chart
             </button>
-            <button mat-button [class.active]="selectedDefensiveTypes().length > 0" (click)="toggleDefensiveType('fire')">
+            <button mat-button [class.active]="defensiveMode()" (click)="toggleDefensiveMode()">
               <mat-icon>shield</mat-icon>
               Defensive View
             </button>
@@ -47,24 +76,24 @@
         <div class="type-chart-wrapper">
           <div class="type-chart-grid">
             <div class="corner-cell"></div>
-            @for (defType of filteredTypes(); track defType) {
+            @for (defType of types; track defType) {
               <div class="header-cell defending-header">
                 <ds-type-badge [type]="defType" size="sm" variant="solid"></ds-type-badge>
               </div>
             }
 
-            @for (atkType of filteredTypes(); track atkType) {
-              <div class="header-cell attacking-header">
+            @for (atkType of types; track atkType) {
+              <div class="header-cell attacking-header" [class.row-selected]="isAttackingTypeSelected(atkType)">
                 <ds-type-badge [type]="atkType" size="sm" variant="solid"></ds-type-badge>
               </div>
-              @for (defType of filteredTypes(); track defType) {
+              @for (defType of types; track defType) {
                 @let effectiveness = getEffectiveness(atkType, defType);
                 <div
                   class="effectiveness-cell {{ getCellClass(effectiveness) }}"
-                  [class.highlighted]="isTypeSelected(atkType) || isTypeSelected(defType)"
-                  [class.row-selected]="isTypeSelected(atkType)"
-                  [class.column-selected]="isTypeSelected(defType)"
-                  (click)="selectType(atkType)"
+                  [class.highlighted]="defensiveMode() ? isDefensiveTypeSelected(defType) : (isAttackingTypeSelected(atkType) || isTypeSelected(atkType))"
+                  [class.row-selected]="isAttackingTypeSelected(atkType)"
+                  [class.column-selected]="isDefensiveTypeSelected(defType)"
+                  (click)="defensiveMode() ? selectDefensiveType(defType) : toggleAttackingType(atkType)"
                   (mouseenter)="onCellHover(atkType, defType)"
                   (mouseleave)="onCellLeave()"
                 >
@@ -86,7 +115,66 @@
           </div>
         }
 
-        @if (selectedType()) {
+        @if (selectedAttackingTypes().length > 0) {
+          <div class="type-info-panel offensive-panel">
+            <div class="offensive-header">
+              <h3>
+                @if (selectedAttackingTypes().length === 1) {
+                  {{ selectedAttackingTypes()[0] | titlecase }} Type Matchups
+                } @else {
+                  Dual Type Matchups
+                }
+              </h3>
+              <div class="selected-types">
+                @for (type of selectedAttackingTypes(); track type) {
+                  <ds-type-badge [type]="type" size="sm" variant="solid"></ds-type-badge>
+                }
+              </div>
+            </div>
+            <div class="matchup-groups">
+              <div class="matchup-group">
+                <h4><mat-icon>arrow_upward</mat-icon> Strong Against (2x+)</h4>
+                <div class="type-badges">
+                  @for (type of offensiveMatchups().strongAgainst; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  } @empty {
+                    <span class="empty-msg">None</span>
+                  }
+                </div>
+              </div>
+              <div class="matchup-group">
+                <h4><mat-icon>arrow_downward</mat-icon> Weak Against (0.5x or less)</h4>
+                <div class="type-badges">
+                  @for (type of offensiveMatchups().weakAgainst; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  } @empty {
+                    <span class="empty-msg">None</span>
+                  }
+                </div>
+              </div>
+              <div class="matchup-group">
+                <h4><mat-icon>shield</mat-icon> Resistant To (below 1x)</h4>
+                <div class="type-badges">
+                  @for (type of offensiveMatchups().resistantTo; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  } @empty {
+                    <span class="empty-msg">None</span>
+                  }
+                </div>
+              </div>
+              <div class="matchup-group">
+                <h4><mat-icon>dangerous</mat-icon> Weak To (above 1x)</h4>
+                <div class="type-badges">
+                  @for (type of offensiveMatchups().weakTo; track type) {
+                    <ds-type-badge [type]="type" size="sm" variant="outline"></ds-type-badge>
+                  } @empty {
+                    <span class="empty-msg">None</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        } @else if (selectedType()) {
           <div class="type-info-panel">
             <h3>{{ selectedType() | titlecase }} Type Matchups</h3>
             <div class="matchup-groups">
@@ -214,6 +302,16 @@
           <mat-form-field appearance="outline">
             <mat-label>Level</mat-label>
             <input matInput type="number" formControlName="level" min="1" max="100">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Attack Stat</mat-label>
+            <input matInput type="number" formControlName="attack" min="1" max="255">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Defense Stat</mat-label>
+            <input matInput type="number" formControlName="defense" min="1" max="255">
           </mat-form-field>
 
           <button mat-raised-button color="primary" (click)="calculateDamage()" type="button">

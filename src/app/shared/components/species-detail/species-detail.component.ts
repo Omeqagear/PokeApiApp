@@ -33,7 +33,7 @@ export class SpeciesDetailComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['speciesData'] && this.speciesData) {
-      this.species.set(this.speciesData as unknown as PokemonSpeciesDetail);
+      this.species.set(this.speciesData);
       this.loading.set(false);
       if (this.speciesData.growth_rate) {
         this.loadGrowthRateName(this.speciesData.growth_rate);
@@ -43,7 +43,7 @@ export class SpeciesDetailComponent implements OnInit, OnChanges {
 
   loadSpeciesDetail(): void {
     if (this.speciesData) {
-      this.species.set(this.speciesData as unknown as PokemonSpeciesDetail);
+      this.species.set(this.speciesData);
       this.loading.set(false);
       if (this.speciesData.growth_rate) {
         this.loadGrowthRateName(this.speciesData.growth_rate);

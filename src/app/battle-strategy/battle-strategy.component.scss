@@ -59,9 +59,80 @@
 .chart-controls {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: 16px;
+
+  .compare-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 16px;
+
+    h4 {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .compare-inputs {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .type-select {
+        width: 160px;
+      }
+
+      .vs-label {
+        font-weight: 600;
+        color: var(--text-tertiary);
+        font-size: 0.9rem;
+      }
+    }
+
+    .comparison-result {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: center;
+
+      &.cell-none {
+        background: rgba(74, 74, 74, 0.3);
+        color: #d4d4d4;
+      }
+
+      &.cell-very-resistant {
+        background: rgba(26, 77, 46, 0.3);
+        color: #86efac;
+      }
+
+      &.cell-resistant {
+        background: rgba(45, 106, 79, 0.3);
+        color: #4ade80;
+      }
+
+      &.cell-neutral {
+        background: rgba(163, 163, 163, 0.15);
+        color: var(--text-secondary);
+      }
+
+      &.cell-super-effective {
+        background: rgba(124, 74, 3, 0.3);
+        color: #fbbf24;
+      }
+
+      &.cell-very-super-effective {
+        background: rgba(153, 27, 27, 0.3);
+        color: #f87171;
+      }
+    }
+  }
 
   .search-box {
     display: flex;
@@ -448,40 +519,40 @@
 
 ::ng-deep .calculator-form .mat-mdc-form-field {
   .mat-mdc-text-field-wrapper {
-    --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.12);
+    --mdc-outlined-text-field-outline-color: var(--border-subtle, rgba(255, 255, 255, 0.12));
     --mdc-outlined-text-field-hover-outline-color: rgba(139, 92, 246, 0.5);
     --mdc-outlined-text-field-focused-outline-color: #8b5cf6;
-    background: #252830;
+    background: var(--surface-card, #1a1d27);
   }
 
   .mat-mdc-form-field-label {
-    color: #a3a3a3;
+    color: var(--text-secondary, #a3a3a3);
   }
 
   .mat-mdc-select-value {
-    color: #e5e5e5;
+    color: var(--text-primary, #e5e5e5);
   }
 
   .mat-mdc-input-element {
-    color: #e5e5e5;
+    color: var(--text-primary, #e5e5e5);
   }
 }
 
 ::ng-deep .calculator-form .mat-mdc-option {
-  background: #252830;
-  color: #e5e5e5;
+  background: var(--surface-card, #1a1d27);
+  color: var(--text-primary, #e5e5e5);
 
   &.mdc-list-item--selected {
-    background: #3a3d4a;
+    background: var(--surface-card-hover, #2a2d3a);
   }
 
   &:hover {
-    background: #2a2d3a;
+    background: var(--surface-card-hover, #2a2d3a);
   }
 }
 
 ::ng-deep .calculator-form .mat-mdc-select-panel {
-  background: #252830;
+  background: var(--surface-card, #1a1d27);
 }
 
 .damage-result {

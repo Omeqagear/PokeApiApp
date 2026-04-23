@@ -94,8 +94,9 @@ export class EquipoPokemonComponent implements OnInit {
     const team: Pokemon[] = [];
 
     keys.forEach(key => {
+      if (key === 'valid_pokemon_ids_cache' || key === 'viewed-pokemon') return;
       const pokemon = this.storageService.get<Pokemon>(key);
-      if (pokemon) {
+      if (pokemon && pokemon.id && pokemon.name) {
         team.push(pokemon);
       }
     });
