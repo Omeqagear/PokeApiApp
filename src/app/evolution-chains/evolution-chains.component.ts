@@ -61,12 +61,22 @@ export class EvolutionChainsComponent implements OnInit, OnDestroy {
 
   displayChains = computed(() => {
     if (this.isSearching()) {
-      return this.searchResults();
+      const searchResults = this.searchResults();
+      const trigger = this.selectedTrigger();
+      if (!trigger) return searchResults;
+      return searchResults.filter(chain => this.chainHasTrigger(chain.chainId, trigger));
     }
-    return this.allChains();
+    return this.filteredChains();
   });
 
   hasResults = computed(() => this.displayChains().length > 0);
+
+  filteredChains = computed(() => {
+    const trigger = this.selectedTrigger();
+    const chains = this.allChains();
+    if (!trigger) return chains;
+    return chains.filter(chain => this.chainHasTrigger(chain.chainId, trigger));
+  });
 
   ngOnInit(): void {
     this.loadTriggers();
@@ -161,6 +171,25 @@ export class EvolutionChainsComponent implements OnInit, OnDestroy {
       branches += this.countBranches(evolution);
     }
     return branches;
+  }
+
+  private chainHasTrigger(chainId: number, triggerName: string): boolean {
+    const cached = this.dataService.getEvolutionChainFromCache(chainId);
+    if (!cached || !cached.chain) return false;
+    return this.linkHasTrigger(cached.chain, triggerName);
+  }
+
+  private linkHasTrigger(link: EvolutionChainLink, triggerName: string): boolean {
+    if (link.evolution_details && link.evolution_details.length > 0) {
+      const hasMatch = link.evolution_details.some(
+        detail => detail.trigger?.name === triggerName
+      );
+      if (hasMatch) return true;
+    }
+    if (link.evolves_to && link.evolves_to.length > 0) {
+      return link.evolves_to.some(child => this.linkHasTrigger(child, triggerName));
+    }
+    return false;
   }
 
   private setupSearch(): void {
