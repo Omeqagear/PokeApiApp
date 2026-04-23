@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormBuilder, FormControl } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of, forkJoin, finalize, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, map, catchError, of, forkJoin, finalize, Subscription, Observable } from 'rxjs';
 import { DataServiceService } from '../services/data-service.service';
 import { EvolutionChain, EvolutionChainLink, EvolutionTriggerDetail } from '../shared/pokemon-api.interfaces';
 import { SkeletonCardComponent } from '../shared/components/skeleton-card/skeleton-card.component';
@@ -43,38 +43,40 @@ interface ChainPreview {
   templateUrl: './evolution-chains.component.html',
   styleUrls: ['./evolution-chains.component.scss']
 })
-export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class EvolutionChainsComponent implements OnInit, OnDestroy {
   private dataService = inject(DataServiceService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
-  @ViewChild('scrollAnchor') scrollAnchor!: ElementRef;
-
   searchControl = new FormControl('');
-  chains = signal<ChainPreview[]>([]);
+  allChains = signal<ChainPreview[]>([]);
   loading = signal<boolean>(false);
-  loadingMore = signal<boolean>(false);
-  hasMore = signal<boolean>(true);
-  totalCount = signal<number>(0);
   selectedTrigger = signal<string | null>(null);
   searchResults = signal<ChainPreview[]>([]);
   isSearching = signal<boolean>(false);
   triggers = signal<EvolutionTriggerDetail[]>([]);
   triggerLoading = signal<boolean>(false);
 
-  private offset = 0;
-  private readonly limit = 20;
   private searchSubscription = new Subscription();
-  private observer: IntersectionObserver | null = null;
 
   displayChains = computed(() => {
     if (this.isSearching()) {
-      return this.searchResults();
+      const searchResults = this.searchResults();
+      const trigger = this.selectedTrigger();
+      if (!trigger) return searchResults;
+      return searchResults.filter(chain => this.chainHasTrigger(chain.chainId, trigger));
     }
-    return this.chains();
+    return this.filteredChains();
   });
 
   hasResults = computed(() => this.displayChains().length > 0);
+
+  filteredChains = computed(() => {
+    const trigger = this.selectedTrigger();
+    const chains = this.allChains();
+    if (!trigger) return chains;
+    return chains.filter(chain => this.chainHasTrigger(chain.chainId, trigger));
+  });
 
   ngOnInit(): void {
     this.loadTriggers();
@@ -82,13 +84,8 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
     this.setupSearch();
   }
 
-  ngAfterViewInit(): void {
-    this.setupIntersectionObserver();
-  }
-
   ngOnDestroy(): void {
     this.searchSubscription.unsubscribe();
-    this.observer?.disconnect();
   }
 
   private loadTriggers(): void {
@@ -100,44 +97,46 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   private loadChains(): void {
-    if (this.loadingMore() || !this.hasMore() || this.loading() || this.isSearching()) return;
+    this.loading.set(true);
+    const allChains: ChainPreview[] = [];
+    const limit = 100;
 
-    if (this.offset === 0) {
-      this.loading.set(true);
-    } else {
-      this.loadingMore.set(true);
-    }
+    const fetchBatch = (offset: number): Observable<{ chains: ChainPreview[]; hasMore: boolean }> => {
+      return this.dataService.getAllEvolutionChains(limit, offset).pipe(
+        switchMap(response => {
+          const chainUrls = response.results;
+          if (chainUrls.length === 0) return of({ chains: [], hasMore: false });
+          const requests = chainUrls.map(item => {
+            const id = extractPokemonId(item.url);
+            return this.dataService.getEvolutionChainById(id).pipe(catchError(() => of(null)));
+          });
+          return forkJoin(requests).pipe(
+            map(chains => ({
+              chains: chains
+                .filter((c): c is EvolutionChain => !!c && !!c.id && !!c.chain)
+                .map(c => this.buildChainPreview(c)),
+              hasMore: !!response.next,
+            }))
+          );
+        })
+      );
+    };
 
-    this.dataService.getAllEvolutionChains(this.limit, this.offset).pipe(
-      switchMap(response => {
-        this.totalCount.set(response.count);
-        this.hasMore.set(!!response.next);
-        const chainUrls = response.results;
-        const requests = chainUrls.map(item => {
-          const id = extractPokemonId(item.url);
-          return this.dataService.getEvolutionChainById(id);
-        });
-        return forkJoin(requests);
-      }),
-      map(chains => {
-        const previews: ChainPreview[] = chains
-          .filter(chain => chain && chain.id && chain.chain)
-          .map(chain => this.buildChainPreview(chain));
-        return previews;
-      }),
-      catchError(() => of([])),
+    const loadRecursive = (offset: number): Observable<void> => {
+      return fetchBatch(offset).pipe(
+        switchMap(result => {
+          allChains.push(...result.chains);
+          return result.hasMore ? loadRecursive(offset + limit) : of(undefined);
+        })
+      );
+    };
+
+    loadRecursive(0).pipe(
       finalize(() => {
+        this.allChains.set(allChains);
         this.loading.set(false);
-        this.loadingMore.set(false);
       })
-    ).subscribe(previews => {
-      if (this.offset === 0) {
-        this.chains.set(previews);
-      } else {
-        this.chains.update(current => [...current, ...previews]);
-      }
-      this.offset += this.limit;
-    });
+    ).subscribe();
   }
 
   private buildChainPreview(chain: EvolutionChain): ChainPreview {
@@ -172,6 +171,25 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
       branches += this.countBranches(evolution);
     }
     return branches;
+  }
+
+  private chainHasTrigger(chainId: number, triggerName: string): boolean {
+    const cached = this.dataService.getEvolutionChainFromCache(chainId);
+    if (!cached || !cached.chain) return false;
+    return this.linkHasTrigger(cached.chain, triggerName);
+  }
+
+  private linkHasTrigger(link: EvolutionChainLink, triggerName: string): boolean {
+    if (link.evolution_details && link.evolution_details.length > 0) {
+      const hasMatch = link.evolution_details.some(
+        detail => detail.trigger?.name === triggerName
+      );
+      if (hasMatch) return true;
+    }
+    if (link.evolves_to && link.evolves_to.length > 0) {
+      return link.evolves_to.some(child => this.linkHasTrigger(child, triggerName));
+    }
+    return false;
   }
 
   private setupSearch(): void {
@@ -220,18 +238,6 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
 
-  private setupIntersectionObserver(): void {
-    this.observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && this.hasMore() && !this.loadingMore() && !this.loading()) {
-        this.loadChains();
-      }
-    }, { rootMargin: '200px' });
-
-    if (this.scrollAnchor?.nativeElement) {
-      this.observer.observe(this.scrollAnchor.nativeElement);
-    }
-  }
-
   onTriggerFilter(triggerName: string): void {
     if (this.selectedTrigger() === triggerName) {
       this.selectedTrigger.set(null);
@@ -264,13 +270,5 @@ export class EvolutionChainsComponent implements OnInit, AfterViewInit, OnDestro
       'other': 'more_horiz'
     };
     return icons[triggerName] || 'help_outline';
-  }
-
-  onScroll(): void {
-    const pos = (document.documentElement.scrollTop || document.body.scrollTop) + window.innerHeight;
-    const max = document.documentElement.scrollHeight || document.body.scrollHeight;
-    if (max - pos <= 500 && this.hasMore() && !this.loadingMore() && !this.loading() && !this.isSearching()) {
-      this.loadChains();
-    }
   }
 }

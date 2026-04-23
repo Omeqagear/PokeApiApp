@@ -103,7 +103,7 @@ export interface EvolutionChain {
 
 export interface EvolutionChainLink {
   species: PokemonSummary;
-  evolution_details: EvolutionDetail[];
+  evolution_details: EvolutionDetail[] | null;
   evolves_to: EvolutionChainLink[];
 }
 

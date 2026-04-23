@@ -477,6 +477,10 @@ export class DataServiceService {
     );
   }
 
+  getEvolutionChainFromCache(id: number): EvolutionChain | undefined {
+    return this.evolutionChainCache.get(id);
+  }
+
   getLocationsList(limit = 20, offset = 0): Observable<LocationListResponse> {
     return this.http.get<LocationListResponse>(`${this.locationUrl}/?limit=${limit}&offset=${offset}`).pipe(
       catchError((error) => {
