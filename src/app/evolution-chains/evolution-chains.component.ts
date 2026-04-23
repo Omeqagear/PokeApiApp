@@ -58,7 +58,6 @@ export class EvolutionChainsComponent implements OnInit, OnDestroy {
   triggers = signal<EvolutionTriggerDetail[]>([]);
   triggerLoading = signal<boolean>(false);
 
-  private readonly limit = 20;
   private searchSubscription = new Subscription();
 
   displayChains = computed(() => {
@@ -90,30 +89,49 @@ export class EvolutionChainsComponent implements OnInit, OnDestroy {
 
   private loadChains(): void {
     this.loading.set(true);
+    const allChains: ChainPreview[] = [];
+    let offset = 0;
+    const limit = 100;
 
-    this.dataService.getAllEvolutionChains(this.limit, 0).pipe(
-      switchMap(response => {
-        this.totalCount.set(response.count);
-        const chainUrls = response.results;
-        const requests = chainUrls.map(item => {
-          const id = extractPokemonId(item.url);
-          return this.dataService.getEvolutionChainById(id);
+    const loadBatch = (): void => {
+      this.dataService.getAllEvolutionChains(limit, offset).pipe(
+        switchMap(response => {
+          const chainUrls = response.results;
+          if (chainUrls.length === 0) return of([]);
+          const requests = chainUrls.map(item => {
+            const id = extractPokemonId(item.url);
+            return this.dataService.getEvolutionChainById(id).pipe(
+              catchError(() => of(null))
+            );
+          });
+          return forkJoin(requests);
+        }),
+        map(chains => {
+          const previews: ChainPreview[] = chains
+            .filter((chain): chain is EvolutionChain => chain !== null && !!chain && !!chain.id && !!chain.chain)
+            .map(chain => this.buildChainPreview(chain));
+          return previews;
+        }),
+        catchError(() => of([]))
+      ).subscribe(previews => {
+        allChains.push(...previews);
+        offset += limit;
+
+        this.dataService.getAllEvolutionChains(1, offset).pipe(
+          map(response => response.results.length > 0),
+          catchError(() => of(false))
+        ).subscribe(hasMore => {
+          if (hasMore) {
+            loadBatch();
+          } else {
+            this.allChains.set(allChains);
+            this.loading.set(false);
+          }
         });
-        return forkJoin(requests);
-      }),
-      map(chains => {
-        const previews: ChainPreview[] = chains
-          .filter(chain => chain && chain.id && chain.chain)
-          .map(chain => this.buildChainPreview(chain));
-        return previews;
-      }),
-      catchError(() => of([])),
-      finalize(() => {
-        this.loading.set(false);
-      })
-    ).subscribe(previews => {
-      this.allChains.set(previews);
-    });
+      });
+    };
+
+    loadBatch();
   }
 
   private buildChainPreview(chain: EvolutionChain): ChainPreview {
