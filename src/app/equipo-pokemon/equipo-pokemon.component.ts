@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -52,6 +53,7 @@ export class EquipoPokemonComponent implements OnInit {
   private teamService = inject(TeamService);
   private pokemonTransformer = inject(PokemonTransformerService);
   private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
 
   teamPokemon = signal<Pokemon[]>([]);
   private validPokemonIds: number[] = [];
@@ -108,7 +110,7 @@ export class EquipoPokemonComponent implements OnInit {
   }
 
   deleteTeam(): void {
-    this.storageService.clear();
+    this.teamPokemon().forEach(p => this.storageService.remove(p.id.toString()));
     this.teamPokemon.set([]);
     this.generatedTeam.set(null);
     this.teamService.refreshCount();
@@ -155,7 +157,7 @@ export class EquipoPokemonComponent implements OnInit {
           const teamData = JSON.parse(content);
 
           if (!Array.isArray(teamData)) {
-            alert('Invalid team file format');
+            this.snackBar.open('Invalid team file format', 'OK', { duration: 4000 });
             return;
           }
 
@@ -208,13 +210,13 @@ export class EquipoPokemonComponent implements OnInit {
           if (imported > 0) {
             this.loadTeamFromStorage();
             this.teamService.refreshCount();
-            alert(`Successfully imported ${imported} Pokémon!`);
+            this.snackBar.open(`Successfully imported ${imported} Pokémon!`, 'OK', { duration: 4000 });
           } else {
-            alert('No new Pokémon to import (team may already have these)');
+            this.snackBar.open('No new Pokémon to import (team may already have these)', 'OK', { duration: 4000 });
           }
         } catch (error) {
           console.error('Error importing team:', error);
-          alert('Failed to import team. Invalid file format.');
+          this.snackBar.open('Failed to import team. Invalid file format.', 'OK', { duration: 4000 });
         }
       };
 
@@ -489,7 +491,7 @@ export class EquipoPokemonComponent implements OnInit {
 
         if (validResults.length === 0) {
           console.error('No valid Pokémon could be loaded');
-          alert('Error generating team. Please try again.');
+          this.snackBar.open('Error generating team. Please try again.', 'OK', { duration: 4000 });
           return;
         }
 
@@ -507,7 +509,7 @@ export class EquipoPokemonComponent implements OnInit {
       },
       error: (error) => {
         console.error('Unexpected error in forkJoin:', error);
-        alert('Error generating team. Please try again.');
+        this.snackBar.open('Error generating team. Please try again.', 'OK', { duration: 4000 });
       }
     });
   }

@@ -1,5 +1,7 @@
 nav {
-  background: var(--bg-secondary);
+  background: var(--glass-elevated);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   height: 100vh;
   width: 240px;
   position: fixed;
@@ -8,7 +10,7 @@ nav {
   display: flex;
   flex-direction: column;
   transition: width 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  border-right: 4px solid var(--border-default);
+  border-right: 1px solid var(--border-default);
   z-index: 100;
   overflow: hidden;
 
@@ -34,8 +36,7 @@ nav {
     align-items: center;
     justify-content: space-between;
     padding: 20px 16px;
-    border-bottom: 4px solid var(--border-default);
-    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-default);
 
     .logo {
       display: flex;
@@ -47,7 +48,6 @@ nav {
         width: 24px;
         height: 24px;
         color: var(--brand-primary);
-        filter: drop-shadow(2px 2px 0px var(--border-default));
       }
 
       .logo-text {
@@ -63,33 +63,25 @@ nav {
     }
 
     .toggle-btn {
-      background: var(--surface-card);
-      border: 2px solid var(--border-subtle);
+      background: var(--glass-surface);
+      border: 1px solid var(--border-subtle);
       color: var(--text-tertiary);
       cursor: pointer;
       padding: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 4px;
-      transition: all 150ms;
-      box-shadow: 2px 2px 0px var(--border-default);
+      border-radius: 8px;
+      transition: all 200ms;
 
       &:focus-visible {
-        outline: 3px solid var(--brand-primary);
+        outline: 2px solid var(--brand-primary);
         outline-offset: 2px;
       }
 
       &:hover {
-        background: var(--bg-tertiary);
+        background: var(--glass-card-hover);
         color: var(--text-secondary);
-        transform: translate(-1px, -1px);
-        box-shadow: 3px 3px 0px var(--border-default);
-      }
-
-      &:active {
-        transform: translate(0, 0);
-        box-shadow: 1px 1px 0px var(--border-default);
       }
 
       mat-icon {
@@ -118,17 +110,17 @@ nav {
         padding: 10px 12px;
         color: var(--text-tertiary);
         text-decoration: none;
-        border-radius: 4px;
-        transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 8px;
+        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
         white-space: nowrap;
         position: relative;
         font-weight: 600;
         font-size: 0.875em;
-        border: 2px solid transparent;
+        border: 1px solid transparent;
 
         &:focus-visible {
-          outline: 3px solid var(--brand-primary);
+          outline: 2px solid var(--brand-primary);
           outline-offset: 2px;
         }
 
@@ -138,7 +130,7 @@ nav {
           height: 20px;
           flex-shrink: 0;
           color: var(--text-tertiary);
-          transition: all 150ms;
+          transition: all 200ms;
         }
 
         .nav-label {
@@ -147,43 +139,42 @@ nav {
         }
 
         &:hover {
-          background: var(--bg-tertiary);
-          color: var(--text-secondary);
+          background: var(--glass-card);
+          color: var(--text-primary);
           border-color: var(--border-subtle);
 
           mat-icon {
-            color: var(--text-secondary);
+            color: var(--text-primary);
           }
         }
 
         &.active {
-          background: var(--brand-primary);
-          color: var(--text-inverse);
-          border-color: var(--border-default);
-          box-shadow: 3px 3px 0px var(--border-default);
+          background: rgba(232, 69, 60, 0.12);
+          color: var(--brand-primary);
+          border-color: var(--border-accent);
+          box-shadow: var(--shadow-sm);
 
           mat-icon {
-            color: var(--text-inverse);
+            color: var(--brand-primary);
           }
 
           .nav-badge {
-            background: var(--text-inverse);
-            color: var(--brand-primary);
+            background: var(--brand-primary);
+            color: #ffffff;
           }
         }
 
         .nav-badge {
           margin-left: auto;
-          background: var(--brand-accent);
-          color: var(--text-inverse);
+          background: var(--glass-card);
+          color: var(--text-secondary);
           font-size: 0.7em;
           font-weight: 800;
           padding: 3px 8px;
-          border-radius: 4px;
+          border-radius: 12px;
           min-width: 36px;
           text-align: center;
-          border: 2px solid var(--border-default);
-          box-shadow: 2px 2px 0px var(--border-default);
+          border: 1px solid var(--border-default);
         }
       }
     }
@@ -191,8 +182,7 @@ nav {
 
   .sidebar-footer {
     padding: 12px;
-    border-top: 4px solid var(--border-default);
-    background: var(--bg-tertiary);
+    border-top: 1px solid var(--border-default);
 
     .theme-toggle {
       display: flex;
@@ -201,18 +191,17 @@ nav {
       width: 100%;
       padding: 10px 12px;
       margin-bottom: 8px;
-      background: var(--surface-card);
-      border: 2px solid var(--border-subtle);
+      background: var(--glass-surface);
+      border: 1px solid var(--border-subtle);
       color: var(--text-tertiary);
       cursor: pointer;
-      border-radius: 4px;
-      transition: all 150ms;
+      border-radius: 8px;
+      transition: all 200ms;
       font-size: 0.8em;
       font-weight: 600;
-      box-shadow: 2px 2px 0px var(--border-default);
 
       &:focus-visible {
-        outline: 3px solid var(--brand-primary);
+        outline: 2px solid var(--brand-primary);
         outline-offset: 2px;
       }
 
@@ -229,15 +218,9 @@ nav {
       }
 
       &:hover {
-        background: var(--bg-secondary);
+        background: var(--glass-card-hover);
         color: var(--text-secondary);
-        transform: translate(-1px, -1px);
-        box-shadow: 3px 3px 0px var(--border-default);
-      }
-
-      &:active {
-        transform: translate(0, 0);
-        box-shadow: 1px 1px 0px var(--border-default);
+        border-color: var(--border-default);
       }
     }
 

@@ -28,8 +28,9 @@ interface StatPoint {
   `,
   styles: [`
     .radar-container {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--glass-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-default);
       border-radius: 16px;
       padding: 1.25rem 1.5rem;
       margin-top: 1rem;
@@ -47,11 +48,11 @@ interface StatPoint {
         gap: 0.5rem;
         font-size: 0.95rem;
         font-weight: 600;
-        color: var(--text-primary, #fff);
+        color: var(--text-primary);
         margin: 0;
 
         mat-icon {
-          color: var(--brand-primary, #8b5cf6);
+          color: var(--brand-primary);
           font-size: 18px;
           width: 18px;
           height: 18px;
@@ -61,10 +62,11 @@ interface StatPoint {
       .radar-total {
         font-size: 0.8rem;
         font-weight: 700;
-        color: var(--brand-primary, #8b5cf6);
-        background: rgba(139, 92, 246, 0.1);
+        color: var(--brand-primary);
+        background: var(--glass-surface);
         padding: 4px 12px;
         border-radius: 10px;
+        border: 1px solid var(--border-default);
       }
     }
 
@@ -125,6 +127,15 @@ export class StatsRadarComponent implements AfterViewInit, OnChanges {
     const points = this.statPoints();
     if (points.length === 0) return;
 
+    const styles = getComputedStyle(document.documentElement);
+    const isDark = document.documentElement.classList.contains('dark-theme');
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+    const axisColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)';
+    const labelColor = isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.55)';
+    const valueColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.35)';
+    const accentColor = styles.getPropertyValue('--brand-primary').trim() || '#E8453C';
+    const dotStrokeColor = isDark ? '#fff' : '#1a1c2e';
+
     const width = this.size;
     const height = this.size;
     const centerX = width / 2;
@@ -147,7 +158,7 @@ export class StatsRadarComponent implements AfterViewInit, OnChanges {
         else ctx.lineTo(x, y);
       }
       ctx.closePath();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.strokeStyle = gridColor;
       ctx.lineWidth = 1;
       ctx.stroke();
     }
@@ -160,7 +171,7 @@ export class StatsRadarComponent implements AfterViewInit, OnChanges {
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.lineTo(x, y);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.strokeStyle = axisColor;
       ctx.lineWidth = 1;
       ctx.stroke();
     }
@@ -179,12 +190,12 @@ export class StatsRadarComponent implements AfterViewInit, OnChanges {
     ctx.closePath();
 
     const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
-    gradient.addColorStop(0, 'rgba(139, 92, 246, 0.3)');
-    gradient.addColorStop(1, 'rgba(99, 102, 241, 0.1)');
+    gradient.addColorStop(0, isDark ? 'rgba(232, 69, 60, 0.3)' : 'rgba(232, 69, 60, 0.15)');
+    gradient.addColorStop(1, isDark ? 'rgba(232, 69, 60, 0.1)' : 'rgba(232, 69, 60, 0.04)');
     ctx.fillStyle = gradient;
     ctx.fill();
 
-    ctx.strokeStyle = 'rgba(139, 92, 246, 0.8)';
+    ctx.strokeStyle = isDark ? 'rgba(232, 69, 60, 0.8)' : 'rgba(232, 69, 60, 0.6)';
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -197,9 +208,9 @@ export class StatsRadarComponent implements AfterViewInit, OnChanges {
 
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#8b5cf6';
+      ctx.fillStyle = accentColor;
       ctx.fill();
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = dotStrokeColor;
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
@@ -214,12 +225,12 @@ export class StatsRadarComponent implements AfterViewInit, OnChanges {
       const x = centerX + labelRadius * Math.cos(angle);
       const y = centerY + labelRadius * Math.sin(angle);
 
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillStyle = labelColor;
       ctx.fillText(points[i].label, x, y);
 
       const valueX = centerX + (radius * 0.5) * Math.cos(angle);
       const valueY = centerY + (radius * 0.5) * Math.sin(angle);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fillStyle = valueColor;
       ctx.font = '500 10px Segoe UI, system-ui, sans-serif';
       ctx.fillText(points[i].value.toString(), valueX, valueY);
       ctx.font = '600 11px Segoe UI, system-ui, sans-serif';

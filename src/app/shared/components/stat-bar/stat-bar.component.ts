@@ -95,10 +95,10 @@ export class StatBarComponent {
 
   barColor = computed(() => {
     const v = this.value;
-    if (v >= 150) return '#DC0A2D';
-    if (v >= 120) return '#E8304A';
-    if (v >= 90) return '#FFCB05';
+    if (v >= 150) return '#E8453C';
+    if (v >= 120) return '#F06058';
+    if (v >= 90) return '#F5C842';
     if (v >= 60) return '#78C850';
-    return '#3B4CCA';
+    return '#5B6ABF';
   });
 }

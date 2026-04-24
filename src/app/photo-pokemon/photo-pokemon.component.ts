@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PokemonDetail, PokemonSpeciesDetail } from '../shared/pokemon-api.interfaces';
 import { Pokemon } from '../shared/pokemon';
 import { TypeBadgeComponent } from '../shared/components/type-badge/type-badge.component';
@@ -32,6 +33,7 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
   private favoritesService = inject(FavoritesService);
   private teamService = inject(TeamService);
   private progressService = inject(ProgressService);
+  private snackBar = inject(MatSnackBar);
 
   @ViewChild(ShortcutsModalComponent) shortcutsModal!: ShortcutsModalComponent;
 
@@ -254,12 +256,12 @@ export class PhotoPokemonComponent implements OnInit, OnDestroy {
     if (!pokemon) return;
 
     if (this.teamService.isTeamFull()) {
-      alert('Your team is full! Remove a Pokémon to add more.');
+      this.snackBar.open('Your team is full! Remove a Pokémon to add more.', 'OK', { duration: 4000 });
       return;
     }
 
     if (this.teamService.isInTeam(pokemon.id)) {
-      alert('This Pokémon is already in your team!');
+      this.snackBar.open('This Pokémon is already in your team!', 'OK', { duration: 4000 });
       return;
     }
 
