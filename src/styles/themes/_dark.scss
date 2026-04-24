@@ -1,66 +1,76 @@
 // ============================================
-// DARK THEME - NEO-BRUTALIST POKÉMON
-// Bold borders, vibrant neon colors, chunky shadows
+// DARK THEME - DEEP DARK GLASS
+// Frosted glass surfaces, soft shadows, rich gradients
 // ============================================
 
 @mixin dark-theme {
   color-scheme: dark;
 
-  // Backgrounds - dark with subtle red/blue warmth
-  --bg-primary: #0F0A0D;
-  --bg-secondary: #1A1418;
-  --bg-tertiary: #221A20;
-  --bg-elevated: #2A2028;
-  --bg-overlay: rgba(0, 0, 0, 0.8);
+  // Backgrounds - layered depth (deep navy-charcoal)
+  --bg-primary: #0a0e17;
+  --bg-secondary: #101520;
+  --bg-tertiary: #161b28;
+  --bg-elevated: #1a1f30;
+  --bg-overlay: rgba(0, 0, 0, 0.7);
 
   // Text - bright on dark
-  --text-primary: #FFF8F0;
-  --text-secondary: #D4C4C8;
-  --text-tertiary: #A8989C;
-  --text-inverse: #0F0A0D;
-  --text-link: #E8304A;
-  --text-link-hover: #FFCB05;
+  --text-primary: #f0f0f5;
+  --text-secondary: #b0b5c0;
+  --text-tertiary: #707580;
+  --text-inverse: #0a0e17;
+  --text-link: #E8453C;
+  --text-link-hover: #F5C842;
 
-  // Borders - bold, visible
-  --border-subtle: #3A2A30;
-  --border-default: #4A3A40;
-  --border-strong: #5A4A50;
+  // Borders - glass, not brutalist
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-accent: rgba(232, 69, 60, 0.30);
+
+  // Glass surfaces (NEW)
+  --glass-surface: rgba(255, 255, 255, 0.03);
+  --glass-card: rgba(255, 255, 255, 0.04);
+  --glass-card-hover: rgba(255, 255, 255, 0.07);
+  --glass-elevated: rgba(255, 255, 255, 0.06);
 
   // Surfaces
-  --surface-card: #221A20;
-  --surface-card-hover: #2A2028;
-  --surface-input: #1A1418;
-  --surface-input-hover: #221A20;
+  --surface-card: rgba(255, 255, 255, 0.04);
+  --surface-card-hover: rgba(255, 255, 255, 0.07);
+  --surface-input: rgba(255, 255, 255, 0.05);
+  --surface-input-hover: rgba(255, 255, 255, 0.08);
 
-  // Gradients - Classic Pokémon
-  --gradient-brand: linear-gradient(135deg, #DC0A2D 0%, #FFCB05 100%);
-  --gradient-brand-hover: linear-gradient(135deg, #E8304A 0%, #FFD840 100%);
-  --gradient-hero: linear-gradient(135deg, #1A1418 0%, #2A1A20 50%, #DC0A2D 100%);
-  --gradient-page: linear-gradient(180deg, #0F0A0D 0%, #1A1418 100%);
+  // Gradients
+  --gradient-brand: linear-gradient(135deg, #E8453C 0%, #F5C842 100%);
+  --gradient-brand-hover: linear-gradient(135deg, #C0392B 0%, #E5B830 100%);
+  --gradient-hero: radial-gradient(ellipse at 30% 20%, rgba(232, 69, 60, 0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 80%, rgba(91, 106, 191, 0.10) 0%, transparent 60%);
+  --gradient-page: linear-gradient(180deg, #0a0e17 0%, #101520 100%);
 
-  // Shadows - chunky with dark offset
-  --shadow-card: 4px 4px 0px #050203;
-  --shadow-card-hover: 6px 6px 0px #050203;
-  --shadow-elevated: 8px 8px 0px #050203;
-  --shadow-sm: 2px 2px 0px #050203;
+  // Shadows - soft, layered
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.30);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.40), 0 1px 4px rgba(0, 0, 0, 0.20);
+  --shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.50), 0 2px 8px rgba(0, 0, 0, 0.30);
+  --shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.60);
+  --glow-brand: 0 0 20px rgba(232, 69, 60, 0.15);
+  --glow-accent: 0 0 20px rgba(245, 200, 66, 0.12);
 
-  // Pokemon Type backgrounds - neon tints
-  --type-bg-normal: rgba(168, 168, 120, 0.22);
-  --type-bg-fire: rgba(240, 128, 48, 0.22);
-  --type-bg-water: rgba(104, 144, 240, 0.22);
-  --type-bg-electric: rgba(248, 208, 48, 0.22);
-  --type-bg-grass: rgba(120, 200, 80, 0.22);
-  --type-bg-ice: rgba(152, 216, 216, 0.22);
-  --type-bg-fighting: rgba(192, 48, 40, 0.22);
-  --type-bg-poison: rgba(160, 64, 160, 0.22);
-  --type-bg-ground: rgba(224, 192, 104, 0.22);
-  --type-bg-flying: rgba(168, 144, 240, 0.22);
-  --type-bg-psychic: rgba(248, 88, 136, 0.22);
-  --type-bg-bug: rgba(168, 184, 32, 0.22);
-  --type-bg-rock: rgba(184, 160, 56, 0.22);
-  --type-bg-ghost: rgba(112, 88, 152, 0.22);
-  --type-bg-dragon: rgba(112, 56, 248, 0.22);
-  --type-bg-dark: rgba(112, 88, 72, 0.22);
-  --type-bg-steel: rgba(184, 184, 208, 0.22);
-  --type-bg-fairy: rgba(238, 153, 172, 0.22);
+  // Pokemon Type backgrounds - deeper tints
+  --type-bg-normal: rgba(168, 168, 120, 0.18);
+  --type-bg-fire: rgba(240, 128, 48, 0.18);
+  --type-bg-water: rgba(104, 144, 240, 0.18);
+  --type-bg-electric: rgba(248, 208, 48, 0.18);
+  --type-bg-grass: rgba(120, 200, 80, 0.18);
+  --type-bg-ice: rgba(152, 216, 216, 0.18);
+  --type-bg-fighting: rgba(192, 48, 40, 0.18);
+  --type-bg-poison: rgba(160, 64, 160, 0.18);
+  --type-bg-ground: rgba(224, 192, 104, 0.18);
+  --type-bg-flying: rgba(168, 144, 240, 0.18);
+  --type-bg-psychic: rgba(248, 88, 136, 0.18);
+  --type-bg-bug: rgba(168, 184, 32, 0.18);
+  --type-bg-rock: rgba(184, 160, 56, 0.18);
+  --type-bg-ghost: rgba(112, 88, 152, 0.18);
+  --type-bg-dragon: rgba(112, 56, 248, 0.18);
+  --type-bg-dark: rgba(112, 88, 72, 0.18);
+  --type-bg-steel: rgba(184, 184, 208, 0.18);
+  --type-bg-fairy: rgba(238, 153, 172, 0.18);
 }
