@@ -1,3 +1,26 @@
+@use 'sass:list';
+
+$type-bg-dark: (
+  normal: (#1a1a2e, #2a2a3e),
+  fire: (#2d1b1b, #4a1942),
+  water: (#1b2d3d, #1b3a4a),
+  grass: (#1b2d1b, #1b4a2a),
+  electric: (#2d2d1b, #3a3a1b),
+  ice: (#1b2d3d, #1b3a3a),
+  fighting: (#2d1b1b, #3a1b1b),
+  poison: (#2d1b2d, #3a1b3a),
+  ground: (#2d2d1b, #3a2d1b),
+  flying: (#1b1b2d, #1b2d3a),
+  psychic: (#2d1b2d, #3a1b2d),
+  bug: (#1b2d1b, #2d3a1b),
+  rock: (#2d2d2d, #3a3a3a),
+  ghost: (#1b1b2d, #2d1b3a),
+  dragon: (#1b1b2d, #1b2d3a),
+  dark: (#141420, #1a1a28),
+  steel: (#2d2d2d, #3a3a3a),
+  fairy: (#2d1b2d, #3a1b3a),
+);
+
 .pokemon-page {
   min-height: 100vh;
   background: var(--bg-primary);
@@ -31,6 +54,16 @@
   position: relative;
   overflow: hidden;
 
+  @each $type, $dark-colors in $type-bg-dark {
+    &.bg-#{$type} {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--type-bg-#{$type}) 50%, var(--bg-secondary) 100%);
+    }
+
+    .dark-theme &.bg-#{$type} {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, list.nth($dark-colors, 1) 50%, list.nth($dark-colors, 2) 100%);
+    }
+  }
+
   &::before {
     content: '';
     position: absolute;
@@ -41,25 +74,6 @@
     opacity: 0.08;
     z-index: 0;
   }
-
-  &.bg-normal { background: var(--gradient-hero); }
-  &.bg-fire { background: linear-gradient(135deg, var(--bg-primary) 0%, #2d1b1b 50%, #4a1942 100%); }
-  &.bg-water { background: linear-gradient(135deg, var(--bg-primary) 0%, #1b2d3d 50%, #1b3a4a 100%); }
-  &.bg-grass { background: linear-gradient(135deg, var(--bg-primary) 0%, #1b2d1b 50%, #1b4a2a 100%); }
-  &.bg-electric { background: linear-gradient(135deg, var(--bg-primary) 0%, #2d2d1b 50%, #3a3a1b 100%); }
-  &.bg-ice { background: linear-gradient(135deg, var(--bg-primary) 0%, #1b2d3d 50%, #1b3a3a 100%); }
-  &.bg-fighting { background: linear-gradient(135deg, var(--bg-primary) 0%, #2d1b1b 50%, #3a1b1b 100%); }
-  &.bg-poison { background: linear-gradient(135deg, var(--bg-primary) 0%, #2d1b2d 50%, #3a1b3a 100%); }
-  &.bg-ground { background: linear-gradient(135deg, var(--bg-primary) 0%, #2d2d1b 50%, #3a2d1b 100%); }
-  &.bg-flying { background: linear-gradient(135deg, var(--bg-primary) 0%, #1b1b2d 50%, #1b2d3a 100%); }
-  &.bg-psychic { background: linear-gradient(135deg, var(--bg-primary) 0%, #2d1b2d 50%, #3a1b2d 100%); }
-  &.bg-bug { background: linear-gradient(135deg, var(--bg-primary) 0%, #1b2d1b 50%, #2d3a1b 100%); }
-  &.bg-rock { background: linear-gradient(135deg, var(--bg-primary) 0%, #2d2d2d 50%, #3a3a3a 100%); }
-  &.bg-ghost { background: linear-gradient(135deg, var(--bg-primary) 0%, #1b1b2d 50%, #2d1b3a 100%); }
-  &.bg-dragon { background: linear-gradient(135deg, var(--bg-primary) 0%, #1b1b2d 50%, #1b2d3a 100%); }
-  &.bg-dark { background: linear-gradient(135deg, var(--bg-primary) 0%, #141420 50%, #1a1a28 100%); }
-  &.bg-steel { background: linear-gradient(135deg, var(--bg-primary) 0%, #2d2d2d 50%, #3a3a3a 100%); }
-  &.bg-fairy { background: linear-gradient(135deg, var(--bg-primary) 0%, #2d1b2d 50%, #3a1b3a 100%); }
 }
 
 .nav-arrows {
@@ -76,10 +90,9 @@
 
   .nav-btn {
     pointer-events: all;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: var(--text-inverse);
+    background: var(--bg-elevated);
+    border: 2px solid var(--border-default);
+    color: var(--text-primary);
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -87,13 +100,26 @@
     flex-shrink: 0;
 
     &:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.2);
+      background: var(--surface-card-hover);
+      border-color: var(--border-strong);
       transform: scale(1.1);
     }
 
     &:disabled {
       opacity: 0.3;
       cursor: not-allowed;
+    }
+  }
+
+  .dark-theme & {
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-inverse);
+
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.2);
+      }
     }
   }
 }
@@ -107,11 +133,21 @@
 .back-btn {
   position: relative;
   z-index: 10;
+  color: var(--text-primary);
+  background: var(--surface-card);
+  border: 2px solid var(--border-default);
+  margin-bottom: 1rem;
+
+  &:hover {
+    background: var(--surface-card-hover);
+    border-color: var(--border-strong);
+  }
+}
+
+.dark-theme .back-btn {
   color: var(--text-inverse);
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  margin-bottom: 1rem;
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -137,7 +173,7 @@
     align-items: center;
     gap: 6px;
     font-size: 0.75em;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-tertiary);
 
     kbd {
       display: inline-flex;
@@ -146,12 +182,21 @@
       min-width: 24px;
       height: 22px;
       padding: 0 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
       border-radius: 4px;
       font-family: inherit;
       font-size: 0.7em;
       font-weight: 500;
+    }
+  }
+
+  .dark-theme & .hint {
+    color: rgba(255, 255, 255, 0.7);
+
+    kbd {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
   }
 }
@@ -189,9 +234,13 @@
     transform: translateX(-50%);
     font-size: 3rem;
     font-weight: 800;
-    color: rgba(255, 255, 255, 0.06);
+    color: rgba(0, 0, 0, 0.04);
     letter-spacing: 2px;
     user-select: none;
+
+    .dark-theme & {
+      color: rgba(255, 255, 255, 0.06);
+    }
   }
 
   .image-wrapper {
@@ -254,10 +303,9 @@
       .action-btn {
         width: 40px;
         height: 40px;
-        background: rgba(255, 255, 255, 0.15) !important;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: var(--text-inverse) !important;
+        background: var(--surface-card) !important;
+        border: 2px solid var(--border-default) !important;
+        color: var(--text-primary) !important;
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
         mat-icon {
@@ -268,11 +316,22 @@
 
         &:hover:not(:disabled) {
           transform: scale(1.1);
+          background: var(--surface-card-hover) !important;
         }
 
         &:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+        }
+      }
+
+      .dark-theme & .action-btn {
+        background: rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: var(--text-inverse) !important;
+
+        &:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.25) !important;
         }
       }
 
@@ -306,7 +365,7 @@
         }
 
         &:hover {
-          background: rgba(255, 255, 255, 0.25) !important;
+          background: var(--surface-card-hover) !important;
         }
       }
     }
@@ -331,7 +390,11 @@
     margin: 0;
     text-transform: capitalize;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-tertiary) 100%);
+
+    .dark-theme & {
+      background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+    }
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -426,13 +489,24 @@
     }
 
     &.pokedex-btn {
+      background: var(--surface-card);
+      color: var(--text-primary);
+      border: 2px solid var(--border-default);
+
+      &:hover {
+        background: var(--surface-card-hover);
+        border-color: var(--border-strong);
+        transform: translateY(-2px);
+      }
+    }
+
+    .dark-theme &.pokedex-btn {
       background: rgba(255, 255, 255, 0.08);
-      color: #fff;
+      color: var(--text-inverse);
       border: 1px solid rgba(255, 255, 255, 0.15);
 
       &:hover {
         background: rgba(255, 255, 255, 0.15);
-        transform: translateY(-2px);
       }
     }
   }
@@ -455,8 +529,8 @@
 
     .ability-tag {
       padding: 0.35rem 0.75rem;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
       border-radius: 8px;
       font-size: 0.85rem;
       color: var(--text-secondary);
@@ -464,6 +538,11 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
+
+      .dark-theme & {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
 
       .hidden-badge {
         font-size: 0.65rem;
@@ -484,12 +563,17 @@
 
     .move-tag {
       padding: 0.3rem 0.6rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
       border-radius: 6px;
       font-size: 0.75rem;
       color: var(--text-tertiary);
       text-transform: capitalize;
+
+      .dark-theme & {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
     }
   }
 }
@@ -517,7 +601,7 @@
     gap: 12px;
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-default);
 
     .total-label {
       font-size: 0.75rem;
