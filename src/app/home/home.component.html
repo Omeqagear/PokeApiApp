@@ -1,55 +1,56 @@
 <div class="home-container">
   <!-- Hero Section -->
   <section class="hero">
-    <div class="hero-bg-pattern"></div>
+    <div class="hero-glow hero-glow-top"></div>
+    <div class="hero-glow hero-glow-bottom"></div>
     <div class="hero-content">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        <span>Angular 21 • Modern Pokédex</span>
+      <div class="hero-glass">
+        <div class="hero-glass-border"></div>
+        <h1 class="hero-title">
+          Welcome to the
+          <span class="highlight-text">Pokédex</span>
+        </h1>
+        <p class="hero-subtitle">
+          Your ultimate companion for exploring the world of Pokémon.
+          Browse, search, and build your dream team.
+        </p>
+        <div class="hero-actions">
+          <a routerLink="/catalog" class="btn btn-primary">
+            <mat-icon>menu_book</mat-icon>
+            Explore Pokédex
+          </a>
+          <a routerLink="/team" class="btn btn-outline">
+            <mat-icon>groups</mat-icon>
+            My Team
+          </a>
+        </div>
       </div>
-      <h1 class="hero-title">
-        Welcome to the
-        <span class="highlight-text">Pokédex</span>
-      </h1>
-      <p class="hero-subtitle">
-        Your ultimate companion for exploring the world of Pokémon. 
-        Browse, search, and build your dream team.
-      </p>
-      <div class="hero-actions">
-        <a routerLink="/catalog" class="btn btn-primary btn-large">
-          <span class="btn-icon">📖</span>
-          Explore Pokédex
-        </a>
-        <a routerLink="/team" class="btn btn-secondary btn-large">
-          <span class="btn-icon">👥</span>
-          My Team
-        </a>
+      <div class="hero-visual">
+        <div class="hero-pokeball">
+          <mat-icon class="pokeball-icon">catching_pokemon</mat-icon>
+        </div>
       </div>
-    </div>
-    <div class="hero-image">
-      <div class="image-frame"></div>
-      <img src="./assets/images/Logo_de_Pokemon.png" alt="Pokémon Logo" loading="lazy">
     </div>
   </section>
 
   <!-- Features Section -->
   <section class="features">
     <div class="section-header">
-      <h2>Features</h2>
+      <h2>Explore the World</h2>
       <p>Everything you need for your Pokémon journey</p>
-      <div class="header-decoration"></div>
     </div>
     <div class="features-grid">
-      @for (feature of features; track feature.title) {
-        <div class="feature-card">
+      @for (feature of features; track feature.title; let i = $index) {
+        <div class="feature-card" [ngClass]="'feature-card-' + (i + 1)">
+          <div class="feature-accent"></div>
           <div class="feature-icon">
-            <span class="icon-emoji">{{ feature.icon }}</span>
+            <mat-icon>{{ feature.icon }}</mat-icon>
           </div>
           <h3>{{ feature.title }}</h3>
           <p>{{ feature.description }}</p>
           <a [routerLink]="feature.route" class="feature-link">
             Get Started
-            <span class="arrow">→</span>
+            <mat-icon class="arrow-icon">arrow_forward</mat-icon>
           </a>
         </div>
       }
@@ -58,19 +59,22 @@
 
   <!-- Stats Section -->
   <section class="stats">
-    <div class="stats-grid">
+    <div class="stats-panel">
       <div class="stat-item">
         <div class="stat-number">1025+</div>
         <div class="stat-label">Pokémon</div>
       </div>
+      <div class="stat-divider"></div>
       <div class="stat-item">
         <div class="stat-number">18</div>
         <div class="stat-label">Types</div>
       </div>
+      <div class="stat-divider"></div>
       <div class="stat-item">
         <div class="stat-number">9</div>
         <div class="stat-label">Regions</div>
       </div>
+      <div class="stat-divider"></div>
       <div class="stat-item">
         <div class="stat-number">∞</div>
         <div class="stat-label">Adventures</div>

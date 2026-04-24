@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 interface Feature {
   icon: string;
@@ -14,7 +15,8 @@ interface Feature {
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    MatIconModule
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
@@ -22,77 +24,76 @@ interface Feature {
 export class HomeComponent {
   features: Feature[] = [
     {
-      icon: '📚',
+      icon: 'menu_book',
       title: 'Regional Pokédex',
       description: 'Browse Pokémon by region: Kanto, Johto, Paldea and more',
       route: '/catalog'
     },
     {
-      icon: '🌳',
+      icon: 'account_tree',
       title: 'Evolution Chains',
       description: 'Explore how Pokémon evolve across all 500+ families',
       route: '/evolution-chains'
     },
     {
-      icon: '⚔️',
+      icon: 'flash_on',
       title: 'Moves Encyclopedia',
       description: 'Explore 900+ moves with power, accuracy, and effects',
       route: '/moves'
     },
     {
-      icon: '🧠',
+      icon: 'psychology',
       title: 'Abilities Browser',
       description: 'Discover 300+ abilities and which Pokémon have them',
       route: '/abilities'
     },
     {
-      icon: '🗡️',
+      icon: 'shield',
       title: 'Battle Strategy',
       description: 'Type effectiveness chart and damage calculator',
       route: '/battle-strategy'
     },
     {
-      icon: '🎯',
+      icon: 'category',
       title: 'Types Deep Dive',
       description: 'Explore all 18 types with matchups, Pokémon, and moves',
       route: '/types'
     },
     {
-      icon: '🗺️',
+      icon: 'map',
       title: 'Locations',
       description: 'Find where Pokémon live across 9 regions',
       route: '/locations'
     },
     {
-      icon: '🎭',
+      icon: 'auto_awesome',
       title: 'Natures & Stats',
       description: 'Understand natures, growth rates, and characteristics',
       route: '/natures'
     },
     {
-      icon: '⚖️',
+      icon: 'compare_arrows',
       title: 'Compare Pokémon',
       description: 'Side-by-side stat comparison of any two Pokémon',
       route: '/compare'
     },
     {
-      icon: '👥',
+      icon: 'groups',
       title: 'Build Your Team',
       description: 'Create and manage your ultimate Pokémon team of 6',
       route: '/team'
     },
     {
-      icon: '🎲',
+      icon: 'shuffle',
       title: 'Random Team',
       description: 'Generate a random team with one click for quick battles',
       route: '/team'
     },
     {
-      icon: '❤️',
+      icon: 'favorite',
       title: 'Favorites',
       description: 'Save up to 50 favorite Pokémon for quick access',
       route: '/favorites'
     }
   ];
 }
-
