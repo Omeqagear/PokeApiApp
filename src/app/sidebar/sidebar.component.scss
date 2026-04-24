@@ -150,16 +150,16 @@ nav {
 
         &.active {
           background: rgba(232, 69, 60, 0.12);
-          color: #E8453C;
-          border-color: rgba(232, 69, 60, 0.20);
+          color: var(--brand-primary);
+          border-color: var(--border-accent);
           box-shadow: var(--shadow-sm);
 
           mat-icon {
-            color: #E8453C;
+            color: var(--brand-primary);
           }
 
           .nav-badge {
-            background: #E8453C;
+            background: var(--brand-primary);
             color: #ffffff;
           }
         }
