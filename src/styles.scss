@@ -112,9 +112,9 @@ body {
   background: var(--bg-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 210, 63, 0.03) 0%, transparent 50%);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(232, 69, 60, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(91, 106, 191, 0.05) 0%, transparent 60%);
   @include mixins.reduced-motion;
 }
 
@@ -151,18 +151,21 @@ body {
 
 // ============================================
 // 9. MATERIAL COMPONENT OVERRIDES
-// Neo-brutalist style: bold borders, chunky shadows
+// Glassmorphism style: frosted glass, blurred backdrops
 // ============================================
 
 mat-card {
-  border-radius: 4px !important;
-  border: 3px solid var(--border-default) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-default) !important;
   box-shadow: var(--shadow-card) !important;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--glass-card) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     box-shadow: var(--shadow-card-hover) !important;
-    transform: translate(-2px, -2px);
+    background: var(--glass-card-hover) !important;
   }
 }
 
@@ -170,40 +173,43 @@ button[mat-flat-button],
 button[mat-raised-button],
 a[mat-flat-button],
 a[mat-raised-button] {
-  border-radius: 4px !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-  border: 3px solid var(--border-default) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0.02em !important;
+  border: none !important;
   box-shadow: var(--shadow-sm) !important;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
 
   &:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: var(--shadow-card) !important;
+    box-shadow: var(--shadow-card), var(--glow-brand) !important;
   }
 }
 
 button[mat-stroked-button] {
-  border-radius: 4px !important;
-  font-weight: 700 !important;
-  border-width: 3px !important;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  border: 1px solid var(--border-default) !important;
+  background: var(--glass-surface) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
 
   &:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: var(--shadow-sm) !important;
+    background: var(--glass-card-hover) !important;
+    border-color: var(--border-strong) !important;
   }
 }
 
 button[mat-icon-button] {
-  border-radius: 4px !important;
-  border: 2px solid var(--border-subtle) !important;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 8px !important;
+  border: none !important;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
 
   &:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: var(--shadow-sm) !important;
+    background: var(--glass-card) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }
 
@@ -360,6 +366,27 @@ mat-input {
 .container { @include mixins.max-content-width; @include mixins.container-padding; }
 
 .sr-only { @include mixins.sr-only; }
+
+// ============================================
+// GLASS UTILITY CLASSES
+// ============================================
+
+.glass-panel {
+  background: var(--glass-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+}
+
+.glass-panel-elevated {
+  background: var(--glass-elevated);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  box-shadow: var(--shadow-elevated);
+}
 
 // ============================================
 // 16. TYPE THEME CLASSES
