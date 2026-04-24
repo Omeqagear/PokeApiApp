@@ -1,10 +1,8 @@
 :host {
-  --surface: rgba(255, 255, 255, 0.05);
-  --border: rgba(255, 255, 255, 0.1);
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --primary: #6366f1;
-  --surface-light: rgba(255, 255, 255, 0.08);
+  --surface: var(--glass-card);
+  --border: var(--border-default);
+  --primary: var(--brand-primary);
+  --surface-light: var(--glass-surface);
 }
 
 .species-detail-container {
@@ -72,10 +70,14 @@ section {
     font-weight: 800;
     text-transform: capitalize;
     margin: 0 0 0.25rem;
-    background: linear-gradient(135deg, #fff 0%, #ccc 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
+
+    .dark-theme & {
+      background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
   }
 
   .genus-text {
@@ -352,7 +354,7 @@ section {
 
       &.is-default {
         border-color: var(--primary);
-        background: rgba(99, 102, 241, 0.1);
+        background: rgba(232, 69, 60, 0.08);
       }
 
       img {
