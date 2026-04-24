@@ -63,7 +63,8 @@ export class TeamService {
   }
 
   clearTeam(): void {
-    this.storageService.clear();
+    const team = this.getTeam();
+    team.forEach(p => this.storageService.remove(p.id.toString()));
     this._teamCount.set(0);
   }
 
